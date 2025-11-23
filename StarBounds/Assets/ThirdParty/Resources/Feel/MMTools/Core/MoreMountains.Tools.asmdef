@@ -1,6 +1,6 @@
 {
-    "name": "MoreMountains.Tools",
-    "rootNamespace": "",
+    "name" : "mountail",
+    "rootNamespace": "MoreMountains.Tools",
     "references": [
         "GUID:75469ad4d38634e559750d17036d5f7c",
         "GUID:4307f53044263cf4b835bd812fc161a4",
