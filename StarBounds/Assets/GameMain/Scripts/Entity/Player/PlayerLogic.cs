@@ -9,7 +9,6 @@ using GameFrameworkLite;
 public class PlayerLogic : EntityLogic
 
 {
-
 	[Header("Movement")]
 	[Tooltip("좌우 이동 속도")]
 	public float moveSpeed = 5f;
@@ -126,11 +125,11 @@ public class PlayerLogic : EntityLogic
 	{
 		
 	}
-	
+
 	// ================== EntityLogic ==================
-	public override void OnInit(object userData)
+
+	private void Awake()
 	{
-		base.OnInit(userData);
 		_rb = GetComponent<Rigidbody2D>();
 		if (_rb == null)
 		{
@@ -159,6 +158,10 @@ public class PlayerLogic : EntityLogic
 				GravityManager.Instance.IsFloatingEnabled
 			);
 		}
+	}
+	public override void OnInit(object userData)
+	{
+		base.OnInit(userData);
 	}
 	public void ApplyGravityAndFloatingState(eGravityDirection direction, bool isFloating)
 	{
