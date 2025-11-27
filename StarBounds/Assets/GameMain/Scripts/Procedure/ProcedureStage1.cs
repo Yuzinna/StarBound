@@ -95,7 +95,7 @@ public class ProcedureStage1 : ProcedureBase
 
 		// 2. 플레이어 엔티티 생성
 		// 'Player' Entity ID: 1 사용
-		_entityModule.ShowEntity(1, "Entities/Player", "Player", null);
+		_entityModule.ShowEntity(1, "Prefabs/Player", "Player", null);
 
 		var logic = _entityModule.GetEntityLogic(1) as PlayerLogic;
 		if (logic != null)

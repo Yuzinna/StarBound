@@ -8,6 +8,9 @@ using UnityEngine;
 /// </summary>
 public class GameEntryLite : MonoBehaviour
 {
+
+	[Header("에디터 전용: 이 씬에서 바로 시작할 프로시저")]
+	[SerializeField] private StartProcedureType startProcedure = StartProcedureType.Stage1_1;
 	private void Start()
 	{
 
@@ -15,15 +18,11 @@ public class GameEntryLite : MonoBehaviour
 		// 1. 프로시저 모듈 가져오기
 		var procedure = GameFrameworkEntry.GetModule<ProcedureModule>();
 
-		// 2. 사용할 프로시저들 등록
+		//2.사용할 프로시저들 등록
 		procedure.Initialize(
 			new ProcedureStage1(),
 			new ProcedureStageClear(),
 			new ProcedureStage2()
-			
-		// 나중에 추가할 스테이지들:
-		// , new ProcedureStage2()
-		// , new ProcedureStage3()
 		);
 
 		// 3. 처음 시작할 프로시저 지정

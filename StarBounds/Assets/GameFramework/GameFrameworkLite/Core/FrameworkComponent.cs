@@ -1,15 +1,19 @@
-// Assets/GameFrameworkLite/Core/FrameworkComponent.cs
+ï»¿// Assets/GameFrameworkLite/Core/FrameworkComponent.cs
 using UnityEngine;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 namespace GameFrameworkLite
 {
 	/// <summary>
-	/// ¾À¿¡ ÇÏ³ª¸¸ Á¸ÀçÇÏ´Â ÇÁ·¹ÀÓ¿öÅ© ÁøÀÔÁ¡ ÄÄÆ÷³ÍÆ®.
-	/// ¿©±â¼­ ¸ğµç ¸ğµâÀ» »ı¼ºÇÏ°í GameFrameworkEntry¿¡ µî·ÏÇÑ´Ù.
+	/// ì”¬ì— í•˜ë‚˜ë§Œ ì¡´ì¬í•˜ëŠ” í”„ë ˆì„ì›Œí¬ ì§„ì…ì  ì»´í¬ë„ŒíŠ¸.aks
+	/// ì—¬ê¸°ì„œ ëª¨ë“  ëª¨ë“ˆì„ ìƒì„±í•˜ê³  GameFrameworkEntryì— ë“±ë¡í•œë‹¤.
 	/// </summary>
 	public sealed class FrameworkComponent : MonoBehaviour
 	{
-		// ------------ ¸ğµâ ÂüÁ¶ (Inspector¿¡¼­ È®ÀÎ¿ë) ------------
+
+		// ì •ì (static) ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì¶”ê°€í•˜ì—¬ ë‹¨ì¼ ì¸ìŠ¤í„´ìŠ¤ì— ì ‘ê·¼ ê°€ëŠ¥í•˜ê²Œ í•¨
+		public static FrameworkComponent Instance { get; private set; }
+		// ------------ ëª¨ë“ˆ ì°¸ì¡° (Inspectorì—ì„œ í™•ì¸ìš©) ------------
 		public EventModule EventModule { get; private set; }
 		public ResourceModule ResourceModule { get; private set; }
 		public ObjectPoolModule ObjectPoolModule { get; private set; }
@@ -21,13 +25,24 @@ namespace GameFrameworkLite
 		public SoundModule SoundModule { get; private set; }
 		public DataTableModule DataTableModule { get; private set; }
 		public ConfigModule ConfigModule { get; private set; }
-
 		private void Awake()
 		{
-			// ¾ÀÀÌ ¹Ù²î¾îµµ ÆÄ±«µÇÁö ¾Êµµ·Ï ¼³Á¤
-			DontDestroyOnLoad(gameObject);
+			// ì¤‘ë³µ ì²´í¬
+			if (Instance != null && Instance != this)
+			{
+				Debug.LogWarning("ì¤‘ë³µ ì œê±°ë¨");
+				Destroy(gameObject);
+				return;
+			}
 
-			// --- ¸ğµâ »ı¼º ---
+			Instance = this;
+
+			// ì”¬ì´ ë°”ë€Œì–´ë„ íŒŒê´´ë˜ì§€ ì•Šë„ë¡ ì„¤ì •
+			DontDestroyOnLoad(this.gameObject);
+
+
+
+			// --- ëª¨ë“ˆ ìƒì„± ---
 			EventModule = new EventModule();
 			ResourceModule = new ResourceModule();
 			ObjectPoolModule = new ObjectPoolModule();
@@ -40,13 +55,13 @@ namespace GameFrameworkLite
 			DataTableModule = new DataTableModule(ResourceModule);
 			ConfigModule = new ConfigModule(ResourceModule);
 
-			// GameFrameworkEntry¿¡ ÀÚ½Å(FrameworkComponent) µî·Ï
+			// GameFrameworkEntryì— ìì‹ (FrameworkComponent) ë“±ë¡
 			GameFrameworkEntry.RegisterFrameworkComponent(this);
 		}
 
 		private void Update()
 		{
-			// ¸Å ÇÁ·¹ÀÓ ¸ğµç ¸ğµâÀÇ Update È£Ãâ
+			// ë§¤ í”„ë ˆì„ ëª¨ë“  ëª¨ë“ˆì˜ Update í˜¸ì¶œ
 			float dt = Time.deltaTime;
 			float realDt = Time.unscaledDeltaTime;
 			GameFrameworkEntry.UpdateAll(dt, realDt);
@@ -54,8 +69,12 @@ namespace GameFrameworkLite
 
 		private void OnDestroy()
 		{
-			// °ÔÀÓ Á¾·á ¶Ç´Â ¿ÀºêÁ§Æ® ÆÄ±« ½Ã ¸ğµâµé Shutdown
-			GameFrameworkEntry.ShutdownAll();
+			// ê²Œì„ ì¢…ë£Œ ë˜ëŠ” ì˜¤ë¸Œì íŠ¸ íŒŒê´´ ì‹œ ëª¨ë“ˆë“¤ Shutdown
+			if (Instance == this)
+			{
+				GameFrameworkEntry.ShutdownAll();
+				Instance = null;
+			}
 		}
 	}
 }
