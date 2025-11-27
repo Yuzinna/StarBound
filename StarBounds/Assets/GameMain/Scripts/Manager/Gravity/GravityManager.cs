@@ -24,12 +24,6 @@ public class GravityManager : MonoBehaviour
 	// Floating 상태가 바뀔 때 발생하는 이벤트
 	public event Action<bool> OnFloatingStateChanged;
 
-	//[Header("부유 상태 움직임 세팅")]
-	//public float floatingUpForce = 0.5f;   // 위로 살짝 밀어주는 힘
-	//public float floatingDrag = 2f;        // 부유 상태일 때 drag
-	//public float normalDrag = 0f;          // 일반 상태 drag
-
-
 	private void Awake()
 	{
 		if(Instance != null&& Instance != this)
@@ -52,12 +46,7 @@ public class GravityManager : MonoBehaviour
 		// ... 실제 Floating 상태 변경 로직 ...
 		OnFloatingStateChanged?.Invoke(isEnabled); // 이벤트 발생
 	}
-	//public void SetState(GravityState state)
-	//{
-	//	CurrentState = state;
-	//	ApplyToAllGravityObjects();
-	//}
-	// SetState 대신 SetDirection과 SetFloatingMode를 사용
+	
 	public void SetDirection(eGravityDirection direction)
 	{
 		CurrentDirection = direction;
@@ -71,13 +60,7 @@ public class GravityManager : MonoBehaviour
 		ApplyToAllGravityObjects();
 		OnFloatingStateChanged?.Invoke(IsFloatingEnabled);
 	}
-	//public void ToggleState()
-	//{
-	//	if (CurrentState == GravityState.Normal)
-	//		SetState(GravityState.Floating);
-	//	else
-	//		SetState(GravityState.Normal);
-	//}
+	
 	private void ApplyToAllGravityObjects()
 	{
 		//여긴 큐브같은

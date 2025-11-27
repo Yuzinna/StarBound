@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4089852277991028443}
   - component: {fileID: 9091697039567785333}
   m_Layer: 0
-  m_Name: SwitchSeg2
+  m_Name: Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 4444679006688324332}
   - component: {fileID: 1988309362995722353}
   m_Layer: 0
-  m_Name: SwitchSeg
+  m_Name: Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -228,9 +228,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwitchLogic
   switchType: 1
-  spriteRenderer: {fileID: 0}
-  spriteOn: {fileID: 0}
-  spriteOff: {fileID: 0}
+  orientation: 0
+  spriteOn:
+  - {fileID: 0}
+  spriteOff:
+  - {fileID: 0}
 --- !u!61 &-7344900934651961794
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -265,7 +267,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 1}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -275,5 +277,5 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1, y: 2}
   m_EdgeRadius: 0

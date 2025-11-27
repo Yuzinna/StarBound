@@ -7,6 +7,13 @@ public enum eSwitch
 	Floating,
 	Inverse
 }
+public enum eSwitchOrientation
+{
+	// 똑바로 서 있는 상태 (중력 방향: Normal)
+	Upright,
+	// 거꾸로 매달린 상태 (중력 방향: Inverse)
+	Inverted
+}
 
 public class SwitchLogic : EntityLogic, IInteractable
 {
@@ -15,11 +22,14 @@ public class SwitchLogic : EntityLogic, IInteractable
 	[Header("스위치 종류")]
 	[SerializeField] public eSwitch switchType; // ⬅️ 이 스위치의 기능 설정
 
+	[Header("스위치 위치")]
+	[SerializeField] public eSwitchOrientation orientation; 
 	[Header("비주얼 옵션")]
-	[SerializeField] private SpriteRenderer spriteRenderer;
-	[SerializeField] private Sprite spriteOn;
-	[SerializeField] private Sprite spriteOff;
+	[SerializeField] private Sprite[] spriteOn;
+	[SerializeField] private Sprite[] spriteOff;
 
+	Transform Top;
+	Transform Bottom;
 
 	private bool _isOn;
 
@@ -32,24 +42,27 @@ public class SwitchLogic : EntityLogic, IInteractable
 		// EntityLogic의 OnInit은 Start 전에 호출될 수 있으나,
 		// 여기서는 Start에서 모든 초기화를 진행합니다.
 	}
-
+	private void Awake()
+	{
+		Top=transform.Find("Top");
+		Bottom=transform.Find("Bottom");
+	}
 	private void Start()
 	{
 		Initialize();
-		SubscribeToGravityEvents(); // 💡 이벤트 구독 호출
+		SubscribeToGravityEvents(); //이벤트 구독 호출
 	}
 
 	private void OnDestroy()
 	{
-		UnsubscribeFromGravityEvents(); // 💡 오브젝트 파괴 시 구독 해제
+		UnsubscribeFromGravityEvents(); //오브젝트 파괴 시 구독 해제
 	}
 
 	public void Initialize()
 	{
-		if (spriteRenderer == null)
-			spriteRenderer = GetComponent<SpriteRenderer>();
+		
 
-		// 💡 현재 GravityManager 상태에 맞춰 _isOn 초기화 (기존 로직 유지)
+		//현재 GravityManager 상태에 맞춰 _isOn 초기화 (기존 로직 유지)
 		if (GravityManager.Instance != null)
 		{
 			UpdateStateFromGravityManager();
@@ -137,6 +150,15 @@ public class SwitchLogic : EntityLogic, IInteractable
 	{
 		if (GravityManager.Instance == null) return;
 
+		// 핵심 로직: 현재 스위치 위치와 중력 방향이 일치하는지 확인
+		bool isInteractable = CheckInteractionCondition(GravityManager.Instance.CurrentDirection);
+
+		if (!isInteractable)
+		{
+			// 조건이 일치하지 않으면 상호작용을 무시하고 종료
+			Debug.LogWarning($"[SwitchLogic-{switchType}] Cannot interact. Gravity direction is not aligned with switch orientation.");
+			return;
+		}
 		// 💡 상호작용 시에는 _isOn을 토글하고 효과 적용 (이벤트 발생)
 		_isOn = !_isOn;
 		ApplySwitchEffect(_isOn);
@@ -150,7 +172,22 @@ public class SwitchLogic : EntityLogic, IInteractable
 
 		Debug.Log($" isOn = {_isOn}");
 	}
+	private bool CheckInteractionCondition(eGravityDirection currentDirection)
+	{
+		// 1. 스위치가 '똑바로 서 있는' 경우: 중력 방향이 Normal일 때만 상호작용 가능
+		if (orientation == eSwitchOrientation.Upright)
+		{
+			return currentDirection == eGravityDirection.Normal;
+		}
+		// 2. 스위치가 '거꾸로 매달린' 경우: 중력 방향이 Inverse일 때만 상호작용 가능
+		else if (orientation == eSwitchOrientation.Inverted)
+		{
+			return currentDirection == eGravityDirection.Inverse;
+		}
 
+		// 기본적으로 true 반환 (혹시 모를 예외 처리)
+		return true;
+	}
 	private void ApplySwitchEffect(bool targetState)
 	{
 		if (GravityManager.Instance == null) return;
@@ -174,16 +211,19 @@ public class SwitchLogic : EntityLogic, IInteractable
 
 	private void UpdateVisual()
 	{
-		if (spriteRenderer == null) return;
 
 		// _isOn 상태에 따라 스프라이트 교체
 		if (_isOn)
 		{
-			spriteRenderer.sprite = spriteOn;
+			Top.GetComponent<SpriteRenderer>().sprite = spriteOn[0];
+			Top.GetComponent<SpriteRenderer>().sprite = spriteOn[1];
+
+			
 		}
 		else
 		{
-			spriteRenderer.sprite = spriteOff;
+			Top.GetComponent<SpriteRenderer>().sprite = spriteOff[0];
+			Top.GetComponent<SpriteRenderer>().sprite = spriteOff[1];
 		}
 	}
 }
