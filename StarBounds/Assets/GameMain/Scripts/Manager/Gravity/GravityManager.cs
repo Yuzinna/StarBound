@@ -24,10 +24,10 @@ public class GravityManager : MonoBehaviour
 	// Floating 상태가 바뀔 때 발생하는 이벤트
 	public event Action<bool> OnFloatingStateChanged;
 
-	[Header("부유 상태 움직임 세팅")]
-	public float floatingUpForce = 0.5f;   // 위로 살짝 밀어주는 힘
-	public float floatingDrag = 2f;        // 부유 상태일 때 drag
-	public float normalDrag = 0f;          // 일반 상태 drag
+	//[Header("부유 상태 움직임 세팅")]
+	//public float floatingUpForce = 0.5f;   // 위로 살짝 밀어주는 힘
+	//public float floatingDrag = 2f;        // 부유 상태일 때 drag
+	//public float normalDrag = 0f;          // 일반 상태 drag
 
 
 	private void Awake()

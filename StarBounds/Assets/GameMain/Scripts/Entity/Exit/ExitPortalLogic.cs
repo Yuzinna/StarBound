@@ -9,11 +9,11 @@ public class ExitPortalLogic : EntityLogic ,IInteractable
 	public void Interact(PlayerLogic player)
 	{
 		//중력 상태가 노말일때만 실행
-		if(GravityManager.Instance.CurrentDirection== eGravityDirection.Normal)
+		if(GravityManager.Instance.CurrentDirection== eGravityDirection.Normal&& GravityManager.Instance.IsFloatingEnabled==false)
 		{
 			Debug.Log("[ExitPortalLogic] Player entered exit. Stage1Clear fired.");
 
-			_eventModule.Fire(GameEventId.Stage1Clear, null);
+			_eventModule.Fire((int)GameEventId.StageClear, null);
 		}
 	}
 	private void Awake()

@@ -54,7 +54,15 @@ namespace GameFrameworkLite
 			if (prefab == null) return null;
 			return Object.Instantiate(prefab, position, rotation, parent);
 		}
+		//ui전용 생성
+		public GameObject Instantiate(string path, Transform parent)
+		{
+			var prefab = Load<GameObject>(path);
+			if (prefab == null) return null;
 
+			// UI용: 로컬 RectTransform 값 유지
+			return Object.Instantiate(prefab, parent, false);
+		}
 		/// <summary>
 		/// 캐시를 비우고 Unity에게 사용하지 않는 에셋 언로드 요청.
 		/// </summary>

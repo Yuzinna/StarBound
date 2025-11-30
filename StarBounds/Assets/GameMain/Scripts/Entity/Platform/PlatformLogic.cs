@@ -9,7 +9,7 @@ public class PlatformLogic : MonoBehaviour
 	{
 		// 플랫폼 오브젝트에 부착된 콜라이더를 가져옵니다.
 		// (BoxCollider2D 또는 EdgeCollider2D 등이 될 수 있습니다.)
-		_platformCollider = GetComponent<Collider2D>();
+		_platformCollider = GetComponent<CompositeCollider2D>();
 
 		if (_platformCollider == null)
 		{

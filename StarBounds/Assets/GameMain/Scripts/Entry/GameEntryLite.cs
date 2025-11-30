@@ -1,4 +1,5 @@
 ﻿using GameFrameworkLite;
+using System.Collections;
 using UnityEngine;
 
 
@@ -9,8 +10,9 @@ using UnityEngine;
 public class GameEntryLite : MonoBehaviour
 {
 
+	public int CurrentStage = 1;
 	[Header("에디터 전용: 이 씬에서 바로 시작할 프로시저")]
-	[SerializeField] private StartProcedureType startProcedure = StartProcedureType.Stage1_1;
+	[SerializeField] private StartProcedureType startProcedure = StartProcedureType.map1_1;
 	private void Start()
 	{
 
@@ -20,13 +22,15 @@ public class GameEntryLite : MonoBehaviour
 
 		//2.사용할 프로시저들 등록
 		procedure.Initialize(
-			new ProcedureStage1(),
-			new ProcedureStageClear(),
-			new ProcedureStage2()
+			new ProcedureStagePlay(),
+			new ProcedureStageClear()
 		);
 
+
+		GameState.CurrentStage = CurrentStage;
 		// 3. 처음 시작할 프로시저 지정
-		procedure.StartProcedure<ProcedureStage1>();
+		procedure.StartProcedure<ProcedureStagePlay>();
 	}
+	
 }
 

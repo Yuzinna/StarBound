@@ -9,7 +9,7 @@ public class ProcedureStage1 : ProcedureBase
 	private EventModule _eventModule;
 	private SceneModule _sceneModule;
 	private EntityModule _entityModule;
-
+	
 	private bool _stageReady = false;
 	private bool _stageCleared = false;
 
@@ -32,7 +32,7 @@ public class ProcedureStage1 : ProcedureBase
 		_sceneModule.LoadScene("Stage1");
 
 		// 3. 스테이지 클리어 이벤트 구독
-		_eventModule.Subscribe(GameEventId.Stage1Clear, OnStage1Clear);
+		_eventModule.Subscribe((int)GameEventId.StageClear, OnStage1Clear);
 	}
 	
 	public override void OnUpdate(Fsm<ProcedureModule> fsm, float elapseSeconds, float realElapseSeconds)
@@ -47,7 +47,7 @@ public class ProcedureStage1 : ProcedureBase
 			var procedure = fsm.Owner;
 
 			// 클리어 화면 절차로
-			procedure.ChangeProcedure<ProcedureStage2>();
+			//procedure.ChangeProcedure<ProcedureStage2>();
 		}
 	}
 
@@ -61,7 +61,7 @@ public class ProcedureStage1 : ProcedureBase
 
 		if (_eventModule != null)
 		{
-			_eventModule.Unsubscribe(GameEventId.Stage1Clear, OnStage1Clear);
+			_eventModule.Unsubscribe((int)GameEventId.StageClear, OnStage1Clear);
 		}
 	}
 
@@ -138,7 +138,7 @@ public class ProcedureStage1 : ProcedureBase
 		_entityModule.HideEntity(1);
 
 		// 2. 더 이상 이 이벤트는 필요 없으니 구독 해제 (중복 실행 방지)
-		_eventModule.Unsubscribe(GameEventId.Stage1Clear, OnStage1Clear);
+		_eventModule.Unsubscribe((int)GameEventId.StageClear, OnStage1Clear);
 
 		// ✔ 여기서는 씬을 직접 로드하지 않고, 플래그만 켬
 		_stageCleared = true;

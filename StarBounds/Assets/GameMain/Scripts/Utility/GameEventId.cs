@@ -1,8 +1,24 @@
 using UnityEngine;
 
-public class GameEventId : MonoBehaviour
+public enum GameEventId
 {
-	public const int Stage1Clear = 1001;
-	public const int Stage2Clear = 1002;
-	public const int Stage3Clear = 1002;
+	StageClear
+}
+public enum StartProcedureType
+{
+	None,       // 자동 시작 안 함
+	map1_1,
+	map1_2,
+	map1_3,
+	map1_4,
+	map1_5,
+	map1_6,
+	map1_7,
+	StageClear,
+	// 필요하면 계속 추가
+}
+public static class GameState
+{
+	public static int CurrentStage = 1;   // 현재 스테이지 번호
+	public const int MaxStage = 7;       // 지금은 7스테이지까지 있다고 가정
 }

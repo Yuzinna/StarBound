@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLogic
   moveSpeed: 5
-  jumpForce: 12
+  jumpForce: 16
   floatingJumpMultiplier: 1.3
   _baseJumpForce: 12
   _gravityDirection: 1

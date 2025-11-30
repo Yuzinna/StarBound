@@ -41,7 +41,7 @@ namespace GameFrameworkLite
 			if (_opened.ContainsKey(path))
 				return _opened[path];
 
-			GameObject go = _resourceModule.Instantiate(path, Vector3.zero, Quaternion.identity, _rootCanvas.transform);
+			GameObject go = _resourceModule.Instantiate(path, _rootCanvas.transform);
 			if (go == null) return null;
 
 			var logic = go.GetComponent<UILogic>();

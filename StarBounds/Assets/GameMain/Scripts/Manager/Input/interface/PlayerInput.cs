@@ -82,4 +82,12 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 			OnDropaction();
 		}
 	}
+
+	public void OnPause(InputAction.CallbackContext context)
+	{
+		if(context.started)
+		{
+			OnPauseAction();
+		}
+	}
 }
