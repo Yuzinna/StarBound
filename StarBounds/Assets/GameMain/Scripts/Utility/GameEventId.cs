@@ -19,6 +19,7 @@ public enum StartProcedureType
 }
 public static class GameState
 {
+	public static string BetaTestSceneName { get; set; }
 	public static int CurrentStage = 1;   // 현재 스테이지 번호
 	public const int MaxStage = 7;       // 지금은 7스테이지까지 있다고 가정
 }

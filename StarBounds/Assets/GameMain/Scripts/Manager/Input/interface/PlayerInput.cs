@@ -1,6 +1,7 @@
 using GameFrameworkLite;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerInput : BaseInput,Platformer.IPlayerActions
 {
@@ -69,9 +70,13 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 		{
 			Debug.Log("[PlayerInput] Restart input received");
 
-			var procedure = GameFrameworkEntry.GetModule<ProcedureModule>();
+			// 1. **현재 활성화된 씬의 이름을 가져옵니다.**
+			// 이것이 유니티가 현재 실행하려는 씬의 이름을 알려주는 함수입니다.
+			string currentSceneName = SceneManager.GetActiveScene().name;
 
-			procedure.ChangeProcedure<ProcedureStage1>();
+			// 2. **해당 씬을 다시 로드하여 스테이지를 재시작합니다.**
+			// LoadScene은 동기 방식으로 씬을 로드합니다.
+			SceneManager.LoadScene(currentSceneName);
 		}
 	}
 

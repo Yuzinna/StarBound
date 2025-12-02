@@ -2,7 +2,7 @@ using UnityEngine;
 using GameFrameworkLite;
 
 [RequireComponent(typeof(Collider2D))]
-public class ExitPortalLogic : EntityLogic ,IInteractable
+public class ExitPortalLogic : MonoBehaviour ,IInteractable
 {
 	private EventModule _eventModule;
 
@@ -33,11 +33,7 @@ public class ExitPortalLogic : EntityLogic ,IInteractable
 			col.isTrigger = true;
 		}
 	}
-	public override void OnInit(object userData)
-	{
-		base.OnInit(userData);
-		InitModulesAndCollider();
-	}
+	
 
 	private void OnTriggerEnter2D(Collider2D other)
 	{

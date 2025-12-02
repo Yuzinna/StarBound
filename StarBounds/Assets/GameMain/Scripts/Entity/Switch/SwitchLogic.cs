@@ -15,7 +15,7 @@ public enum eSwitchOrientation
 	Inverted
 }
 
-public class SwitchLogic : EntityLogic, IInteractable
+public class SwitchLogic : MonoBehaviour, IInteractable
 {
 	// ... (기존 변수 선언은 유지) ...
 
@@ -37,11 +37,7 @@ public class SwitchLogic : EntityLogic, IInteractable
 	// Unity Lifecycle / Initialization
 	// =========================================================================
 
-	public override void OnInit(object userData)
-	{
-		// EntityLogic의 OnInit은 Start 전에 호출될 수 있으나,
-		// 여기서는 Start에서 모든 초기화를 진행합니다.
-	}
+	
 	private void Awake()
 	{
 		Top=transform.Find("Top");
@@ -216,14 +212,14 @@ public class SwitchLogic : EntityLogic, IInteractable
 		if (_isOn)
 		{
 			Top.GetComponent<SpriteRenderer>().sprite = spriteOn[0];
-			Top.GetComponent<SpriteRenderer>().sprite = spriteOn[1];
+			Bottom.GetComponent<SpriteRenderer>().sprite = spriteOn[1];
 
 			
 		}
 		else
 		{
 			Top.GetComponent<SpriteRenderer>().sprite = spriteOff[0];
-			Top.GetComponent<SpriteRenderer>().sprite = spriteOff[1];
+			Bottom.GetComponent<SpriteRenderer>().sprite = spriteOff[1];
 		}
 	}
 }

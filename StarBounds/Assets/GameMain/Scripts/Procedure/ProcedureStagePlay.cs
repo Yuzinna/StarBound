@@ -97,29 +97,29 @@ public class ProcedureStagePlay : ProcedureBase
 		// 2. 플레이어 엔티티 생성
 		_entityModule.ShowEntity(1, "Prefabs/Player", "Player", null);
 
-		var logic = _entityModule.GetEntityLogic(1) as PlayerLogic;
-		if (logic != null)
-		{
-			logic.transform.position = spawnPos;
-			Debug.Log("[ProcedureStagePlay] PlayerLogic 위치 세팅 완료");
+		//var logic = _entityModule.GetEntityLogic(1) as PlayerLogic;
+		//if (logic != null)
+		//{
+		//	logic.transform.position = spawnPos;
+		//	Debug.Log("[ProcedureStagePlay] PlayerLogic 위치 세팅 완료");
 
-			// Cinemachine 카메라 연결
-			CinemachineCamera virtualCam = GameObject.FindAnyObjectByType<CinemachineCamera>();
-			if (virtualCam != null)
-			{
-				virtualCam.Follow = logic.transform;
-				virtualCam.LookAt = logic.transform;
-				Debug.Log("[ProcedureStagePlay] Cinemachine Camera를 플레이어에 연결 완료.");
-			}
-			else
-			{
-				Debug.LogWarning("[ProcedureStagePlay] CinemachineCamera 오브젝트를 찾을 수 없습니다!");
-			}
-		}
-		else
-		{
-			Debug.LogError("[ProcedureStagePlay] PlayerLogic 을 못 가져옴");
-		}
+		//	// Cinemachine 카메라 연결
+		//	CinemachineCamera virtualCam = GameObject.FindAnyObjectByType<CinemachineCamera>();
+		//	if (virtualCam != null)
+		//	{
+		//		virtualCam.Follow = logic.transform;
+		//		virtualCam.LookAt = logic.transform;
+		//		Debug.Log("[ProcedureStagePlay] Cinemachine Camera를 플레이어에 연결 완료.");
+		//	}
+		//	else
+		//	{
+		//		Debug.LogWarning("[ProcedureStagePlay] CinemachineCamera 오브젝트를 찾을 수 없습니다!");
+		//	}
+		//}
+		//else
+		//{
+		//	Debug.LogError("[ProcedureStagePlay] PlayerLogic 을 못 가져옴");
+		//}
 	}
 	private void SetupOtherThings()
 	{

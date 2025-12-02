@@ -6,7 +6,7 @@ using GameFrameworkLite;
 
 [RequireComponent(typeof(Rigidbody2D))]
 
-public class PlayerLogic : EntityLogic
+public class PlayerLogic : MonoBehaviour
 
 {
 	[Header("Movement")]
@@ -73,6 +73,8 @@ public class PlayerLogic : EntityLogic
 	private float _jumpBufferTimer;    // 점프 버퍼 타이머
 
 	private IInteractable _currentInteractable; // 굳이 안 써도 되지만, 상호작용 대상이 여러 개일 때를 위해 유지
+	[SerializeField] private bool isInteract=false;
+	
 	private SwitchLogic _currentSwitch = null; // ❗ 현재 충돌 중인 SwitchLogic을 저장
 											   // 입력 소스
 	[Header("Push Settings")]
@@ -159,10 +161,7 @@ public class PlayerLogic : EntityLogic
 			);
 		}
 	}
-	public override void OnInit(object userData)
-	{
-		base.OnInit(userData);
-	}
+	
 	public void ApplyGravityAndFloatingState(eGravityDirection direction, bool isFloating)
 	{
 		if(_rb == null)
@@ -248,9 +247,8 @@ public class PlayerLogic : EntityLogic
 		Debug.Log("[PlayerLogic] Jump input received");
 		_jumpBufferTimer = jumpBufferTime;
 	}
-	public override void OnUpdate(float deltaTime, float realDeltaTime)
+	private void Update()
 	{
-		base.OnUpdate(deltaTime, realDeltaTime);
 		if (_input == null) return;
 		// 1. 입력 값은 OnUpdate에서 매 프레임 받아둡니다.
 		_moveX = _input.MoveDir.x;
@@ -258,12 +256,13 @@ public class PlayerLogic : EntityLogic
 		// 2. 점프 버퍼 타이머 업데이트 (OnUpdate에서 deltaTime 사용)
 		if (_jumpBufferTimer > 0)
 		{
-			_jumpBufferTimer -= deltaTime;
+			_jumpBufferTimer -= Time.deltaTime;
 		}
 		// 3. 시각적 업데이트는 OnUpdate에서 처리
 		UpdateDirectionVisuals();
 		UpdateAnimation();
 	}
+	
 	private bool GroundCheck()
 	{
 		// GroundCheckOffset을 사용하여 발 근처에서 레이를 쏩니다.
@@ -389,6 +388,7 @@ public class PlayerLogic : EntityLogic
 	}
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
+		
 		int layerMask = 1 << collision.gameObject.layer;
 
 		// ❗ 3. Interact 체크 (충돌 진입 시 SwitchLogic 저장)
@@ -400,19 +400,20 @@ public class PlayerLogic : EntityLogic
 			// 충돌한 오브젝트에서 SwitchLogic을 찾고 저장
 
 			_currentInteractable = collision.gameObject.GetComponent<IInteractable>();
+			isInteract = true;
 
 		}
 
 
 	}
-
 	private void OnTriggerStay2D(Collider2D collision)
 	{
+		
 	}
 
 	private void OnTriggerExit2D(Collider2D collision)
 	{
-		int layerMask = 1 << collision.gameObject.layer;
+   		int layerMask = 1 << collision.gameObject.layer;
 		// ❗ 3. Interact 체크 리셋 (충돌 종료 시 SwitchLogic 해제)
 		if ((layerMask & interactLayer) != 0)
 		{
@@ -421,6 +422,7 @@ public class PlayerLogic : EntityLogic
 			if (interactable == _currentInteractable)
 			{
 				_currentInteractable = null;
+				isInteract = false;
 			}
 		}
 	}

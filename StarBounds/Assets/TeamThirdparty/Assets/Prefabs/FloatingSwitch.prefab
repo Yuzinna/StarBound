@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4089852277991028443}
   - component: {fileID: 9091697039567785333}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4444679006688324332}
   - component: {fileID: 1988309362995722353}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -191,7 +191,7 @@ GameObject:
   - component: {fileID: 6819391142193829504}
   - component: {fileID: -8810894281735698574}
   - component: {fileID: -7566334738636999832}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FloatingSwitch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -230,9 +230,11 @@ MonoBehaviour:
   switchType: 0
   orientation: 0
   spriteOn:
-  - {fileID: 0}
+  - {fileID: -1601250681, guid: 236ada8a820b14a4dbb7b82f4854a378, type: 3}
+  - {fileID: -1794843544, guid: 236ada8a820b14a4dbb7b82f4854a378, type: 3}
   spriteOff:
-  - {fileID: 0}
+  - {fileID: 1552079055, guid: 236ada8a820b14a4dbb7b82f4854a378, type: 3}
+  - {fileID: -1794843544, guid: 236ada8a820b14a4dbb7b82f4854a378, type: 3}
 --- !u!61 &-7566334738636999832
 BoxCollider2D:
   m_ObjectHideFlags: 0
