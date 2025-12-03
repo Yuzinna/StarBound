@@ -46,7 +46,7 @@ public class PlayerLogic : MonoBehaviour
 	// ❗ [Ground Check Settings]
 	[Header("Ground Check")]
 	[Tooltip("발 아래 Ray를 쏠 시작점 (Collider 중앙 아래)")]
-	public Vector3 groundCheckOffset = new Vector3(0, -0.5f, 0);
+	public Vector3 groundCheckOffset = new Vector3(0, -1f, 0);
 	[Tooltip("Raycast의 길이")]
 	public float groundCheckDistance = 1f;
 
@@ -211,7 +211,7 @@ public class PlayerLogic : MonoBehaviour
 		// (이전에 정의된 GroundCheck() 로직을 활용합니다.)
 
 		// GroundCheck를 다시 수행하여 현재 닿고 있는 콜라이더 정보를 얻습니다.
-		Vector2 rayStart = (Vector2)transform.position + (Vector2)groundCheckOffset;
+		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
 
 		// ❗ 중요: 레이캐스트의 방향을 현재 '중력 방향'과 동일하게 설정하여, 
 		// 일반 중력(아래)이든 반중력(위)이든 '밟고 있는' 표면을 검사해야 합니다.
@@ -266,9 +266,10 @@ public class PlayerLogic : MonoBehaviour
 	private bool GroundCheck()
 	{
 		// GroundCheckOffset을 사용하여 발 근처에서 레이를 쏩니다.
-		Vector2 rayStart = (Vector2)transform.position;
+		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
+			
 
-		float rayLen = 3f;
+		
 		// 레이캐스트의 방향을 현재 '중력 방향'(_gravityDirection)에 따라 설정
 		RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
 
