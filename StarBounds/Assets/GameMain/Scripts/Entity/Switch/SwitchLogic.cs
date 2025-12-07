@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using GameFrameworkLite;
+
 using System; // Action 타입을 사용하려면 필요 (GravityManager 이벤트 정의 시 사용됨)
 
 public enum eSwitch

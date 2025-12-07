@@ -1,32 +1,37 @@
-using UnityEngine;
-using GameFrameworkLite;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Collider2D))]
 public class ExitPortalLogic : MonoBehaviour ,IInteractable
 {
-	private EventModule _eventModule;
-
+	[SerializeField] string nextSceneName = "Level_02";	
+	
 	public void Interact(PlayerLogic player)
 	{
-		//�߷� ���°� �븻�϶��� ����
+		//중력 상태가 노말일때만 실행
 		if(GravityManager.Instance.CurrentDirection== eGravityDirection.Normal&& GravityManager.Instance.IsFloatingEnabled==false)
 		{
 			Debug.Log("[ExitPortalLogic] Player entered exit. Stage1Clear fired.");
 
-			_eventModule.Fire((int)GameEventId.StageClear, null);
+			// ✨ SceneTransitionManager를 통해 씬 전환 요청
+			if (SceneTransitionManager.Instance != null)
+			{
+				SceneTransitionManager.Instance.LoadNextScene(nextSceneName);
+			}
+			else
+			{
+				// 트랜지션 매니저가 없을 경우 바로 로드 (비상 시)
+				SceneManager.LoadScene(nextSceneName);
+			}
 		}
 	}
+	
 	private void Awake()
 	{
 		InitModulesAndCollider();
 	}
 	private void InitModulesAndCollider()
 	{
-		if (_eventModule == null)
-		{
-			_eventModule = GameFrameworkEntry.GetModule<EventModule>();
-		}
-
 		var col = GetComponent<Collider2D>();
 		if (col != null)
 		{

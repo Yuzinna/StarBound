@@ -1,15 +1,15 @@
-using GameFrameworkLite;
+
 using UnityEngine;
 
 public class PauseController : MonoBehaviour
 {
-	private UIModule _uiModule;
+
 	[SerializeField] bool _isPaused = false;
 	private const string PauseUIPath = "UI/PauseUI";
 
 	private void Start()
 	{
-		_uiModule = GameFrameworkEntry.GetModule<UIModule>();
+		
 		InputManager.Instance._input.PauseAction += TogglePause;
 		
 	}
@@ -33,7 +33,7 @@ public class PauseController : MonoBehaviour
 	{
 		//if (_isPaused)
 		//	return;
-		_uiModule.Open(PauseUIPath);
+		
 		_isPaused = true;
 	}
 
@@ -41,7 +41,7 @@ public class PauseController : MonoBehaviour
 	{
 		//if (!_isPaused)
 		//	return;
-		_uiModule.Close(PauseUIPath);
+		
 		_isPaused = false;
 	}
 }

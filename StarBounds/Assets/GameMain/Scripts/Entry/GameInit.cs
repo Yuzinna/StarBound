@@ -1,71 +1,121 @@
-using GameFrameworkLite;
+ï»¿
+using System;
 using Unity.Cinemachine;
 using UnityEngine;
 
 public class GameInit : MonoBehaviour
 {
-	// [ÇÊ¼ö] Inspector Ã¢¿¡¼­ ÇÃ·¹ÀÌ¾î ÇÁ¸®ÆÕÀ» ¿©±â¿¡ ¿¬°áÇØ¾ß ÇÕ´Ï´Ù.
-	[Tooltip("Hierarchy¿¡ ÀÎ½ºÅÏ½ºÈ­ÇÒ ÇÃ·¹ÀÌ¾î GameObject ÇÁ¸®ÆÕÀ» ¿¬°áÇÏ¼¼¿ä.")]
+	// [í•„ìˆ˜] Inspector ì°½ì—ì„œ í”Œë ˆì´ì–´ í”„ë¦¬íŒ¹ì„ ì—¬ê¸°ì— ì—°ê²°í•´ì•¼ í•©ë‹ˆë‹¤.
+	[Tooltip("Hierarchyì— ì¸ìŠ¤í„´ìŠ¤í™”í•  í”Œë ˆì´ì–´ GameObject í”„ë¦¬íŒ¹ì„ ì—°ê²°í•˜ì„¸ìš”.")]
+
+	//1. ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤: ì”¬ì´ ë°”ë€Œì–´ë„ ì´ ì˜¤ë¸Œì íŠ¸ì˜ ë¡œì§ì„ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ í•©ë‹ˆë‹¤.
+	public static GameInit Instance { get; private set; }
+
+
+
 	public GameObject playerPrefab;
-
-	// ÀÌ º¯¼ö¿¡ »ı¼ºµÈ ÇÃ·¹ÀÌ¾î ÀÎ½ºÅÏ½º¸¦ ÀúÀåÇÏ¿© Ä«¸Ş¶ó ¿¬°á¿¡ »ç¿ëÇÕ´Ï´Ù.
+	// ì´ ë³€ìˆ˜ì— ìƒì„±ëœ í”Œë ˆì´ì–´ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì €ì¥í•˜ì—¬ ì¹´ë©”ë¼ ì—°ê²°ì— ì‚¬ìš©í•©ë‹ˆë‹¤.
 	private GameObject _playerInstance;
-	void Start()
-	{
-		Init();
-	}
-	public void Init()
-	{
-		// 1. ÇÃ·¹ÀÌ¾î ÇÁ¸®ÆÕ À¯È¿¼º °Ë»ç
-		if (playerPrefab == null)
-		{
-			Debug.LogError("[GameInit] ÇÃ·¹ÀÌ¾î ÇÁ¸®ÆÕ(playerPrefab)ÀÌ Inspector¿¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù! ÃÊ±âÈ­ Áß´Ü.");
-			return;
-		}
 
-		// 2. PlayerStart ¿ÀºêÁ§Æ®¸¦ Ã£¾Æ ½ºÆù À§Ä¡ °áÁ¤
-		var startObj = GameObject.FindWithTag("PlayerStart");
-		Vector3 spawnPos;
+	// 2. ì´ˆê¸°í™” ì™„ë£Œ ì´ë²¤íŠ¸: ì™¸ë¶€ì—ì„œ ì´ˆê¸°í™”ê°€ ëë‚œ ì‹œì ì„ ì•Œ ìˆ˜ ìˆë„ë¡ í•©ë‹ˆë‹¤.
+	public event Action OnInitCompleted;
 
-		if (startObj == null)
+	private void Awake()
+	{
+		// 3. ì‹±ê¸€í†¤ ë° DDOL ì²˜ë¦¬
+		if (Instance == null)
 		{
-			Debug.LogWarning("[GameInit] 'PlayerStart' ÅÂ±×¸¦ °¡Áø ¿ÀºêÁ§Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù. (0, 1, 0)¿¡ »ı¼ºÇÕ´Ï´Ù.");
-			spawnPos = Vector3.up; // (0, 1, 0)
+			Instance = this;
+			// ì”¬ì´ ë°”ë€Œì–´ë„ íŒŒê´´ë˜ì§€ ì•Šê²Œ í•˜ì—¬ ì–´ë””ì„œë“  ì ‘ê·¼ ê°€ëŠ¥í•˜ê²Œ í•©ë‹ˆë‹¤.
+			DontDestroyOnLoad(gameObject);
 		}
 		else
 		{
-			// ¿ä±¸ »çÇ×: PlayerStart À§Ä¡ + Vector3.up (Áö¸é¿¡¼­ ¾à°£ À§)
-			spawnPos = startObj.transform.position + Vector3.up;
+			// ì´ë¯¸ ì¡´ì¬í•˜ë©´ ìƒˆ ì¸ìŠ¤í„´ìŠ¤ë¥¼ íŒŒê´´í•©ë‹ˆë‹¤.
+			Destroy(gameObject);
+			return; // ì´í›„ ì½”ë“œê°€ ì‹¤í–‰ë˜ì§€ ì•Šë„ë¡ ì¦‰ì‹œ ì¢…ë£Œ
+		}
+	}
+	void Start()
+	{
+		Debug.Log("[GameInit] ìµœì´ˆ ì”¬ ì‹œì‘ ê°ì§€. InitAndFadeIn() í˜¸ì¶œ.");
+		// âœ¨ ìµœì´ˆ ì‹œì‘ ì‹œ, ì´ˆê¸°í™” ë° Fade Inì„ ì¦‰ì‹œ ì‹¤í–‰
+		InitGame();
+		StartFadeIn();
+	}
+	// ì”¬ ë¡œë“œ í›„ ì´ˆê¸°í™”ì™€ Fade Inì„ ì‹œì‘í•˜ëŠ” ì§„ì…ì 
+	
+	public void InitGame()
+	{
+		// 1. í”Œë ˆì´ì–´ í”„ë¦¬íŒ¹ ìœ íš¨ì„± ê²€ì‚¬
+		if (playerPrefab == null)
+		{
+			Debug.LogError("[GameInit] í”Œë ˆì´ì–´ í”„ë¦¬íŒ¹(playerPrefab)ì´ Inspectorì— ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! ì´ˆê¸°í™” ì¤‘ë‹¨.");
+			return;
 		}
 
-		// 3. **ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ® ÀÎ½ºÅÏ½ºÈ­ ¹× À§Ä¡ ¼³Á¤**
-		// ÀÎ½ºÅÏ½ºÈ­µÈ ¿ÀºêÁ§Æ®¸¦ _playerInstance º¯¼ö¿¡ ÀúÀåÇÕ´Ï´Ù.
-		_playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+		// 2. PlayerStart ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì•„ ìŠ¤í° ìœ„ì¹˜ ê²°ì •
+		var startObj = GameObject.FindWithTag("PlayerStart");
+		if (startObj == null)
+		{
+			return; //ìŠ¤íƒ€íŠ¸ ì§€ì ì´ ì—†ìœ¼ë©´ ì‹¤í–‰ ì¤‘ì§€
+		}
+		Vector3 spawnPos = (startObj != null) ? startObj.transform.position + Vector3.up : Vector3.up;
 
-		// ÀÌ ¸Å´ÏÀú ¿ÀºêÁ§Æ®ÀÇ À§Ä¡°¡ ¾Æ´Ñ, ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ®ÀÇ À§Ä¡¸¦ ¼³Á¤ÇÕ´Ï´Ù.
-		// _playerInstance.transform.position = spawnPos; // Instantiate ½ÃÁ¡¿¡ À§Ä¡°¡ ¼³Á¤µÇ¾úÀ¸¹Ç·Î »ı·« °¡´É
 
-		Debug.Log($"[GameInit] ÇÃ·¹ÀÌ¾î ¿ÀºêÁ§Æ®¸¦ {spawnPos} À§Ä¡¿¡ ÀÎ½ºÅÏ½ºÈ­ ¿Ï·á.");
+		// 2. **í”Œë ˆì´ì–´ ì˜¤ë¸Œì íŠ¸ ì¸ìŠ¤í„´ìŠ¤í™”**
+		// ì”¬ ì „í™˜ ì‹œ í”Œë ˆì´ì–´ê°€ DDOLì´ ì•„ë‹ˆë¼ë©´, ìƒˆ ì”¬ë§ˆë‹¤ ì¬ìŠ¤í°í•©ë‹ˆë‹¤.
+		if (_playerInstance == null)
+		{
+			_playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
+		}
+		else
+		{
+			_playerInstance.transform.position = spawnPos;
+		}
+		// ì´ ë§¤ë‹ˆì € ì˜¤ë¸Œì íŠ¸ì˜ ìœ„ì¹˜ê°€ ì•„ë‹Œ, í”Œë ˆì´ì–´ ì˜¤ë¸Œì íŠ¸ì˜ ìœ„ì¹˜ë¥¼ ì„¤ì •í•©ë‹ˆë‹¤.
+		// _playerInstance.transform.position = spawnPos; // Instantiate ì‹œì ì— ìœ„ì¹˜ê°€ ì„¤ì •ë˜ì—ˆìœ¼ë¯€ë¡œ ìƒëµ ê°€ëŠ¥
 
-		// 4. Cinemachine Ä«¸Ş¶ó ¿¬°á (ÀÎ½ºÅÏ½ºÈ­µÈ ÇÃ·¹ÀÌ¾îÀÇ Transform Àü´Ş)
+		Debug.Log($"[GameInit] í”Œë ˆì´ì–´ ì˜¤ë¸Œì íŠ¸ë¥¼ {spawnPos} ìœ„ì¹˜ì— ì¸ìŠ¤í„´ìŠ¤í™” ì™„ë£Œ.");
+
+		// 4. Cinemachine ì¹´ë©”ë¼ ì—°ê²° (ì¸ìŠ¤í„´ìŠ¤í™”ëœ í”Œë ˆì´ì–´ì˜ Transform ì „ë‹¬)
 		SetupCamera(_playerInstance.transform);
 
-		// Âü°í: ±âÁ¸ ÄÚµåÀÇ PlayerPrefabPath º¯¼ö´Â ´õ ÀÌ»ó »ç¿ëÇÏÁö ¾Ê½À´Ï´Ù.
+		// ì°¸ê³ : ê¸°ì¡´ ì½”ë“œì˜ PlayerPrefabPath ë³€ìˆ˜ëŠ” ë” ì´ìƒ ì‚¬ìš©í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
+
+
+	}
+	// ==========================================================
+	// Fade In í•¨ìˆ˜ (StartFadeInìœ¼ë¡œ ê°„ê²°í•˜ê²Œ ë³€ê²½)
+	// ==========================================================
+	/// <summary>
+	/// ì´ˆê¸°í™” ì™„ë£Œ í›„ SceneTransitionManagerë¥¼ í†µí•´ í™”ë©´ì„ ë°í™ë‹ˆë‹¤.
+	/// </summary>
+	public void StartFadeIn()
+	{
+		if (SceneTransitionManager.Instance != null)
+		{
+			SceneTransitionManager.Instance.StartFadeIn();
+		}
+		else
+		{
+			Debug.LogWarning("[GameInit] SceneTransitionManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ì–´ Fade Inì„ ê±´ë„ˆëœë‹ˆë‹¤.");
+		}
 	}
 	private void SetupCamera(Transform playerTransform)
 	{
-		// ¾À ³»ÀÇ CinemachineCamera¸¦ Ã£½À´Ï´Ù.
+		// ì”¬ ë‚´ì˜ CinemachineCameraë¥¼ ì°¾ìŠµë‹ˆë‹¤.
 		CinemachineCamera virtualCam = GameObject.FindAnyObjectByType<CinemachineCamera>();
 
 		if (virtualCam != null)
 		{
 			virtualCam.Follow = playerTransform;
 			virtualCam.LookAt = playerTransform;
-			Debug.Log("[PlayerStarter] Cinemachine Camera¸¦ ÇÃ·¹ÀÌ¾î¿¡ ¿¬°á ¿Ï·á.");
+			Debug.Log("[PlayerStarter] Cinemachine Cameraë¥¼ í”Œë ˆì´ì–´ì— ì—°ê²° ì™„ë£Œ.");
 		}
 		else
 		{
-			Debug.LogWarning("[PlayerStarter] CinemachineCamera ¿ÀºêÁ§Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù! Ä«¸Ş¶ó ÃßÀû ±â´ÉÀÌ ºñÈ°¼ºÈ­µË´Ï´Ù.");
+			Debug.LogWarning("[PlayerStarter] CinemachineCamera ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤! ì¹´ë©”ë¼ ì¶”ì  ê¸°ëŠ¥ì´ ë¹„í™œì„±í™”ë©ë‹ˆë‹¤.");
 		}
 	}
 }
