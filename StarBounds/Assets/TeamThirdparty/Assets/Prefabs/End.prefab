@@ -455,3 +455,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2b37bb3d0a256c44a0cc93423b06896, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExitPortalLogic
+  nextSceneName: Level_02

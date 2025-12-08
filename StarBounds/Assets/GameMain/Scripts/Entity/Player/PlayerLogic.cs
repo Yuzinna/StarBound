@@ -46,7 +46,7 @@ public class PlayerLogic : MonoBehaviour
 	// ❗ [Ground Check Settings]
 	[Header("Ground Check")]
 	[Tooltip("발 아래 Ray를 쏠 시작점 (Collider 중앙 아래)")]
-	public Vector3 groundCheckOffset = new Vector3(0, -1f, 0);
+	public Vector3 groundCheckOffset;
 	[Tooltip("Raycast의 길이")]
 	public float groundCheckDistance = 1f;
 
@@ -225,7 +225,7 @@ public class PlayerLogic : MonoBehaviour
 			{
 				// 2. 플랫폼의 드롭 함수 호출
 				// 플레이어 자신의 콜라이더를 PlatformLogic에 넘겨줍니다.
-				platform.DisableCollisionForDrop(GetComponent<Collider2D>(), 0.3f);
+				platform.DisableCollisionForDrop(GetComponent<Collider2D>(), 0.2f);
 
 				// 드롭 스루 시 즉시 중력 방향으로 약간의 힘을 가하여 콜라이더 겹침을 방지할 수 있습니다.
 				_rb.AddForce(Vector2.down * _gravityDirection * 5f, ForceMode2D.Impulse);
