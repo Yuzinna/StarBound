@@ -10,14 +10,14 @@ public class PauseController : MonoBehaviour
 	private void Start()
 	{
 		
-		InputManager.Instance._input.PauseAction += TogglePause;
+		InputManager.Instance._plInput.PauseAction += TogglePause;
 		
 	}
 	private void OnDestroy()
 	{
 		if (InputManager.Instance != null)
 		{
-			InputManager.Instance._input.PauseAction -= TogglePause;
+			InputManager.Instance._plInput.PauseAction -= TogglePause;
 		}
 	}
 	private void TogglePause()

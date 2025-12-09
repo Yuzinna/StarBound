@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerInput : BaseInput,Platformer.IPlayerActions
 {
-	Platformer input;
+	
 
 	private void OnEnable()
 	{
@@ -13,20 +13,11 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	}
 	private void Start()
 	{
-		if (input == null)
-		{
-			input = InputManager.Instance.Actions;
-		}
-		if (input != null)
-		{
-			input.Player.SetCallbacks(this);
-			input.Player.Enable();
-		}
+		
 	}
 	private void OnDisable()
 	{
-		input.Player.Disable();
-		input.Player.SetCallbacks(null);
+		
 	}
 	
 	public void OnMove(InputAction.CallbackContext context)
@@ -42,7 +33,6 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 		// Move를 1D Axis로 만들었으면 float로 읽고, 2D면 Vector2로 읽으면 된다.
 		// 여기서는 1D 가정 (← -1, 0, 1 →)
 		
-
 		// BaseInput에 저장
 		
 	}

@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 6918203440600646255}
   - component: {fileID: 6574371822512920372}
   - component: {fileID: 9070842247184551775}
+  - component: {fileID: 8164092757095279787}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -150,6 +151,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4183dca20628dc459679dd4399dd583, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInput
+--- !u!114 &8164092757095279787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4779210900225354053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3639c5fde37a1ab4ca7dc80b84ab6fa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIInput
 --- !u!1001 &6163901936733890164
 PrefabInstance:
   m_ObjectHideFlags: 0

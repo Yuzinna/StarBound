@@ -145,7 +145,7 @@ public class PlayerLogic : MonoBehaviour
 
 		if (_input == null)
 		{
-			_input = InputManager.Instance._input;
+			_input = InputManager.Instance._plInput;
 			_input.InteractAction += OnInputInteract; // 구독 시 메서드 이름만 전달
 			_input.JumpAction += OnInputJump; // ❗ 점프 입력 구독
 			_input.DropAction += OnInputDropThrough;
