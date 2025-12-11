@@ -4,7 +4,7 @@ using UnityEngine;
 public class SinglePlatformLogic : MonoBehaviour
 {
 	private Collider2D _platformCollider;
-	
+	private Transform _localTransform;
 	public float duration = 0.5f;
 	private void Awake()
 	{
@@ -16,6 +16,26 @@ public class SinglePlatformLogic : MonoBehaviour
 		{
 			Debug.LogError("PlatformLogic에는 Collider2D 컴포넌트가 필요합니다.");
 			enabled = false;
+		}
+	}
+	private void Start()
+	{
+		//중력 방향이 바뀌면 호출할 함수
+		GravityManager.Instance.OnGravityDirectionChanged += setInverseCollider;
+	}
+	public void setInverseCollider(eGravityDirection direction)
+	{
+		//중력 방향이 거꾸로 바뀜
+		if (direction == eGravityDirection.Inverse)
+		{
+			transform.localPosition = new Vector3(0, 0.7f, 0);
+			transform.localScale = new Vector3(1, -1, 1);
+		}
+		//중력 방향이 노말로 바뀜
+		else if (direction == eGravityDirection.Normal)
+		{
+			transform.localPosition = Vector3.zero;
+			transform.localScale = Vector3.one;
 		}
 	}
 	/// <summary>

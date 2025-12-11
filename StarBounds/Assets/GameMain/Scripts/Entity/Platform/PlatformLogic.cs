@@ -5,6 +5,7 @@ public class PlatformLogic : MonoBehaviour
 {
 	private Collider2D _platformCollider;
 	private Coroutine _reEnableCoroutine;
+	private Transform _localTransform;
 	private void Awake()
 	{
 		// 플랫폼 오브젝트에 부착된 콜라이더를 가져옵니다.
@@ -17,6 +18,26 @@ public class PlatformLogic : MonoBehaviour
 			enabled = false;
 		}	
 
+	}
+	private void Start()
+	{
+		//중력 방향이 바뀌면 호출할 함수
+		GravityManager.Instance.OnGravityDirectionChanged += setInverseCollider;
+	}
+	public void setInverseCollider(eGravityDirection direction)
+	{
+		//중력 방향이 거꾸로 바뀜
+		if (direction == eGravityDirection.Inverse)
+		{
+			transform.localPosition = new Vector3(0,0.7f,0);
+			transform.localScale = new Vector3(1,-1,1);
+		}
+		//중력 방향이 노말로 바뀜
+		else if(direction == eGravityDirection.Normal)
+		{
+			transform.localPosition = Vector3.zero;
+			transform.localScale = Vector3.one;
+		}
 	}
 	/// <summary>
 	/// 플레이어와 이 플랫폼 간의 충돌을 일시적으로 비활성화합니다.
