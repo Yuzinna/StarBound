@@ -17,9 +17,6 @@ public class InputManager : MonoBehaviour
 	//inputActionAsset
 	public Platformer Actions { get; set ; }
 
-	public PlayerInput _plInput;
-	public UIInput _uiInput;
-
 	private void Awake()
 	{
 		if (Instance != null && Instance != this)
@@ -32,26 +29,12 @@ public class InputManager : MonoBehaviour
 		DontDestroyOnLoad(gameObject);
 
 		Actions = new Platformer();
-		_plInput = GetComponent<PlayerInput>();
-		_uiInput = GetComponent<UIInput>();
-
+		
 		InitInputCallbacks();
 	}
 	private void InitInputCallbacks()
 	{
-		if (_plInput == null || _uiInput == null)
-		{
-			return;
-		}
-		// 중요: 모든 콜백 등록은 여기서 총괄합니다. (PlayerInput/UIInput의 Start 함수에서 제거)
-
-		// Player ActionMap의 콜백을 PlayerInput 인스턴스에 연결
-		Actions.Player.SetCallbacks(_plInput);
-
-		// UI ActionMap의 콜백을 UIInput 인스턴스에 연결
-		Actions.UI.SetCallbacks(_uiInput);
-
-		// 초기 활성화 상태 설정 (보통 게임 시작 시 Player만 활성화)
+		
 		Actions.Enable(); // 모든 ActionMap을 고,
 		Actions.UI.Disable(); // UI ActionMap은 명시적으로 끕니다.
 	}

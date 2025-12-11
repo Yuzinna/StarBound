@@ -35,17 +35,17 @@ public class GravityManager : MonoBehaviour
 		DontDestroyOnLoad(gameObject);
 	}
 
-	public void ChangeGravityDirection(eGravityDirection newDirection)
-	{
-		// ... 실제 중력 변경 로직 ...
-		OnGravityDirectionChanged?.Invoke(newDirection); // 이벤트 발생
-	}
+	//public void ChangeGravityDirection(eGravityDirection newDirection)
+	//{
+	//	// ... 실제 중력 변경 로직 ...
+	//	OnGravityDirectionChanged?.Invoke(newDirection); // 이벤트 발생
+	//}
 
-	public void SetFloatingEnabled(bool isEnabled)
-	{
-		// ... 실제 Floating 상태 변경 로직 ...
-		OnFloatingStateChanged?.Invoke(isEnabled); // 이벤트 발생
-	}
+	//public void SetFloatingEnabled(bool isEnabled)
+	//{
+	//	// ... 실제 Floating 상태 변경 로직 ...
+	//	OnFloatingStateChanged?.Invoke(isEnabled); // 이벤트 발생
+	//}
 	
 	public void SetDirection(eGravityDirection direction)
 	{

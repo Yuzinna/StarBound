@@ -45557,7 +45557,7 @@ Transform:
   m_GameObject: {fileID: 498963100}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.9317331, y: -0.11839628, z: -26.015638}
+  m_LocalPosition: {x: -6.1268854, y: 0.379642, z: -26.015638}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45806,6 +45806,22 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Size.x
+      value: 29.869713
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Size.y
+      value: 16.52299
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Offset.x
+      value: 2.6408272
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Offset.y
+      value: -1.5577879
+      objectReference: {fileID: 0}
     - target: {fileID: 5792337273466498535, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.03999
@@ -45943,7 +45959,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9ca5b0b6dc8022469fc4cf90ebd6a2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseController
-  _isPaused: 0
 --- !u!114 &1228051449
 MonoBehaviour:
   m_ObjectHideFlags: 0

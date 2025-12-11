@@ -1,46 +1,66 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 
 public class PlatformLogic : MonoBehaviour
 {
-    private Collider2D _platformCollider;
-
+	private Collider2D _platformCollider;
+	private Coroutine _reEnableCoroutine;
 	private void Awake()
 	{
-		// ÇÃ·§Æû ¿ÀºêÁ§Æ®¿¡ ºÎÂøµÈ Äİ¶óÀÌ´õ¸¦ °¡Á®¿É´Ï´Ù.
-		// (BoxCollider2D ¶Ç´Â EdgeCollider2D µîÀÌ µÉ ¼ö ÀÖ½À´Ï´Ù.)
+		// í”Œë«í¼ ì˜¤ë¸Œì íŠ¸ì— ë¶€ì°©ëœ ì½œë¼ì´ë”ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
+		// (BoxCollider2D ë˜ëŠ” EdgeCollider2D ë“±ì´ ë  ìˆ˜ ìˆìŠµë‹ˆë‹¤.)
 		_platformCollider = GetComponent<CompositeCollider2D>();
 
 		if (_platformCollider == null)
 		{
-			Debug.LogError("PlatformLogic¿¡´Â Collider2D ÄÄÆ÷³ÍÆ®°¡ ÇÊ¿äÇÕ´Ï´Ù.");
+			Debug.LogError("PlatformLogicì—ëŠ” Collider2D ì»´í¬ë„ŒíŠ¸ê°€ í•„ìš”í•©ë‹ˆë‹¤.", gameObject);
 			enabled = false;
-		}
+		}	
+
 	}
 	/// <summary>
-	/// ÇÃ·¹ÀÌ¾î¿Í ÀÌ ÇÃ·§Æû °£ÀÇ Ãæµ¹À» ÀÏ½ÃÀûÀ¸·Î ºñÈ°¼ºÈ­ÇÕ´Ï´Ù.
+	/// í”Œë ˆì´ì–´ì™€ ì´ í”Œë«í¼ ê°„ì˜ ì¶©ëŒì„ ì¼ì‹œì ìœ¼ë¡œ ë¹„í™œì„±í™”í•©ë‹ˆë‹¤.
 	/// </summary>
-	/// <param name="playerCollider">ÇÃ·¹ÀÌ¾îÀÇ Collider2D ÄÄÆ÷³ÍÆ®.</param>
-	/// <param name="duration">Ãæµ¹À» ºñÈ°¼ºÈ­ÇÒ ½Ã°£(ÃÊ).</param>
-	public void DisableCollisionForDrop(Collider2D playerCollider, float duration = 0.3f)
+	/// <param name="playerCollider">í”Œë ˆì´ì–´ì˜ Collider2D ì»´í¬ë„ŒíŠ¸.</param>
+	/// <param name="duration">ì¶©ëŒì„ ë¹„í™œì„±í™”í•  ì‹œê°„(ì´ˆ).</param>
+	public void DisableCollisionForDrop(Collider2D playerCollider)
 	{
 		if (playerCollider == null || _platformCollider == null) return;
 
-		// 1. ÇÃ·¹ÀÌ¾î¿Í ÇÃ·§Æû °£ÀÇ Ãæµ¹À» ¹«½Ã (Drop-Through ½ÃÀÛ)
+		// ì¤‘ë³µ ì½”ë£¨í‹´ ì‹¤í–‰ ë°©ì§€
+		if (_reEnableCoroutine != null)
+		{
+			StopCoroutine(_reEnableCoroutine);
+		}
+
+		// 1. ë“œë¡­ì„ ì‹œì‘í•œ ìˆœê°„ì˜ í”Œë ˆì´ì–´ í•˜ë‹¨ Y ì¢Œí‘œë¥¼ ì €ì¥í•©ë‹ˆë‹¤.
+		float startDropY = playerCollider.bounds.min.y;
+
+		// 2. í”Œë ˆì´ì–´ì™€ 'ì´ íŠ¹ì • í”Œë«í¼'ì˜ ì¶©ëŒë§Œì„ ë¬´ì‹œí•©ë‹ˆë‹¤. (ìˆ˜ì§ ê²¹ì¹¨ ë¬¸ì œ í•´ê²°)
 		Physics2D.IgnoreCollision(playerCollider, _platformCollider, true);
 
-		// 2. Àá½Ã ÈÄ Ãæµ¹À» ´Ù½Ã È°¼ºÈ­ÇÏ´Â ÄÚ·çÆ¾ ½ÃÀÛ
-		StartCoroutine(ReEnableCollisionCoroutine(playerCollider, duration));
+		// 3. Y ì¢Œí‘œ ê¸°ë°˜ ë³µêµ¬ ë¡œì§ ì‹œì‘ (ë‚®ì€ í”Œë«í¼ íŠ•ê¹€ ë¬¸ì œ í•´ê²°)
+		_reEnableCoroutine = StartCoroutine(ReEnableCollisionCoroutine(playerCollider, startDropY));
 	}
-	// ÄÚ·çÆ¾: Ãæµ¹ ¹«½Ã¸¦ ÇØÁ¦ÇÏ¿© ÇÃ·¹ÀÌ¾î°¡ ´Ù½Ã ¹âÀ» ¼ö ÀÖ°Ô ÇÕ´Ï´Ù.
-	private IEnumerator ReEnableCollisionCoroutine(Collider2D playerCollider, float duration)
+	// ì½”ë£¨í‹´: ì¶©ëŒ ë¬´ì‹œë¥¼ í•´ì œí•˜ì—¬ í”Œë ˆì´ì–´ê°€ ë‹¤ì‹œ ë°Ÿì„ ìˆ˜ ìˆê²Œ í•©ë‹ˆë‹¤.
+	private IEnumerator ReEnableCollisionCoroutine(Collider2D playerCollider, float startDropY)
 	{
-		yield return new WaitForSeconds(duration);
+		// í”Œë ˆì´ì–´ì˜ í•˜ë‹¨ Y ì¢Œí‘œê°€ ì¶œë°œì„ (startDropY)ë³´ë‹¤ í¬ê±°ë‚˜ ê°™ìœ¼ë©´ ê³„ì† ëŒ€ê¸°í•©ë‹ˆë‹¤.
+		while (playerCollider != null && playerCollider.bounds.max.y >= startDropY)
+		{
+			yield return null;
+		}
 
-		// ¾ÈÀüÇÏ°Ô ÇÃ·¹ÀÌ¾î Äİ¶óÀÌ´õ°¡ ¾ÆÁ÷ À¯È¿ÇÑ °æ¿ì¿¡¸¸ º¹¿ø
+		// ì•ˆì „ ë§ˆì§„: ì¶œë°œì„  ì•„ë˜ë¡œ ë‚´ë ¤ì™”ë‹¤ë©´, 0.1ì´ˆ ë™ì•ˆ ì¶”ê°€ë¡œ ë‚™í•˜í•  ì‹œê°„ì„ ì¤ë‹ˆë‹¤.
+		yield return new WaitForSeconds(0.1f);
+
+		// 4. ì¶©ëŒ ë³µì›
 		if (playerCollider != null && _platformCollider != null)
 		{
 			Physics2D.IgnoreCollision(playerCollider, _platformCollider, false);
+			Debug.Log($"[PlatformLogic] ì¶©ëŒ ë³µêµ¬ ì™„ë£Œ: Y ì¢Œí‘œ({startDropY}) í†µê³¼");
 		}
+
+		_reEnableCoroutine = null;
 	}
 }

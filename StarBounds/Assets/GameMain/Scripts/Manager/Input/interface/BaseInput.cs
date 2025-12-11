@@ -5,15 +5,24 @@ public class BaseInput : MonoBehaviour
 {
 	/// <summary>좌우 이동 등 방향 입력</summary>
 	public Vector2 MoveDir { get; protected set; }
+	public Vector2 UIDir { get; protected set; }
 
 	/// <summary>이 프레임에 점프 버튼이 눌렸는지 (WasPressedThisFrame 느낌)</summary>
 	public bool JumpPressed { get; protected set; }
 
 	public bool InteractPressd { get; protected set; }
+	
+	//플레이어 액션
 	public event Action InteractAction;
 	public event Action JumpAction;
 	public event Action DropAction;
 	public event Action PauseAction;
+
+	//UI액션
+	public event Action NavigateAction;
+	public event Action SubmitAction;
+	public event Action EscapeAction;
+
 	/// <summary>
 	/// 콜백에서 Jump/Interact를 켜고,
 	/// 이 메서드에서 한 프레임짜리 플래그들을 초기화해준다.
@@ -28,20 +37,32 @@ public class BaseInput : MonoBehaviour
 		MoveDir = dir;
 	}
 
-	protected void OnInteraction()
+	protected void OnInterAction()
 	{
 		InteractAction?.Invoke();
 	}
-	protected void OnJumpaction()
+	protected void OnJumpAction()
 	{
 		JumpAction?.Invoke();
 	}
-	protected void OnDropaction()
+	protected void OnDropAction()
 	{
 		DropAction?.Invoke();
 	}
 	protected void OnPauseAction()
 	{
 		PauseAction?.Invoke();
+	}
+	protected void OnNavigateAction()
+	{
+		NavigateAction?.Invoke();
+	}
+	protected void OnSubmitAction()
+	{
+		SubmitAction?.Invoke();
+	}
+	protected void OnEscapeAction()
+	{
+		EscapeAction?.Invoke();
 	}
 }

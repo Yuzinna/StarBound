@@ -42,7 +42,8 @@ public class PauseUI : MonoBehaviour
 		}
 		// 게임이 시작될 때 timeScale이 1로 설정되어 있는지 확인합니다.
 		Time.timeScale = 1f;
-		InputManager.Instance._plInput.PauseAction+= PauseGame;
+		selectedButtonIndex = 0;
+		InputManager.Instance.SwitchToGameplay();
 	}
 	
 	/// <summary>
@@ -84,23 +85,24 @@ public class PauseUI : MonoBehaviour
 	}
 	public void PauseGame()
 	{
+		
 		if (pausePanel != null)
 		{
 			pausePanel.SetActive(true);
 		}
 		Time.timeScale = 0f; // 게임 시간 정지
 		isPaused = true;
-
-		UpdateButtonVisuals(resumeButtonVisuals, true);
-		UpdateButtonVisuals(mainMenuButtonVisuals, false);
 		if (InputManager.Instance != null)
 		{
 			InputManager.Instance.SwitchToUI();
 		}
+		UpdateButtonVisuals(resumeButtonVisuals, true);
+		UpdateButtonVisuals(mainMenuButtonVisuals, false);
+		
 	}
 	public void ResumeGame()
 	{
-		if (pausePanel != null)
+		if (pausePanel != null&& isPaused)
 		{
 			pausePanel.SetActive(false);
 		}
@@ -116,7 +118,11 @@ public class PauseUI : MonoBehaviour
 	/// </summary>
 	public void GoToMainMenu()
 	{
-		// 씬 전환 전 게임 시간을 다시 흐르게 합니다. (필수)
+
+		// 1. 현재 씬 이름을 임시 저장소에 기록합니다. (핵심 변경)
+		// 이 정보는 게임을 껐다 켜면 사라집니다.
+		GameSceneSaver.SaveCurrentSceneForSession();
+		// 씬 전환 전 게임 시간을 다시 흐르게 합니다
 		Time.timeScale = 1f;
 
 		// SceneTransitionManager를 통해 StartScene으로 전환 요청
@@ -158,8 +164,6 @@ public class PauseUI : MonoBehaviour
 				buttonVisuals.targetButton.gameObject.SetActive(false);
 				buttonVisuals.targetImage.gameObject.SetActive(true);
 			}
-			// ButtonVisuals에 정의된 고유 이미지를 사용
-			//buttonVisuals.targetButton.image.sprite = isSelected ? buttonVisuals.selectedSprite : buttonVisuals.unselectedSprite;
 		}
 	}
 }

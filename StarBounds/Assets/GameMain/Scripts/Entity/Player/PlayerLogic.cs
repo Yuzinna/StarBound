@@ -1,3 +1,4 @@
+using MoreMountains.Feedbacks;
 using UnityEngine;
 
 
@@ -60,7 +61,7 @@ public class PlayerLogic : MonoBehaviour
 	private int _facingDir = 1; // 1 = 오른쪽, -1 = 왼쪽
 
 	[SerializeField] private bool _isPushing;
-	private float _moveX; // OnUpdate에서 입력 값을 받아 FixedUpdate에서 사용
+	public float _moveX; // OnUpdate에서 입력 값을 받아 FixedUpdate에서 사용
 	private bool _isCollidingWithPushable; // 미는 오브젝트와 충돌 중인가?
 
 	[Header("Visual")]
@@ -84,8 +85,8 @@ public class PlayerLogic : MonoBehaviour
 	public LayerMask cubeLayer; // GravityObjectLogic을 가진 오브젝트 레이어
 
 
-	[SerializeField]
-	private BaseInput _input;
+	//[SerializeField]
+	//private BaseInput _input;
 	// ================== Unity Lifecycle / Physics ==================
 
 
@@ -97,7 +98,7 @@ public class PlayerLogic : MonoBehaviour
 		// 현재 코드에서는 _moveX 체크가 빠져있으므로, 안전을 위해 0.1f 체크를 다시 추가합니다.
 		bool currentlyGrounded = GroundCheck();
 
-		Debug.Log($"{currentlyGrounded}");
+		
 		if (currentlyGrounded && !_isGrounded)
 		{
 			_coyoteTimer = coyoteTime; // 땅에 닿는 순간 타이머 리셋
@@ -143,13 +144,6 @@ public class PlayerLogic : MonoBehaviour
 		if (_spriteRenderer == null)
 			_spriteRenderer = GetComponent<SpriteRenderer>();
 
-		if (_input == null)
-		{
-			_input = InputManager.Instance._plInput;
-			_input.InteractAction += OnInputInteract; // 구독 시 메서드 이름만 전달
-			_input.JumpAction += OnInputJump; // ❗ 점프 입력 구독
-			_input.DropAction += OnInputDropThrough;
-		}
 		// 현재 jumpForce를 기본값으로 저장
 		_baseJumpForce = jumpForce;
 		//초기 상태를 반영
@@ -202,7 +196,7 @@ public class PlayerLogic : MonoBehaviour
 		Debug.Log($"[PlayerLogic] Dir={direction}, Floating={isFloating}, gravityScale={_rb.gravityScale}, jumpForce={jumpForce}");
 	}
 
-	private void OnInputDropThrough()
+	public void OnInputDropThrough()
 	{
 		// 드롭 스루는 '바닥' 위에 있을 때만 작동해야 합니다.
 		if (!_isGrounded) return;
@@ -216,23 +210,23 @@ public class PlayerLogic : MonoBehaviour
 		// ❗ 중요: 레이캐스트의 방향을 현재 '중력 방향'과 동일하게 설정하여, 
 		// 일반 중력(아래)이든 반중력(위)이든 '밟고 있는' 표면을 검사해야 합니다.
 		RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
-
+		Debug.Log($"{hit.collider.gameObject}");
 		if (hit.collider != null)
 		{
-			PlatformLogic platform = hit.collider.GetComponent<PlatformLogic>();
+			SinglePlatformLogic platform = hit.collider.GetComponent<SinglePlatformLogic>();
 
 			if (platform != null)
 			{
 				// 2. 플랫폼의 드롭 함수 호출
 				// 플레이어 자신의 콜라이더를 PlatformLogic에 넘겨줍니다.
-				platform.DisableCollisionForDrop(GetComponent<Collider2D>(), 0.2f);
+				platform.DisableCollisionForDrop(GetComponent<Collider2D>());
 
 				// 드롭 스루 시 즉시 중력 방향으로 약간의 힘을 가하여 콜라이더 겹침을 방지할 수 있습니다.
-				_rb.AddForce(Vector2.down * _gravityDirection * 5f, ForceMode2D.Impulse);
+				//_rb.AddForce(Vector2.down * _gravityDirection * 5f, ForceMode2D.Impulse);
 			}
 		}
 	}
-	private void OnInputInteract()
+	public void OnInputInteract()
 	{
 		// 입력 이벤트가 발생했을 때, 플레이어가 스위치와 충돌 중인지 확인합니다.
 		if (_currentInteractable != null)
@@ -241,17 +235,16 @@ public class PlayerLogic : MonoBehaviour
 			_currentInteractable.Interact(this);
 		}
 	}
-	private void OnInputJump()
+	public void OnInputJump()
 	{
 		// 점프 키가 눌릴 때마다 버퍼 타이머를 최대치로 설정
-		Debug.Log("[PlayerLogic] Jump input received");
 		_jumpBufferTimer = jumpBufferTime;
 	}
 	private void Update()
 	{
-		if (_input == null) return;
+		
 		// 1. 입력 값은 OnUpdate에서 매 프레임 받아둡니다.
-		_moveX = _input.MoveDir.x;
+		
 
 		// 2. 점프 버퍼 타이머 업데이트 (OnUpdate에서 deltaTime 사용)
 		if (_jumpBufferTimer > 0)
@@ -267,20 +260,10 @@ public class PlayerLogic : MonoBehaviour
 	{
 		// GroundCheckOffset을 사용하여 발 근처에서 레이를 쏩니다.
 		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
-			
-
 		
 		// 레이캐스트의 방향을 현재 '중력 방향'(_gravityDirection)에 따라 설정
 		RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
 
-		if (hit.collider != null)
-		{
-			Debug.Log($"[GroundCheck] Hit = {hit.collider.name}, layer = {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
-		}
-		else
-		{
-			Debug.Log("[GroundCheck] No ground");
-		}
 		// 디버깅을 위해 Ray를 그려줍니다.
 		Debug.DrawRay(rayStart, Vector2.down * _gravityDirection * groundCheckDistance, hit.collider != null ? Color.green : Color.black);
 		return hit.collider != null;
@@ -300,7 +283,7 @@ public class PlayerLogic : MonoBehaviour
 		// ❗ 점프 실행 조건: 점프 입력이 있었고 (버퍼 타이머 > 0), 
 		// 땅에 닿아 있거나 (isGrounded), 땅에서 떨어진지 얼마 안 되었을 때 (코요테 타이머 > 0)
 		bool canJump = (_jumpBufferTimer > 0) && (_isGrounded || _coyoteTimer > 0);
-		Debug.Log($"{canJump}");
+		
 		if (canJump)
 		{
 			// 점프 전 y 속도 초기화 (더블 점프 방지)
@@ -315,7 +298,7 @@ public class PlayerLogic : MonoBehaviour
 			_coyoteTimer = 0;
 			_jumpBufferTimer = 0;
 
-			Debug.Log("Jump executed!");
+			
 		}
 		
 	}

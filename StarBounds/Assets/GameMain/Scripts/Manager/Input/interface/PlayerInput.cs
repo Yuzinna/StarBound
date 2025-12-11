@@ -1,23 +1,67 @@
-
+ï»¿
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class PlayerInput : BaseInput,Platformer.IPlayerActions
 {
-	
+	private PlayerLogic plLogic;
+	private PauseUI pauseUi;
 
+	private bool _isCallbackRegistered = false;
 	private void OnEnable()
 	{
-		//TODO ¾ğÁ¨°¡ startÀÇ ³»¿ëÀ» ÀÌ°÷¿¡ ³Ö±â
+		// ì¤‘ë³µ ë“±ë¡ ë°©ì§€ ë¡œì§ ì¶”ê°€
+		if (!_isCallbackRegistered)
+		{
+			InputManager.Instance.Actions.Player.AddCallbacks(this);
+			_isCallbackRegistered = true;
+		}
+		else
+		{
+			// ğŸš¨ InputManagerê°€ ì•„ì§ nullì´ë©´ ë“±ë¡ì„ ì‹œë„í•˜ëŠ” ì½”ë£¨í‹´ ì‹œì‘
+			// (ì½”ë£¨í‹´ì€ MonoBehaviourê°€ í™œì„±í™”ëœ ìƒíƒœì—ì„œë§Œ ì‘ë™í•©ë‹ˆë‹¤.)
+			StartCoroutine(WaitForInputManagerAndRegister());
+		}
+	}
+	// ğŸ“Œ ì•ˆì „í•˜ê²Œ InputManager ì´ˆê¸°í™”ë¥¼ ê¸°ë‹¤ë¦¬ëŠ” ì½”ë£¨í‹´
+	private IEnumerator WaitForInputManagerAndRegister()
+	{
+		// ë§¤ í”„ë ˆì„ë§ˆë‹¤ InputManagerê°€ ì´ˆê¸°í™”ë˜ì—ˆëŠ”ì§€ í™•ì¸í•©ë‹ˆë‹¤.
+		while (InputManager.Instance == null)
+		{
+			yield return null; // ë‹¤ìŒ í”„ë ˆì„ê¹Œì§€ ëŒ€ê¸°
+		}
+
+		// ì´ˆê¸°í™”ê°€ ì™„ë£Œë˜ì—ˆì„ ë•Œ, ì´ ìŠ¤í¬ë¦½íŠ¸ê°€ ì•„ì§ í™œì„±í™” ìƒíƒœë¼ë©´ ë“±ë¡
+		if (this.enabled && !_isCallbackRegistered)
+		{
+			InputManager.Instance.Actions.Player.AddCallbacks(this);
+			_isCallbackRegistered = true;
+		}
+	}
+	private void Awake()
+	{
+		plLogic = GetComponent<PlayerLogic>();
+		if (plLogic == null)
+		{
+			Debug.LogError("PlayerInput requires a PlayerController on the same GameObject.");
+		}
+		
 	}
 	private void Start()
 	{
-		
+		pauseUi = FindAnyObjectByType<PauseUI>();
 	}
 	private void OnDisable()
 	{
-		
+		// ì´ ìŠ¤í¬ë¦½íŠ¸ê°€ ë¹„í™œì„±í™”ë˜ê±°ë‚˜ íŒŒê´´ë  ë•Œë§Œ ì½œë°± ì œê±°
+		if (InputManager.Instance != null && _isCallbackRegistered)
+		{
+			InputManager.Instance.Actions.Player.RemoveCallbacks(this);
+			_isCallbackRegistered = false;
+		}
 	}
 	
 	public void OnMove(InputAction.CallbackContext context)
@@ -25,15 +69,17 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 		if (context.performed)
 		{
 			MoveDir = new Vector2(context.ReadValue<float>(),0);
+			plLogic._moveX = MoveDir.x;
 		}
 		if(context.canceled)
 		{
 			MoveDir = new Vector2(0, 0);
+			plLogic._moveX = MoveDir.x;
 		}
-		// Move¸¦ 1D Axis·Î ¸¸µé¾úÀ¸¸é float·Î ÀĞ°í, 2D¸é Vector2·Î ÀĞÀ¸¸é µÈ´Ù.
-		// ¿©±â¼­´Â 1D °¡Á¤ (¡ç -1, 0, 1 ¡æ)
+		// Moveë¥¼ 1D Axisë¡œ ë§Œë“¤ì—ˆìœ¼ë©´ floatë¡œ ì½ê³ , 2Dë©´ Vector2ë¡œ ì½ìœ¼ë©´ ëœë‹¤.
+		// ì—¬ê¸°ì„œëŠ” 1D ê°€ì • (â† -1, 0, 1 â†’)
 		
-		// BaseInput¿¡ ÀúÀå
+		// BaseInputì— ì €ì¥
 		
 	}
 
@@ -41,16 +87,16 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	{
 		if (context.started)
 		{
-			OnJumpaction();
+			plLogic.OnInputJump();
 		}
 	}
 
-	//Å¬¸¯À» ÇÏ¸é
+	//í´ë¦­ì„ í•˜ë©´
 	public void OnInteract(InputAction.CallbackContext context)
 	{
 		if (context.started)
 		{
-			OnInteraction();
+			plLogic.OnInputInteract();
 		}
 	}
 
@@ -60,12 +106,12 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 		{
 			Debug.Log("[PlayerInput] Restart input received");
 
-			// 1. **ÇöÀç È°¼ºÈ­µÈ ¾ÀÀÇ ÀÌ¸§À» °¡Á®¿É´Ï´Ù.**
-			// ÀÌ°ÍÀÌ À¯´ÏÆ¼°¡ ÇöÀç ½ÇÇàÇÏ·Á´Â ¾ÀÀÇ ÀÌ¸§À» ¾Ë·ÁÁÖ´Â ÇÔ¼öÀÔ´Ï´Ù.
+			// 1. **í˜„ì¬ í™œì„±í™”ëœ ì”¬ì˜ ì´ë¦„ì„ ê°€ì ¸ì˜µë‹ˆë‹¤.**
+			// ì´ê²ƒì´ ìœ ë‹ˆí‹°ê°€ í˜„ì¬ ì‹¤í–‰í•˜ë ¤ëŠ” ì”¬ì˜ ì´ë¦„ì„ ì•Œë ¤ì£¼ëŠ” í•¨ìˆ˜ì…ë‹ˆë‹¤.
 			string currentSceneName = SceneManager.GetActiveScene().name;
 
-			// 2. **ÇØ´ç ¾ÀÀ» ´Ù½Ã ·ÎµåÇÏ¿© ½ºÅ×ÀÌÁö¸¦ Àç½ÃÀÛÇÕ´Ï´Ù.**
-			// LoadSceneÀº µ¿±â ¹æ½ÄÀ¸·Î ¾ÀÀ» ·ÎµåÇÕ´Ï´Ù.
+			// 2. **í•´ë‹¹ ì”¬ì„ ë‹¤ì‹œ ë¡œë“œí•˜ì—¬ ìŠ¤í…Œì´ì§€ë¥¼ ì¬ì‹œì‘í•©ë‹ˆë‹¤.**
+			// LoadSceneì€ ë™ê¸° ë°©ì‹ìœ¼ë¡œ ì”¬ì„ ë¡œë“œí•©ë‹ˆë‹¤.
 			SceneManager.LoadScene(currentSceneName);
 		}
 	}
@@ -74,7 +120,7 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	{
 		if (context.started)
 		{
-			OnDropaction();
+			plLogic.OnInputDropThrough();
 		}
 	}
 
@@ -82,7 +128,7 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	{
 		if(context.started)
 		{
-			OnPauseAction();
+			pauseUi.PauseGame();
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,6 +11,7 @@ public class SceneTransitionManager : MonoBehaviour
     private const string FADE_OUT_TRIGGER = "StartFade";
 	private const string FADE_IN_TRIGGER = "StratFadeIn";
 
+	public GameObject fadePanel;
 	public static SceneTransitionManager Instance { get; private set; }
 
 	private void Awake()
@@ -36,6 +38,7 @@ public class SceneTransitionManager : MonoBehaviour
 		// 1. 페이드 아웃 애니메이션 시작
 		if (transitionAnimator != null)
 		{
+			fadePanel.SetActive(true);
 			transitionAnimator.SetTrigger(FADE_OUT_TRIGGER);
 
 			// 애니메이션이 끝날 때까지 기다립니다.
@@ -43,8 +46,9 @@ public class SceneTransitionManager : MonoBehaviour
 			// 아래와 같이 애니메이터 상태가 될 때까지 기다립니다. (더 정교한 방법)
 			yield return new WaitForSeconds(1f); // 임시로 충분한 시간을 기다립니다.
 		}
-
 		
+
+
 		Debug.Log($"[TransitionManager] 씬 로드 시작: {sceneName} (동기)");
 		SceneManager.LoadScene(sceneName);
 		
@@ -62,6 +66,22 @@ public class SceneTransitionManager : MonoBehaviour
 			// ✨ Fade In 트리거 발동
 			transitionAnimator.SetTrigger(FADE_IN_TRIGGER);
 		}
+		StartCoroutine(FadeIn());
+	}
+	private IEnumerator FadeIn()
+	{
+		// 1. 페이드 아웃 애니메이션 시작
+		if (transitionAnimator != null)
+		{
+			transitionAnimator.SetTrigger(FADE_IN_TRIGGER);
+
+			// 애니메이션이 끝날 때까지 기다립니다.
+			// 애니메이션 클립 길이가 0.5초라면, 여기에 yield return new WaitForSeconds(0.5f); 를 넣거나
+			// 아래와 같이 애니메이터 상태가 될 때까지 기다립니다. (더 정교한 방법)
+			yield return new WaitForSeconds(1f); // 임시로 충분한 시간을 기다립니다.
+		}
+		fadePanel.SetActive(false);
+
 	}
 	private void OnSceneLoadCompleted(Scene scene, LoadSceneMode mode)
 	{
@@ -75,6 +95,11 @@ public class SceneTransitionManager : MonoBehaviour
 
 			// 2. Fade In 시작
 			GameInit.Instance.StartFadeIn();
+
+			//3.중력 설정은 초기화
+			GravityManager.Instance.SetDirection(eGravityDirection.Normal);
+			GravityManager.Instance.SetFloatingMode(false);
+			
 		}
 	}
 }

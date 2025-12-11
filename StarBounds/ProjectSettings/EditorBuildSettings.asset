@@ -11,21 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/TeamThirdparty/Assets/Game Maps/synopsis/SynopsisScene.unity
     guid: 68c0106ca4b53d145ba428c62d9616d1
-  - enabled: 0
-    path: Assets/GameMain/Scenes/Stage1.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 0
-    path: Assets/GameMain/Scenes/Entry.unity
-    guid: 583df7a52a4e7a44aa0e5baf4f9bbd52
-  - enabled: 0
-    path: Assets/GameMain/Scenes/Stage2.unity
-    guid: 7449c78f45bc45041931c31b98e70bb5
   - enabled: 1
-    path: Assets/TeamThirdparty/Assets/Game Maps/map1-11.unity
-    guid: 4b3e31bf32eb1d1488be530ee002932f
+    path: Assets/TeamThirdparty/Assets/Game Maps/Game Maps/map1-1.unity
+    guid: b90dc57b83d639f4cb71b61afaf96ad1
   - enabled: 1
-    path: Assets/TeamThirdparty/Assets/Game Maps/map1-21.unity
-    guid: 6f5811da2593c7b4a8355bd33e2427db
+    path: Assets/TeamThirdparty/Assets/Game Maps/Game Maps/Map1-2.unity
+    guid: d124255aa5d3f354e8f8ddf3b148ea2b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -72,11 +72,11 @@ public class SynopsisManager : MonoBehaviour
 	}
 	void Update()
 	{
-		// 스페이스바 입력 감지
-		if (Input.GetKeyDown(KeyCode.Space))
-		{
-			AdvancePage();
-		}
+		//// 스페이스바 입력 감지
+		//if (Input.GetKeyDown(KeyCode.Space))
+		//{
+		//	AdvancePage();
+		//}
 	}
 	/// <summary>
 	/// 현재 인덱스의 이미지와 텍스트를 UI에 표시합니다.
@@ -111,7 +111,7 @@ public class SynopsisManager : MonoBehaviour
 	/// <summary>
 	/// 스페이스바 입력 시 다음 페이지로 이동하거나 시퀀스를 종료합니다.
 	/// </summary>
-	private void AdvancePage()
+	public void AdvancePage()
 	{
 		//currentPageIndex++;
 

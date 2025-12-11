@@ -76,7 +76,7 @@ public class GameInit : MonoBehaviour
 		// 이 매니저 오브젝트의 위치가 아닌, 플레이어 오브젝트의 위치를 설정합니다.
 		// _playerInstance.transform.position = spawnPos; // Instantiate 시점에 위치가 설정되었으므로 생략 가능
 
-		Debug.Log($"[GameInit] 플레이어 오브젝트를 {spawnPos} 위치에 인스턴스화 완료.");
+		
 
 		// 4. Cinemachine 카메라 연결 (인스턴스화된 플레이어의 Transform 전달)
 		SetupCamera(_playerInstance.transform);
@@ -95,6 +95,7 @@ public class GameInit : MonoBehaviour
 	{
 		if (SceneTransitionManager.Instance != null)
 		{
+			
 			SceneTransitionManager.Instance.StartFadeIn();
 		}
 		else
