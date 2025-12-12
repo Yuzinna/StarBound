@@ -50,6 +50,14 @@ public class GravityObjectLogic : MonoBehaviour
 	// 디버그용 레이 시작 위치
 	private Vector2 _rayOrigin;
 
+	[Header("SFX - Landing")]
+	[SerializeField] private AudioClip landThudClip;
+	[SerializeField, Range(0f, 1f)] private float landVolume = 0.8f;
+	[SerializeField] private float landMinImpactSpeed = 1.2f; // 너무 살살 닿을 땐 소리 X
+	[SerializeField] private float landOffset = 0.6f; // 필요하면
+
+	private bool _wasAirborne = false;
+
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
@@ -270,6 +278,23 @@ public class GravityObjectLogic : MonoBehaviour
 	private void OnCollisionEnter2D(Collision2D other)
 	{
 		CheckSideCollision(other, true);
+
+		// Floating 중에는 착지 개념이 애매하니 스킵(원하면 바꿔도 됨)
+		if (_isFloating) return;
+
+		// standableLayers에 해당하는 것에 닿았는지 확인
+		int mask = 1 << other.gameObject.layer;
+		if ((standableLayers.value & mask) == 0) return;
+
+		// 충격(상대 속도) 기준으로 너무 약하면 소리 안 냄
+		float impact = other.relativeVelocity.magnitude;
+		if (impact < landMinImpactSpeed) return;
+
+		// 대표 소리 1번만 재생 요청
+		if (SfxManager.Instance != null && landThudClip != null)
+		{
+			SfxManager.Instance.PlayThudOnce(landThudClip, landVolume, landOffset);
+		}
 	}
 
 	private void OnCollisionStay2D(Collision2D other)

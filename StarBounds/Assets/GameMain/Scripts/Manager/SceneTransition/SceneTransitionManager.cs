@@ -11,6 +11,8 @@ public class SceneTransitionManager : MonoBehaviour
     private const string FADE_OUT_TRIGGER = "StartFade";
 	private const string FADE_IN_TRIGGER = "StratFadeIn";
 
+	[SerializeField] private AudioClip startSFX;
+
 	public GameObject fadePanel;
 	public static SceneTransitionManager Instance { get; private set; }
 
@@ -99,6 +101,11 @@ public class SceneTransitionManager : MonoBehaviour
 			//3.중력 설정은 초기화
 			GravityManager.Instance.SetDirection(eGravityDirection.Normal);
 			GravityManager.Instance.SetFloatingMode(false);
+			var gameobj=GameObject.FindWithTag("PlayerStart");
+			if(gameobj!=null)
+			{
+				SfxManager.Instance.PlaySfx(startSFX);
+			}
 			
 		}
 	}

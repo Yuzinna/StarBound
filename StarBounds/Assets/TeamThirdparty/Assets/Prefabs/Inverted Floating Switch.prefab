@@ -235,6 +235,9 @@ MonoBehaviour:
   spriteOff:
   - {fileID: 1552079055, guid: 236ada8a820b14a4dbb7b82f4854a378, type: 3}
   - {fileID: -1794843544, guid: 236ada8a820b14a4dbb7b82f4854a378, type: 3}
+  switchOnClip: {fileID: 8300000, guid: ec4fc579751f7d64782a6240172057cd, type: 3}
+  switchOffClip: {fileID: 8300000, guid: d68ac6724b04005498b382e022d9d688, type: 3}
+  sfxVolume: 1
 --- !u!61 &-7566334738636999832
 BoxCollider2D:
   m_ObjectHideFlags: 0

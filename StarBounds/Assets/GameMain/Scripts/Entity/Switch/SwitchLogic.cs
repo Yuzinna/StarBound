@@ -32,12 +32,16 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 	Transform Bottom;
 
 	private bool _isOn;
+	[Header("SFX")]
+	[SerializeField] private AudioClip switchOnClip;
+	[SerializeField] private AudioClip switchOffClip;
+	[SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
 
 	// =========================================================================
 	// Unity Lifecycle / Initialization
 	// =========================================================================
 
-	
+
 	private void Awake()
 	{
 		Top=transform.Find("Top");
@@ -68,6 +72,14 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 			_isOn = false;
 		}
 		UpdateVisual();
+	}
+	private void SetIsOn(bool newState)
+	{
+		if (_isOn == newState) return; //
+
+		_isOn = newState;
+		UpdateVisual();
+		PlaySwitchSfx(_isOn);
 	}
 
 	// =========================================================================
@@ -105,21 +117,15 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 		}
 	}
 
-	// 💡 Floating 이벤트 핸들러
 	private void OnFloatingStateChange(bool isEnabled)
 	{
-		// _isOn을 이벤트 값으로 업데이트하고 비주얼 업데이트
-		_isOn = isEnabled;
-		UpdateVisual();
+		SetIsOn(isEnabled);
 		Debug.Log($"[SwitchLogic-{switchType}] State updated via event: {_isOn}");
 	}
 
-	// 💡 Inverse 이벤트 핸들러
 	private void OnGravityDirectionChange(eGravityDirection newDirection)
 	{
-		// Inverse 스위치는 방향이 Inverse일 때만 켜짐
-		_isOn = (newDirection == eGravityDirection.Inverse);
-		UpdateVisual();
+		SetIsOn(newDirection == eGravityDirection.Inverse);
 		Debug.Log($"[SwitchLogic-{switchType}] State updated via event: {_isOn}");
 	}
 
@@ -156,8 +162,8 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 			return;
 		}
 		// 💡 상호작용 시에는 _isOn을 토글하고 효과 적용 (이벤트 발생)
-		_isOn = !_isOn;
-		ApplySwitchEffect(_isOn);
+		bool targetState = !_isOn;
+		ApplySwitchEffect(targetState);
 
 		// Note: UpdateVisual()은 이벤트 핸들러(On...Change)에서 호출되므로, 
 		// 여기서는 제거하는 것이 깔끔하지만, 현재 GravityManager 코드를 모르므로 일단 유지합니다.
@@ -204,7 +210,14 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 				break;
 		}
 	}
+	private void PlaySwitchSfx(bool isOn)
+	{
+		if (SfxManager.Instance == null) return;
 
+		var clip = isOn ? switchOnClip : switchOffClip;
+		var offset = isOn ? 0.5f : 0.5f;
+		SfxManager.Instance.PlaySfx(clip, sfxVolume,offset);
+	}
 	private void UpdateVisual()
 	{
 

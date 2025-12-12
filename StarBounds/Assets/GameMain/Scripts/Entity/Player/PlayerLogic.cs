@@ -51,12 +51,8 @@ public class PlayerLogic : MonoBehaviour
 	[Tooltip("Raycast의 길이")]
 	public float groundCheckDistance = 1f;
 
-	// ❗ [Jump Timing Variables]
-	[Header("Jump Timing")]
-	[Tooltip("땅에서 떨어진 후 점프를 허용하는 시간")]
-	public float coyoteTime = 0.15f;
-	[Tooltip("땅에 닿기 전 점프 입력을 저장하는 시간")]
-	public float jumpBufferTime = 0.15f;
+	// ❗ [추가] 점프 입력 감지 플래그
+	private bool _jumpInputReceived = false;
 
 	private int _facingDir = 1; // 1 = 오른쪽, -1 = 왼쪽
 
@@ -69,10 +65,7 @@ public class PlayerLogic : MonoBehaviour
 	[SerializeField] private SpriteRenderer _spriteRenderer;
 	// 상호작용 관련
 
-	// ❗ [Timing Variables]
-	private float _coyoteTimer;        // 코요테 시간 타이머
-	private float _jumpBufferTimer;    // 점프 버퍼 타이머
-
+	
 	private IInteractable _currentInteractable; // 굳이 안 써도 되지만, 상호작용 대상이 여러 개일 때를 위해 유지
 	[SerializeField] private bool isInteract=false;
 	
@@ -84,53 +77,19 @@ public class PlayerLogic : MonoBehaviour
 	[Tooltip("큐브의 레이어 (GroundCheck Layer와는 별개)")]
 	public LayerMask cubeLayer; // GravityObjectLogic을 가진 오브젝트 레이어
 
+	// 기존 AudioSource는 SFX용으로 사용
+	public AudioSource audioSourceSFX;
+	// ❗ [추가] 걷기 사운드 전용 AudioSource
+	public AudioSource audioSourceLoop;
+	// 유니티 인스펙터에서 할당할 사운드 클립들
+	[Header("사운드 이펙트")]
+	public AudioClip walkSound;
+	public AudioClip normalJumpSound;//노말점프
+	public AudioClip floatingJumpSound;//플로팅점프
+	
 
-	//[SerializeField]
-	//private BaseInput _input;
+
 	// ================== Unity Lifecycle / Physics ==================
-
-
-	private void FixedUpdate()
-	{
-		if (_rb == null) return;
-		// --- 1. 푸시 상태 결정 (물리 계산 전) ---
-		// X축 움직임이 있을 때만 푸시 상태를 허용해야 애니메이션 고착 문제를 해결합니다.
-		// 현재 코드에서는 _moveX 체크가 빠져있으므로, 안전을 위해 0.1f 체크를 다시 추가합니다.
-		bool currentlyGrounded = GroundCheck();
-
-		
-		if (currentlyGrounded && !_isGrounded)
-		{
-			_coyoteTimer = coyoteTime; // 땅에 닿는 순간 타이머 리셋
-		}
-		else if (!currentlyGrounded)
-		{
-			_coyoteTimer -= Time.fixedDeltaTime; // 땅에서 떨어지면 타이머 감소
-		}
-
-		_isGrounded = currentlyGrounded;
-
-		// ▼ 입력값이 있을 때만 푸시 상태 허용
-		bool hasMoveInput = Mathf.Abs(_moveX) > 0.01f;
-		_isPushing = _isCollidingWithPushable && _isGrounded && hasMoveInput;
-
-
-		// --- 2. 이동 처리 (FixedUpdate로 이동) ---
-		HandleMovementPhysics();
-		// --- 3. 점프 처리 (FixedUpdate로 이동) ---
-		HandleJumpPhysics();
-
-		// ❗ 4. 밀기 처리 호출
-		HandlePushing();
-
-	}
-	private void HandlePushing()
-	{
-		
-	}
-
-	// ================== EntityLogic ==================
-
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
@@ -155,6 +114,57 @@ public class PlayerLogic : MonoBehaviour
 			);
 		}
 	}
+
+	private void Start()
+	{
+		audioSourceSFX.volume = 0.6f;
+		audioSourceLoop.volume = 1.0f;
+	}
+	private void FixedUpdate()
+	{
+		if (_rb == null) return;
+		// --- 1. 푸시 상태 결정 (물리 계산 전) ---
+		// X축 움직임이 있을 때만 푸시 상태를 허용해야 애니메이션 고착 문제를 해결합니다.
+		// 현재 코드에서는 _moveX 체크가 빠져있으므로, 안전을 위해 0.1f 체크를 다시 추가합니다.
+		bool currentlyGrounded = GroundCheck();
+
+		
+		//if (currentlyGrounded && !_isGrounded)
+		//{
+
+		//	if (audioSourceSFX != null && jumpSound != null)
+		//	{
+		//		audioSourceSFX.clip = jumpSound;
+		//		audioSourceSFX.time = 0.7f; // 0.8초 오프셋 적용
+		//		audioSourceSFX.Play();
+		//	}
+		//}
+		
+
+		_isGrounded = currentlyGrounded;
+
+		// ▼ 입력값이 있을 때만 푸시 상태 허용
+		bool hasMoveInput = Mathf.Abs(_moveX) > 0.01f;
+		_isPushing = _isCollidingWithPushable && _isGrounded && hasMoveInput;
+
+
+		// --- 2. 이동 처리 (FixedUpdate로 이동) ---
+		HandleMovementPhysics();
+		// --- 3. 점프 처리 (FixedUpdate로 이동) ---
+		HandleJumpPhysics();
+
+		// ❗ 4. 밀기 처리 호출
+		HandlePushing();
+
+	}
+	private void HandlePushing()
+	{
+		
+	}
+
+	// ================== EntityLogic ==================
+
+	
 	
 	public void ApplyGravityAndFloatingState(eGravityDirection direction, bool isFloating)
 	{
@@ -237,20 +247,12 @@ public class PlayerLogic : MonoBehaviour
 	}
 	public void OnInputJump()
 	{
-		// 점프 키가 눌릴 때마다 버퍼 타이머를 최대치로 설정
-		_jumpBufferTimer = jumpBufferTime;
+			// 점프 키가 눌릴 때마다 플래그를 true로 설정
+			_jumpInputReceived = true;
+		
 	}
 	private void Update()
 	{
-		
-		// 1. 입력 값은 OnUpdate에서 매 프레임 받아둡니다.
-		
-
-		// 2. 점프 버퍼 타이머 업데이트 (OnUpdate에서 deltaTime 사용)
-		if (_jumpBufferTimer > 0)
-		{
-			_jumpBufferTimer -= Time.deltaTime;
-		}
 		// 3. 시각적 업데이트는 OnUpdate에서 처리
 		UpdateDirectionVisuals();
 		UpdateAnimation();
@@ -272,18 +274,41 @@ public class PlayerLogic : MonoBehaviour
 	/// 키보드 입력 처리 (좌우 이동) - Rigidbody 사용
 	private void HandleMovementPhysics()
 	{
+		
 		// Rigidbody2D의 x 속도만 변경 (y 속도는 점프/중력 담당)
 		Vector2 v = _rb.linearVelocity;
 		v.x = _moveX * moveSpeed;
 		_rb.linearVelocity = v;
+		// 1. 플레이어가 현재 움직이는 중인지 확인 (FixedUpdate이므로 _rb.linearVelocity.x 사용)
+		bool isMoving = Mathf.Abs(_rb.linearVelocity.x) > 0.01f;
+
+		// 2. 땅에 닿아 있고, 움직이는 중이라면
+		if (_isGrounded && isMoving)
+		{
+			// AudioSource가 재생 중이 아니라면 (처음 걷기 시작할 때)
+			if (audioSourceLoop != null && !audioSourceLoop.isPlaying)
+			{
+				// WalkSound를 AudioSource의 기본 클립으로 설정하고 반복 재생 시작
+				audioSourceLoop.clip = walkSound;
+				audioSourceLoop.loop = true; // 반복 재생
+				audioSourceLoop.time = 2f;
+				audioSourceLoop.Play();
+			}
+		}
+		else // 멈췄거나 공중에 있다면
+		{
+			if (audioSourceLoop != null && audioSourceLoop.isPlaying)
+			{
+				audioSourceLoop.Stop();
+			}
+		}
 	}
 	/// 점프 처리 (바닥 위에서만 점프) - Rigidbody 사용
 	private void HandleJumpPhysics()
 	{
-		// ❗ 점프 실행 조건: 점프 입력이 있었고 (버퍼 타이머 > 0), 
-		// 땅에 닿아 있거나 (isGrounded), 땅에서 떨어진지 얼마 안 되었을 때 (코요테 타이머 > 0)
-		bool canJump = (_jumpBufferTimer > 0) && (_isGrounded || _coyoteTimer > 0);
-		
+		// ❗ 점프 실행 조건: 땅에 닿아 있고, 점프 입력이 들어왔을 때
+		bool canJump = _isGrounded && _jumpInputReceived;
+
 		if (canJump)
 		{
 			// 점프 전 y 속도 초기화 (더블 점프 방지)
@@ -294,14 +319,27 @@ public class PlayerLogic : MonoBehaviour
 			float jumpDirection = _gravityDirection;
 			_rb.AddForce(Vector2.up * jumpDirection * jumpForce, ForceMode2D.Impulse);
 
-			// 점프 실행 후 타이머와 입력 상태 리셋
-			_coyoteTimer = 0;
-			_jumpBufferTimer = 0;
 
+			// 1. 현재 부유 상태 확인
+			bool isFloating = GravityManager.Instance.IsFloatingEnabled;
+
+			// 2. 재생할 사운드 클립 결정
+			AudioClip clipToPlay = isFloating ? floatingJumpSound : normalJumpSound;
+			float jumpOffset = isFloating ? 1.0f : 0.7f;
+			//// ❗ [추가] 점프 사운드 재생							
+			// 3. 사운드 재생
+			if (audioSourceSFX != null && clipToPlay != null)
+			{
+				audioSourceSFX.Stop();   // ❗ 이전 재생 잔여 제거
+				audioSourceSFX.clip = clipToPlay;
+				audioSourceSFX.time = jumpOffset;
+				audioSourceSFX.Play();
+			}
 			
 		}
-		
+		_jumpInputReceived = false;
 	}
+
 	// ================== Visuals / Animation / Interaction (OnUpdate 호출) ==================
 	/// 바라보는 방향 및 스프라이트 좌우 반전 업데이트
 	private void UpdateDirectionVisuals()

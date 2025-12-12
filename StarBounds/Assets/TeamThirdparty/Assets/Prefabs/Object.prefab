@@ -283,3 +283,7 @@ MonoBehaviour:
   useWave: 1
   waveAmplitude: 0.1
   waveFrequency: 1
+  landThudClip: {fileID: 8300000, guid: a7e20eafbf2a52f4b88fcef030c3e81f, type: 3}
+  landVolume: 0.8
+  landMinImpactSpeed: 1.2
+  landOffset: 0.6

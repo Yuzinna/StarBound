@@ -20,15 +20,13 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 		}
 		else
 		{
-			// 🚨 InputManager가 아직 null이면 등록을 시도하는 코루틴 시작
-			// (코루틴은 MonoBehaviour가 활성화된 상태에서만 작동합니다.)
 			StartCoroutine(WaitForInputManagerAndRegister());
 		}
 	}
-	// 📌 안전하게 InputManager 초기화를 기다리는 코루틴
+	//InputManager 초기화를 기다리는 코루틴
 	private IEnumerator WaitForInputManagerAndRegister()
 	{
-		// 매 프레임마다 InputManager가 초기화되었는지 확인합니다.
+		// 매 프레임마다 InputManager가 초기화되었는지 확인
 		while (InputManager.Instance == null)
 		{
 			yield return null; // 다음 프레임까지 대기

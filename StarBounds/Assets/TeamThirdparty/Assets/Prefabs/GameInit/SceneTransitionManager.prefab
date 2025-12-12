@@ -246,4 +246,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionManager
   transitionAnimator: {fileID: 8044694638282102528}
+  startSFX: {fileID: 8300000, guid: b2470dafd2d39314a8cd126d7a907a03, type: 3}
   fadePanel: {fileID: 98531770658772716}
