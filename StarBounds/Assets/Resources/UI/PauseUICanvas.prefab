@@ -366,7 +366,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1902, y: 1080}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -422,6 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3639c5fde37a1ab4ca7dc80b84ab6fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIInput
+  pauseUI: {fileID: 0}
 --- !u!1 &3961440267087423143
 GameObject:
   m_ObjectHideFlags: 0
