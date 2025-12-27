@@ -97,8 +97,6 @@ public class PlayerLogic : MonoBehaviour
 		if (_spriteRenderer == null)
 			_spriteRenderer = GetComponent<SpriteRenderer>();
 
-		// 현재 jumpForce를 기본값으로 저장
-		_baseJumpForce = jumpForce;
 		//초기 상태를 반영
 		if (GravityManager.Instance != null)
 		{
@@ -147,14 +145,9 @@ public class PlayerLogic : MonoBehaviour
 		// --- 3. 점프 처리 (FixedUpdate로 이동) ---
 		HandleJumpPhysics();
 
-		// ❗ 4. 밀기 처리 호출
-		HandlePushing();
-
-	}
-	private void HandlePushing()
-	{
 		
 	}
+	
 
 	// ================== EntityLogic ==================
 
@@ -256,10 +249,11 @@ public class PlayerLogic : MonoBehaviour
 	{
 		// GroundCheckOffset을 사용하여 발 근처에서 레이를 쏩니다.
 		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
-		
-		// 레이캐스트의 방향을 현재 '중력 방향'(_gravityDirection)에 따라 설정
-		RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
 
+		Vector2 size = new Vector2(0.7f, 0.1f);
+		// 레이캐스트의 방향을 현재 '중력 방향'(_gravityDirection)에 따라 설정
+		
+		RaycastHit2D hit = Physics2D.BoxCast(rayStart, size, 0f, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
 		// 디버깅을 위해 Ray를 그려줍니다.
 		Debug.DrawRay(rayStart, Vector2.down * _gravityDirection * groundCheckDistance, hit.collider != null ? Color.green : Color.black);
 		return hit.collider != null;
