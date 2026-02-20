@@ -119,7 +119,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 5
+  m_Constraints: 4
 --- !u!61 &6427424355276341313
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -178,8 +178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b9c5c10baa63634e908f04a7c43b8cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravityObjectLogic
-  normalDrag: 0
-  normalMaterial: {fileID: 6200000, guid: cd9c5195bcee44843b0d8660e575b994, type: 2}
   ascendSpeed: 4
   floatingDrag: 2
   floatingMaterial: {fileID: 6200000, guid: 688b4230d57538f4e88e9f6712cf7ab6, type: 2}
@@ -191,3 +189,7 @@ MonoBehaviour:
   useWave: 1
   waveAmplitude: 0.1
   waveFrequency: 1
+  landThudClip: {fileID: 0}
+  landVolume: 0.8
+  landMinImpactSpeed: 1.2
+  landOffset: 0.6
