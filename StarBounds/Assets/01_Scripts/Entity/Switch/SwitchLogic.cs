@@ -235,4 +235,15 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 			Bottom.GetComponent<SpriteRenderer>().sprite = spriteOff[1];
 		}
 	}
+	// =========================================================================
+	// [새로 추가] 레이저 전력 공급용 함수
+	// =========================================================================
+	public void SetLaserPower(bool powerOn)
+	{
+		// 이미 원하는 상태(켜짐/꺼짐)와 똑같다면 무시
+		if (_isOn == powerOn) return;
+
+		// 전력이 들어오면 켜고, 끊기면 끄는 효과 적용!
+		ApplySwitchEffect(powerOn);
+	}
 }

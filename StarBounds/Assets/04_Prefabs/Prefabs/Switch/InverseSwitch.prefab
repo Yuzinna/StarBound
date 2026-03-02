@@ -193,7 +193,7 @@ GameObject:
   - component: {fileID: -7344900934651961794}
   m_Layer: 7
   m_Name: InverseSwitch
-  m_TagString: Untagged
+  m_TagString: Switch
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

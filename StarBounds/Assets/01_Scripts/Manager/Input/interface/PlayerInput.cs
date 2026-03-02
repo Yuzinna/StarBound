@@ -12,12 +12,16 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	private bool _isCallbackRegistered = false;
 	private void OnEnable()
 	{
-		// 중복 등록 방지 로직 추가
-		if (!_isCallbackRegistered)
+		// 1. 이미 등록되어 있다면 아무것도 안 함
+		if (_isCallbackRegistered) return;
+
+		// 2. InputManager가 이미 존재한다면 즉시 등록!
+		if (InputManager.Instance != null && InputManager.Instance.Actions != null)
 		{
 			InputManager.Instance.Actions.Player.AddCallbacks(this);
 			_isCallbackRegistered = true;
 		}
+		// 3. 아직 InputManager가 안 만들어졌다면 코루틴으로 기다림!
 		else
 		{
 			StartCoroutine(WaitForInputManagerAndRegister());
@@ -26,13 +30,12 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	//InputManager 초기화를 기다리는 코루틴
 	private IEnumerator WaitForInputManagerAndRegister()
 	{
-		// 매 프레임마다 InputManager가 초기화되었는지 확인
-		while (InputManager.Instance == null)
+		// InputManager와 Actions가 완벽히 준비될 때까지 안전하게 대기
+		while (InputManager.Instance == null || InputManager.Instance.Actions == null)
 		{
-			yield return null; // 다음 프레임까지 대기
+			yield return null;
 		}
 
-		// 초기화가 완료되었을 때, 이 스크립트가 아직 활성화 상태라면 등록
 		if (this.enabled && !_isCallbackRegistered)
 		{
 			InputManager.Instance.Actions.Player.AddCallbacks(this);

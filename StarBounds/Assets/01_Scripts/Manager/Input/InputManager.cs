@@ -59,13 +59,13 @@ public class InputManager : MonoBehaviour
 	private void OnEnable()
 	{
 		// InputManager 컴포넌트가 활성화될 때 Action 객체 전체를 활성화
-		Actions.Enable();
+		Actions?.Enable();
 	}
 
 	private void OnDisable()
 	{
 		// InputManager 컴포넌트가 비활성화될 때 Action 객체 전체를 비활성화 (메모리 정리 목적)
-		Actions.Disable();
+		Actions?.Disable();
 	}
 
 }

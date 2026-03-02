@@ -2,7 +2,7 @@
 using System;
 using Unity.Cinemachine;
 using UnityEngine;
-
+using UnityEngine.SceneManagement; // [추가!] 씬 이벤트를 감지하기 위해 꼭 필요합니다.
 public class GameInit : MonoBehaviour
 {
 	// [필수] Inspector 창에서 플레이어 프리팹을 여기에 연결해야 합니다.
@@ -38,13 +38,32 @@ public class GameInit : MonoBehaviour
 	}
 	void Start()
 	{
-		Debug.Log("[GameInit] 최초 씬 시작 감지. InitAndFadeIn() 호출.");
-		// ✨ 최초 시작 시, 초기화 및 Fade In을 즉시 실행
+		//Debug.Log("[GameInit] 최초 씬 시작 감지. InitAndFadeIn() 호출.");
+		//// ✨ 최초 시작 시, 초기화 및 Fade In을 즉시 실행
+		//InitGame();
+		//StartFadeIn();
+	}
+	// 씬 로드 후 초기화와 Fade In을 시작하는 진입점
+	private void OnEnable()
+	{
+		// 씬이 로드될 때마다 OnSceneLoaded 함수를 실행하라고 구독(예약)합니다.
+		SceneManager.sceneLoaded += OnSceneLoaded;
+	}
+
+	private void OnDisable()
+	{
+		// 매니저가 파괴될 때는 예약을 취소해 줍니다.
+		SceneManager.sceneLoaded -= OnSceneLoaded;
+	}
+	// 씬이 로드 완료되면 유니티가 자동으로 이 함수를 불러줍니다!
+	private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+	{
+		Debug.Log($"[GameInit] {scene.name} 씬 로드 감지. InitGame() 호출.");
+
+		// 씬이 켜질 때마다 플레이어를 다시 만들고 화면을 밝힙니다.
 		InitGame();
 		StartFadeIn();
 	}
-	// 씬 로드 후 초기화와 Fade In을 시작하는 진입점
-	
 	public void InitGame()
 	{
 		// 1. 플레이어 프리팹 유효성 검사

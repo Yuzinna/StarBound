@@ -80,8 +80,9 @@ public class PlayerLogic : MonoBehaviour
 	public AudioClip walkSound;
 	public AudioClip normalJumpSound;//노말점프
 	public AudioClip floatingJumpSound;//플로팅점프
-	
 
+	[Header("Conveyor")]
+	private float _conveyorSpeed = 0f; // 컨베이어 벨트 속도 저장용
 
 	// ================== Unity Lifecycle / Physics ==================
 	private void Awake()
@@ -254,10 +255,11 @@ public class PlayerLogic : MonoBehaviour
 		
 		// Rigidbody2D의 x 속도만 변경 (y 속도는 점프/중력 담당)
 		Vector2 v = _rb.linearVelocity;
-		v.x = _moveX * moveSpeed;
+		// ❗ 수정된 부분: 플레이어의 조작 속도 + 컨베이어 벨트의 속도
+		v.x = (_moveX * moveSpeed) + _conveyorSpeed;
 		_rb.linearVelocity = v;
 		// 1. 플레이어가 현재 움직이는 중인지 확인 (FixedUpdate이므로 _rb.linearVelocity.x 사용)
-		bool isMoving = Mathf.Abs(_rb.linearVelocity.x) > 0.01f;
+		bool isMoving = Mathf.Abs(_moveX) > 0.01f;
 
 		// 2. 땅에 닿아 있고, 움직이는 중이라면
 		if (_isGrounded && isMoving)
@@ -335,7 +337,9 @@ public class PlayerLogic : MonoBehaviour
 	private void UpdateAnimation()
 	{
 		if (_animator == null || _rb == null) return;
-		float speedX = Mathf.Abs(_rb.linearVelocity.x);
+
+		//float speedX = Mathf.Abs(_rb.linearVelocity.x);
+		float speedX = Mathf.Abs(_moveX * moveSpeed);
 		_animator.SetFloat("Speed", speedX);
 		_animator.SetBool("IsGrounded", _isGrounded);
 		_animator.SetBool("IsPushing", _isPushing);
@@ -369,9 +373,15 @@ public class PlayerLogic : MonoBehaviour
 
 			// 옆면 접촉일 때만 "푸시 가능한 상태"로 취급
 			_isCollidingWithPushable = sideContact;
+			// ❗ 컨베이어 벨트 감지 추가
+			UpdateConveyorSpeed(other);
 		}
 	}
-
+	private void OnCollisionEnter2D(Collision2D other)
+	{
+		// ❗ 충돌 시작 시에도 감지
+		UpdateConveyorSpeed(other);
+	}
 
 	private void OnCollisionExit2D(Collision2D other)
 	{
@@ -383,6 +393,20 @@ public class PlayerLogic : MonoBehaviour
 		if ((layerMask & pushableLayers) != 0)
 		{
 			_isCollidingWithPushable = false;
+		}
+		// ❗ 컨베이어 벨트에서 벗어나면 속도 초기화
+		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null)
+		{
+			_conveyorSpeed = 0f;
+		}
+	}
+	private void UpdateConveyorSpeed(Collision2D collision)
+	{
+		SurfaceEffector2D effector = collision.gameObject.GetComponent<SurfaceEffector2D>();
+		if (effector != null)
+		{
+			// 중력 방향에 상관없이 Effector의 speed를 가져옴
+			_conveyorSpeed = effector.speed;
 		}
 	}
 	private void OnTriggerEnter2D(Collider2D collision)
