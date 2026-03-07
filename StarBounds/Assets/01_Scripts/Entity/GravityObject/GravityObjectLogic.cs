@@ -44,6 +44,8 @@ public class GravityObjectLogic : MonoBehaviour
 	[SerializeField] private float landMinImpactSpeed = 1.2f;
 	[SerializeField] private float landOffset = 0.6f;
 
+	// 상태 관리 (기존 변수들 아래에 추가)
+	private bool _isTouchingMovingBlock = false; // 움직이는 블럭과 닿아있는가?
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
@@ -108,24 +110,22 @@ public class GravityObjectLogic : MonoBehaviour
 	{
 		if (_isFloating)
 		{
-			// [플로팅 상태] X축 고정을 풀어 플레이어가 자유롭게 밀 수 있음
 			_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 		}
 		else
 		{
-			// [일반 상태]
 			if (_conveyorSpeed != 0)
 			{
-				// 1. 컨베이어 위: Effector가 밀어줄 수 있도록 X축 고정을 풉니다.
 				_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-
-				// 2. 플레이어가 몸으로 억지로 미는 것을 막기 위해, 
-				// X축 속도를 무조건 컨베이어 속도로 강제 덮어씌웁니다. (벽처럼 느껴짐)
 				_rb.linearVelocity = new Vector2(_conveyorSpeed, _rb.linearVelocity.y);
+			}
+			// [여기 추가!] 움직이는 블럭에 닿아있으면 잠시 X축 고정을 풀어줍니다!
+			else if (_isTouchingMovingBlock)
+			{
+				_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 			}
 			else
 			{
-				// 일반 땅: X축을 완벽히 고정하여 플레이어가 절대 밀지 못하게 합니다.
 				_rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
 			}
 		}
@@ -207,6 +207,7 @@ public class GravityObjectLogic : MonoBehaviour
 	{
 		UpdateConveyorSpeed(other);
 
+		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
 		if (!_isFloating)
 		{
 			int mask = 1 << other.gameObject.layer;
@@ -224,6 +225,8 @@ public class GravityObjectLogic : MonoBehaviour
 	private void OnCollisionStay2D(Collision2D other)
 	{
 		UpdateConveyorSpeed(other);
+
+		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
 	}
 
 	private void OnCollisionExit2D(Collision2D other)
@@ -232,6 +235,8 @@ public class GravityObjectLogic : MonoBehaviour
 		{
 			_conveyorSpeed = 0f; // 컨베이어에서 떨어지면 속도 초기화
 		}
+		// [추가] 움직이는 블럭에서 떨어졌어! (다시 X축 꽁꽁 얼리기)
+		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = false;
 	}
 
 	private void UpdateConveyorSpeed(Collision2D collision)

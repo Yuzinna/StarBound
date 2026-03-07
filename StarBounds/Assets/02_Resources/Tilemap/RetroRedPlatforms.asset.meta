@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 92047b633c16d0042b4e02d7bc654d5e
+timeCreated: 1508864833
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 26617
+  packageName: Corgi Engine - 2D + 2.5D Platformer
+  packageVersion: 9.3
+  assetPath: Assets/CorgiEngine/Demos/Retro/Tilemaps/RetroRedPlatforms.asset
+  uploadId: 719335

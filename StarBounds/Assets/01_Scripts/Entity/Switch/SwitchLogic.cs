@@ -29,7 +29,6 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 	[SerializeField] private Sprite[] spriteOff;
 
 	Transform Top;
-	Transform Bottom;
 
 	private bool _isOn;
 	[Header("SFX")]
@@ -45,7 +44,6 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 	private void Awake()
 	{
 		Top=transform.Find("Top");
-		Bottom=transform.Find("Bottom");
 	}
 	private void Start()
 	{
@@ -225,14 +223,10 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 		if (_isOn)
 		{
 			Top.GetComponent<SpriteRenderer>().sprite = spriteOn[0];
-			Bottom.GetComponent<SpriteRenderer>().sprite = spriteOn[1];
-
-			
 		}
 		else
 		{
 			Top.GetComponent<SpriteRenderer>().sprite = spriteOff[0];
-			Bottom.GetComponent<SpriteRenderer>().sprite = spriteOff[1];
 		}
 	}
 	// =========================================================================

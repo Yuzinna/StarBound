@@ -28,13 +28,13 @@ public class SinglePlatformLogic : MonoBehaviour
 		//중력 방향이 거꾸로 바뀜
 		if (direction == eGravityDirection.Inverse)
 		{
-			transform.localPosition = new Vector3(0, 0.7f, 0);
+			transform.localPosition = new Vector3(0, 0, 0);
 			transform.localScale = new Vector3(1, -1, 1);
 		}
 		//중력 방향이 노말로 바뀜
 		else if (direction == eGravityDirection.Normal)
 		{
-			transform.localPosition = Vector3.zero;
+			transform.localPosition =  new Vector3(0, 0.133f, 0);
 			transform.localScale = Vector3.one;
 		}
 	}

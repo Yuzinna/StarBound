@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 82ae5ac2c53c5ca43a3d1ab8fb2af1d7
+timeCreated: 1578107283
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 26617
+  packageName: Corgi Engine - 2D + 2.5D Platformer
+  packageVersion: 9.3
+  assetPath: Assets/CorgiEngine/Demos/Retro/Tilemaps/RetroRocks/RetroRocks_37.asset
+  uploadId: 719335
