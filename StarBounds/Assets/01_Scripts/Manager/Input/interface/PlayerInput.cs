@@ -100,23 +100,6 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 			plLogic.OnInputInteract();
 		}
 	}
-
-	public void OnRestart(InputAction.CallbackContext context)
-	{
-		if (context.started)
-		{
-			Debug.Log("[PlayerInput] Restart input received");
-
-			// 1. **현재 활성화된 씬의 이름을 가져옵니다.**
-			// 이것이 유니티가 현재 실행하려는 씬의 이름을 알려주는 함수입니다.
-			string currentSceneName = SceneManager.GetActiveScene().name;
-
-			// 2. **해당 씬을 다시 로드하여 스테이지를 재시작합니다.**
-			// LoadScene은 동기 방식으로 씬을 로드합니다.
-			SceneManager.LoadScene(currentSceneName);
-		}
-	}
-
 	public void OnDrop(InputAction.CallbackContext context)
 	{
 		if (context.started)
@@ -125,11 +108,22 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 		}
 	}
 
+	public void OnRestart(InputAction.CallbackContext context)
+	{
+		if (context.started)
+		{
+			// 이제 매니저가 재시작을 깔끔하게 처리합니다!
+			if (GameManager.Instance != null)
+				GameManager.Instance.RestartCurrentStage();
+		}
+	}
 	public void OnPause(InputAction.CallbackContext context)
 	{
 		if(context.started)
 		{
-			pauseUi.PauseGame();
+			// 매니저에게 일시정지를 켜고 끄라고(Toggle) 명령합니다!
+			if (GameManager.Instance != null)
+				GameManager.Instance.TogglePause();
 		}
 	}
 }

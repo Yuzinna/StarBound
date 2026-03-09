@@ -58,8 +58,6 @@ public class GameInit : MonoBehaviour
 	// 씬이 로드 완료되면 유니티가 자동으로 이 함수를 불러줍니다!
 	private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
-		Debug.Log($"[GameInit] {scene.name} 씬 로드 감지. InitGame() 호출.");
-
 		// 씬이 켜질 때마다 플레이어를 다시 만들고 화면을 밝힙니다.
 		InitGame();
 		StartFadeIn();
@@ -112,15 +110,15 @@ public class GameInit : MonoBehaviour
 	/// </summary>
 	public void StartFadeIn()
 	{
-		if (SceneTransitionManager.Instance != null)
-		{
+		//if (SceneTransitionManager.Instance != null)
+		//{
 			
-			SceneTransitionManager.Instance.StartFadeIn();
-		}
-		else
-		{
-			Debug.LogWarning("[GameInit] SceneTransitionManager를 찾을 수 없어 Fade In을 건너뜁니다.");
-		}
+		//	SceneTransitionManager.Instance.StartFadeIn();
+		//}
+		//else
+		//{
+		//	Debug.LogWarning("[GameInit] SceneTransitionManager를 찾을 수 없어 Fade In을 건너뜁니다.");
+		//}
 	}
 	private void SetupCamera(Transform playerTransform)
 	{
