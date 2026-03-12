@@ -140,7 +140,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLogic
   moveSpeed: 5
   _baseJumpForce: 12
-  floatingJumpMultiplier: 1.3
+  floatingJumpMultiplier: 1.2
   _gravityDirection: 1
   interactLayer:
     serializedVersion: 2

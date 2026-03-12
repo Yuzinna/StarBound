@@ -22,7 +22,7 @@ public class PlayerDeath : MonoBehaviour
 	{
 		Debug.Log("플레이어 사망");
 
-		// 👇 [여기 추가!] 죽는 순간 애니메이터의 Alive 파라미터를 false로 꺼줍니다!
+		//[여기 추가!] 죽는 순간 애니메이터의 Alive 파라미터를 false로 꺼줍니다!
 		Animator anim = GetComponent<Animator>();
 		if (anim != null) anim.SetBool("Alive", false);
 

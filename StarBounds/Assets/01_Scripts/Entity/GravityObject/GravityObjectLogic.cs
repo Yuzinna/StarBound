@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
@@ -7,6 +6,13 @@ public class GravityObjectLogic : MonoBehaviour
 {
 	private Rigidbody2D _rb;
 	private Collider2D _col;
+
+	// ==========================================
+	// 💡 [새로 추가된 특수 기믹 설정!]
+	// ==========================================
+	[Header("특수 큐브 설정")]
+	[Tooltip("체크하면 중력 반전(Inverse)을 무시하고 항상 아래로만 떨어집니다. (부유 상태는 정상 작동)")]
+	[SerializeField] private bool ignoreInverseGravity = false;
 
 	[Header("Floating 설정")]
 	[SerializeField] private float ascendSpeed = 2f;
@@ -44,8 +50,8 @@ public class GravityObjectLogic : MonoBehaviour
 	[SerializeField] private float landMinImpactSpeed = 1.2f;
 	[SerializeField] private float landOffset = 0.6f;
 
-	// 상태 관리 (기존 변수들 아래에 추가)
-	private bool _isTouchingMovingBlock = false; // 움직이는 블럭과 닿아있는가?
+	private bool _isTouchingMovingBlock = false;
+
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
@@ -55,7 +61,12 @@ public class GravityObjectLogic : MonoBehaviour
 	private void Start()
 	{
 		if (GravityManager.Instance == null) return;
-		_currentDirection = GravityManager.Instance.CurrentDirection;
+
+		// 💡 큐브가 태어날 때도 무시 옵션 체크!
+		eGravityDirection targetDir = GravityManager.Instance.CurrentDirection;
+		if (ignoreInverseGravity) targetDir = eGravityDirection.Normal;
+
+		_currentDirection = targetDir;
 		_isFloating = GravityManager.Instance.IsFloatingEnabled;
 		ApplyGravityAndFloatingState(_currentDirection, _isFloating);
 	}
@@ -66,7 +77,6 @@ public class GravityObjectLogic : MonoBehaviour
 
 		SyncGravityState();
 
-		// ⭐ 핵심: 물리 및 컨베이어 로직
 		HandlePhysicsAndConveyor();
 
 		if (_isFloating)
@@ -79,33 +89,23 @@ public class GravityObjectLogic : MonoBehaviour
 			}
 		}
 	}
-	// =========================================================================
-	// [추가] 물리 엔진 오류 없는 완벽한 순간이동 전용 함수!
-	// =========================================================================
+
 	public void TeleportTo(Vector2 newPosition)
 	{
-		// 1. Rigidbody와 Transform 위치를 완전히 이동시키고 속도 초기화
 		_rb.position = newPosition;
 		transform.position = newPosition;
 		_rb.linearVelocity = Vector2.zero;
 
 		if (_isFloating)
 		{
-			// 2. 물리 엔진에 "위치 옮겼으니 지금 당장 새로고침 해!" 라고 강제 명령 (매우 중요)
 			Physics2D.SyncTransforms();
-
-			// 3. 예전 바닥의 기억을 완전히 지우고 새 위치에서 다시 바닥 찾기
 			_surfaceCollider = null;
 			_floatCenter = ComputeFloatCenterAndCacheSurface(_currentDirection);
-
-			// 4. 강제로 끌어내리던 Waving 상태를 멈추고, 천천히 하강(Ascending)하도록 리셋
 			_floatingState = FloatingState.Ascending;
 			_waveTime = 0f;
 		}
 	}
-	// --------------------------------------------------
-	// ⭐ 가장 완벽한 물리 고정 & 컨베이어 로직 (수정됨)
-	// --------------------------------------------------
+
 	private void HandlePhysicsAndConveyor()
 	{
 		if (_isFloating)
@@ -119,7 +119,6 @@ public class GravityObjectLogic : MonoBehaviour
 				_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 				_rb.linearVelocity = new Vector2(_conveyorSpeed, _rb.linearVelocity.y);
 			}
-			// [여기 추가!] 움직이는 블럭에 닿아있으면 잠시 X축 고정을 풀어줍니다!
 			else if (_isTouchingMovingBlock)
 			{
 				_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -132,21 +131,30 @@ public class GravityObjectLogic : MonoBehaviour
 	}
 
 	// --------------------------------------------------
-	// 중력 및 플로팅 전환
+	// 💡 [핵심 수정] 매 프레임 상태를 동기화할 때, 무시 옵션이 켜져있으면 강제로 Normal로 둔갑시킵니다!
 	// --------------------------------------------------
 	private void SyncGravityState()
 	{
-		var newDir = GravityManager.Instance.CurrentDirection;
-		var newFloating = GravityManager.Instance.IsFloatingEnabled;
+		eGravityDirection targetDir = GravityManager.Instance.CurrentDirection;
+		bool targetFloating = GravityManager.Instance.IsFloatingEnabled;
 
-		if (newDir != _currentDirection || newFloating != _isFloating)
+		// 반전 무시 큐브라면, 매니저가 Inverse를 외쳐도 귀를 막고 Normal로 취급합니다.
+		if (ignoreInverseGravity)
 		{
-			ApplyGravityAndFloatingState(newDir, newFloating);
+			targetDir = eGravityDirection.Normal;
+		}
+
+		if (targetDir != _currentDirection || targetFloating != _isFloating)
+		{
+			ApplyGravityAndFloatingState(targetDir, targetFloating);
 		}
 	}
 
 	public void ApplyGravityAndFloatingState(eGravityDirection direction, bool isFloating)
 	{
+		// (안전장치) 외부에서 이 함수를 직접 부를 때도 무시 옵션을 적용
+		if (ignoreInverseGravity) direction = eGravityDirection.Normal;
+
 		_currentDirection = direction;
 		_isFloating = isFloating;
 
@@ -200,9 +208,6 @@ public class GravityObjectLogic : MonoBehaviour
 		_rb.MovePosition(new Vector2(_rb.position.x, _floatCenter.y + normal.y * wave));
 	}
 
-	// --------------------------------------------------
-	// 충돌 처리 (컨베이어 속도 수집 & 착지음)
-	// --------------------------------------------------
 	private void OnCollisionEnter2D(Collision2D other)
 	{
 		UpdateConveyorSpeed(other);
@@ -225,7 +230,6 @@ public class GravityObjectLogic : MonoBehaviour
 	private void OnCollisionStay2D(Collision2D other)
 	{
 		UpdateConveyorSpeed(other);
-
 		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
 	}
 
@@ -233,9 +237,8 @@ public class GravityObjectLogic : MonoBehaviour
 	{
 		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null)
 		{
-			_conveyorSpeed = 0f; // 컨베이어에서 떨어지면 속도 초기화
+			_conveyorSpeed = 0f;
 		}
-		// [추가] 움직이는 블럭에서 떨어졌어! (다시 X축 꽁꽁 얼리기)
 		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = false;
 	}
 
@@ -248,9 +251,6 @@ public class GravityObjectLogic : MonoBehaviour
 		}
 	}
 
-	// --------------------------------------------------
-	// 유틸리티
-	// --------------------------------------------------
 	private Vector2 ComputeFloatCenterAndCacheSurface(eGravityDirection direction)
 	{
 		Vector2 gravityDir = (direction == eGravityDirection.Normal) ? Vector2.down : Vector2.up;

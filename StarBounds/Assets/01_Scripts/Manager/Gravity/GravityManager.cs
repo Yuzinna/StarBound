@@ -1,31 +1,38 @@
 ﻿using System;
 using UnityEngine;
 
-
 public enum eGravityDirection
 {
 	Normal,
 	Inverse,
-
 }
+
 public class GravityManager : MonoBehaviour
 {
-	//싱글톤
-	static public GravityManager Instance { get;private set; }
+	// 싱글톤
+	public static GravityManager Instance { get; private set; }
 
 	public eGravityDirection CurrentDirection { get; private set; } = eGravityDirection.Normal;
-	public bool IsFloatingEnabled { get; private set; } = false; // ⬅️ 부유 특성 플래그 추가
-	public float normalGravityScale { get; set; } =3.0f;
+	public bool IsFloatingEnabled { get; private set; } = false;
+	public float normalGravityScale { get; set; } = 3.0f;
 	public float floatingGravityScale { get; set; } = 0.1f;
 
-	// 중력 방향이 바뀔 때 발생하는 이벤트
+	// 이벤트
 	public event Action<eGravityDirection> OnGravityDirectionChanged;
-	// Floating 상태가 바뀔 때 발생하는 이벤트
 	public event Action<bool> OnFloatingStateChanged;
+
+	// ==========================================
+	// 🔒 [수정됨] 자물쇠를 2개로 분리했습니다!
+	// ==========================================
+	private int _directionLockCount = 0; // 방향(Inverse/Normal) 전용 자물쇠
+	public bool IsDirectionLocked => _directionLockCount > 0;
+
+	private int _floatingLockCount = 0;  // 부유(Floating) 전용 자물쇠
+	public bool IsFloatingLocked => _floatingLockCount > 0;
 
 	private void Awake()
 	{
-		if(Instance != null&& Instance != this)
+		if (Instance != null && Instance != this)
 		{
 			Destroy(gameObject);
 			return;
@@ -33,23 +40,103 @@ public class GravityManager : MonoBehaviour
 		Instance = this;
 		DontDestroyOnLoad(gameObject);
 	}
-	
-	//public void ChangeGravityDirection(eGravityDirection newDirection)
-	//{
-	//	// ... 실제 중력 변경 로직 ...
-	//	OnGravityDirectionChanged?.Invoke(newDirection); // 이벤트 발생
-	//}
 
-	//public void SetFloatingEnabled(bool isEnabled)
-	//{
-	//	// ... 실제 Floating 상태 변경 로직 ...
-	//	OnFloatingStateChanged?.Invoke(isEnabled); // 이벤트 발생
-	//}
+	// ==========================================
+	// 1. 방향 중력 잠금 함수 수정
+	// ==========================================
+	public void SetDirectionAndLock(eGravityDirection newDir, bool isLocking)
+	{
+		if (isLocking)
+		{
+			_directionLockCount++;
+			CurrentDirection = newDir;
+			ApplyToAllGravityObjects();
+			OnGravityDirectionChanged?.Invoke(CurrentDirection);
+		}
+		else
+		{
+			_directionLockCount--;
+			if (_directionLockCount <= 0)
+			{
+				_directionLockCount = 0;
 
+				// 🚨 [제가 빼먹었던 바로 그 핵심 코드!!] 
+				// 잠금이 풀렸으니 원래 중력(Normal)으로 강제로 되돌리고 알림을 쏴야 스위치가 꺼집니다!
+				CurrentDirection = eGravityDirection.Normal;
+				ApplyToAllGravityObjects();
+				OnGravityDirectionChanged?.Invoke(CurrentDirection);
+			}
+		}
+	}
+
+	// ==========================================
+	// 2. 부유(Floating) 잠금 함수 수정
+	// ==========================================
+	public void SetFloatingAndLock(bool isFloating, bool isLocking)
+	{
+		if (isLocking)
+		{
+			_floatingLockCount++;
+			IsFloatingEnabled = isFloating;
+			ApplyToAllGravityObjects();
+			OnFloatingStateChanged?.Invoke(IsFloatingEnabled);
+		}
+		else
+		{
+			_floatingLockCount--;
+			if (_floatingLockCount <= 0)
+			{
+				_floatingLockCount = 0;
+
+				
+				// 잠금이 풀렸으니 부유 상태를 끄고(false) 알림을 쏴야 스위치가 꺼집니다!
+				IsFloatingEnabled = false;
+				ApplyToAllGravityObjects();
+				OnFloatingStateChanged?.Invoke(IsFloatingEnabled);
+			}
+		}
+	}
+
+	// ==========================================
+	// 2. 수동 스위치 전용 함수 
+	// ==========================================
+	public bool TryChangeDirectionManual(eGravityDirection newDir)
+	{
+		//  부유 스위치가 잠겨있든 말든, "방향 자물쇠"만 안 잠겨있으면 통과!
+		if (IsDirectionLocked)
+		{
+			Debug.Log("❌ [거부됨] 방향 중력 레이저가 켜져 있어 수동으로 바꿀 수 없습니다!");
+			return false;
+		}
+
+		CurrentDirection = newDir;
+		ApplyToAllGravityObjects();
+		OnGravityDirectionChanged?.Invoke(CurrentDirection);
+		return true;
+	}
+
+	public bool TryChangeFloatingManual(bool isFloating)
+	{
+		// 💡 방향 스위치가 잠겨있든 말든, "부유 자물쇠"만 안 잠겨있으면 통과!
+		if (IsFloatingLocked)
+		{
+			Debug.Log("❌ [거부됨] 부유 중력 레이저가 켜져 있어 수동으로 바꿀 수 없습니다!");
+			return false;
+		}
+
+		IsFloatingEnabled = isFloating;
+		ApplyToAllGravityObjects();
+		OnFloatingStateChanged?.Invoke(IsFloatingEnabled);
+		return true;
+	}
+
+	// ==========================================
+	// 기존 함수들 (유지)
+	// ==========================================
 	public void SetDirection(eGravityDirection direction)
 	{
 		CurrentDirection = direction;
-		ApplyToAllGravityObjects(); // GravityObjectLogic에서 이 두 상태를 모두 받아 처리하도록 변경
+		ApplyToAllGravityObjects();
 		OnGravityDirectionChanged?.Invoke(CurrentDirection);
 	}
 
@@ -59,26 +146,19 @@ public class GravityManager : MonoBehaviour
 		ApplyToAllGravityObjects();
 		OnFloatingStateChanged?.Invoke(IsFloatingEnabled);
 	}
-	
+
 	private void ApplyToAllGravityObjects()
 	{
-		//여긴 큐브같은
 		var objects = FindObjectsByType<GravityObjectLogic>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 		foreach (var obj in objects)
 		{
-			// ⬅️ ApplyState 대신 두 개의 인자를 받는 새로운 메서드를 호출해야 합니다.
 			obj.ApplyGravityAndFloatingState(CurrentDirection, IsFloatingEnabled);
 		}
 
-		// 2) 플레이어에도 중력 상태에 따른 점프력 적용
-		var players = FindObjectsByType<PlayerLogic>(
-			FindObjectsInactive.Exclude,
-			FindObjectsSortMode.None
-		);
+		var players = FindObjectsByType<PlayerLogic>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 		foreach (var player in players)
 		{
 			player.ApplyGravityAndFloatingState(CurrentDirection, IsFloatingEnabled);
 		}
 	}
-	
 }

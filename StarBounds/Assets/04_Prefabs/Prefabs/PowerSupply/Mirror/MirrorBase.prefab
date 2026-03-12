@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8147401971238877548}
   - component: {fileID: 2060482305675974439}
   - component: {fileID: 988352346708329530}
+  - component: {fileID: 3199108079783151979}
   m_Layer: 11
   m_Name: MirrorBase
   m_TagString: Mirror
@@ -143,3 +144,17 @@ PolygonCollider2D:
       - {x: 0.5, y: -0.5}
       - {x: 0.5, y: -0.436354}
   m_UseDelaunayMesh: 0
+--- !u!114 &3199108079783151979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3875200639792673208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6af598274698a1b469f6e1e4f2602fc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MirrorLogic
+  rotateSfx: {fileID: 0}
+  sfxVolume: 1
