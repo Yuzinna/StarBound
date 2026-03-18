@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -7087241554805473205}
   - component: {fileID: 7522376586600615541}
   m_Layer: 8
-  m_Name: Object
+  m_Name: InverseOffcube
   m_TagString: Cube
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
