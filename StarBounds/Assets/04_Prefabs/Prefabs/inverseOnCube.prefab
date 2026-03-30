@@ -164,7 +164,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.9, y: 0.9}
   m_EdgeRadius: 0
 --- !u!114 &5542155842923453778
 MonoBehaviour:
@@ -178,6 +178,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b9c5c10baa63634e908f04a7c43b8cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravityObjectLogic
+  ignoreInverseGravity: 0
   ascendSpeed: 4
   floatingDrag: 2
   surfaceGap: 0.5

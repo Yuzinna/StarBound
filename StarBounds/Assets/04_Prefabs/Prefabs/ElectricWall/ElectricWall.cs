@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic; // List 사용을 위해 추가
 
 public class ElectricWall : MonoBehaviour
 {
@@ -15,21 +16,18 @@ public class ElectricWall : MonoBehaviour
 	public Transform endPost;
 
 	[Header("전기벽 세팅")]
-	[Tooltip("총 칸 수 (Start와 End 사이의 간격)")]
 	public int beamLength = 4;
-
-	[Tooltip("스프라이트 1칸의 간격 (보통 1)")]
 	public float tileSize = 1f;
-
-	[Tooltip("생성될 콜라이더의 두께 (Y축)")]
 	public float beamThickness = 0.5f;
 
 	[Header("사운드")]
 	public AudioClip zapSfx;
 
-	private int _blockingCubeCount = 0;
+	// 💡 [수정] 현재 전기장 안에 들어와 있는 모든 큐브를 추적합니다.
+	private List<Collider2D> _cubesInRange = new List<Collider2D>();
 	private bool _isElectricOn = true;
-	
+	private float _currentBlockingX = float.MaxValue;
+
 	[ContextMenu("전기벽 길이 자동 맞춤")]
 	public void SetupWall()
 	{
@@ -39,7 +37,6 @@ public class ElectricWall : MonoBehaviour
 			return;
 		}
 
-		// 1. 기존 복사본 청소
 		for (int i = electricBeamsGroup.transform.childCount - 1; i >= 0; i--)
 		{
 			Transform child = electricBeamsGroup.transform.GetChild(i);
@@ -49,63 +46,61 @@ public class ElectricWall : MonoBehaviour
 			}
 		}
 
-		int actualLength = Mathf.Max(3, beamLength); // 최소 3칸
+		int actualLength = Mathf.Max(3, beamLength);
 
-		// 2. 기둥(Post) 배치 (Start는 0, End는 칸수 위치)
 		if (startPost != null) startPost.localPosition = new Vector3(0f, 0f, 0f);
 		if (endPost != null) endPost.localPosition = new Vector3(actualLength * tileSize, 0f, 0f);
 
-		// 3. 전기빔 그룹 배치 (Start와 첫 번째 빔 사이의 중간인 0.5 위치로 고정!)
 		electricBeamsGroup.transform.localPosition = new Vector3(0.5f * tileSize, 0f, 0f);
 
-		// 4. 자식 빔들 정렬 (ElectricBeams 기준 로컬 좌표)
-		bottomBeam.localPosition = new Vector3(0f, 0f, 0f); // 0부터 시작
-
-		for (int i = 1; i < actualLength - 1; i++) // 1부터 배치 시작
+		bottomBeam.localPosition = new Vector3(0f, 0f, 0f);
+		for (int i = 1; i < actualLength - 1; i++)
 		{
 			Transform newMiddle = Instantiate(middleBeamTemplate, electricBeamsGroup.transform);
 			newMiddle.localPosition = new Vector3(i * tileSize, 0f, 0f);
 			newMiddle.name = "Middle_Clone_" + i;
 		}
-
 		topBeam.localPosition = new Vector3((actualLength - 1) * tileSize, 0f, 0f);
 
-		// 5. 콜라이더 설정 (ElectricBeams에 자동 추가 및 세팅)
 		BoxCollider2D childCol = electricBeamsGroup.GetComponent<BoxCollider2D>();
 		if (childCol == null) childCol = electricBeamsGroup.AddComponent<BoxCollider2D>();
 		childCol.isTrigger = true;
 
-		
 		float offsetX = (actualLength - 1) / 2f * tileSize;
-
 		childCol.offset = new Vector2(offsetX, 0f);
 		childCol.size = new Vector2(actualLength * tileSize, beamThickness);
 
-		// 6. 충돌 전달자 스크립트 달아주기 (이전 단계에서 만든 자식용 스크립트)
 		ElectricBeamTrigger triggerHelper = electricBeamsGroup.GetComponent<ElectricBeamTrigger>();
 		if (triggerHelper == null) triggerHelper = electricBeamsGroup.AddComponent<ElectricBeamTrigger>();
 		triggerHelper.parentWall = this;
-
-		Debug.Log($"가로 방향 {actualLength}칸 자동 생성");
 	}
 
-	// =========================================================
-	// 자식(ElectricBeamTrigger)이 호출해 줄 충돌 로직들
-	// =========================================================
+	private void Update()
+	{
+		// 매 프레임 큐브들의 위치를 체크하여 전기를 업데이트합니다.
+		UpdateElectricState();
+	}
+
 	public void OnBeamEnter(Collider2D collision)
 	{
 		if (collision.CompareTag("Cube"))
 		{
-			_blockingCubeCount++;
-			UpdateElectricState();
+			if (!_cubesInRange.Contains(collision))
+				_cubesInRange.Add(collision);
 		}
 	}
 
 	public void OnBeamStay(Collider2D collision)
 	{
-		if (_isElectricOn && collision.CompareTag("Player"))
+		if (collision.CompareTag("Player"))
 		{
-			KillAndRespawnPlayer(collision.gameObject);
+			// 💡 [중요] 플레이어가 전기에 닿았을 때, 차단막(큐브)보다 앞에 있는지 확인합니다.
+			float playerLocalX = transform.InverseTransformPoint(collision.transform.position).x;
+
+			if (playerLocalX < _currentBlockingX)
+			{
+				KillAndRespawnPlayer(collision.gameObject);
+			}
 		}
 	}
 
@@ -113,47 +108,57 @@ public class ElectricWall : MonoBehaviour
 	{
 		if (collision.CompareTag("Cube"))
 		{
-			_blockingCubeCount--;
-			if (_blockingCubeCount < 0) _blockingCubeCount = 0;
-			UpdateElectricState();
+			if (_cubesInRange.Contains(collision))
+				_cubesInRange.Remove(collision);
 		}
 	}
 
-	// =========================================================
-	// 전력 제어 및 사망 로직
-	// =========================================================
-		private void UpdateElectricState()
+	private void UpdateElectricState()
+	{
+		// 1. 가장 가까운 큐브 찾기
+		_currentBlockingX = float.MaxValue;
+
+		foreach (var cube in _cubesInRange)
 		{
-			_isElectricOn = (_blockingCubeCount == 0);
-
-			// 🚨 오브젝트 전체를 끄지 않고(SetActive 금지), 그림(SpriteRenderer)만 끕니다!
-			// 그래야 콜라이더가 살아있어서 큐브가 나가는 걸 인식할 수 있습니다.
-			if (electricBeamsGroup != null)
+			if (cube == null) continue;
+			// 큐브의 위치를 전기벽 기준 로컬 좌표로 변환
+			float cubeLocalX = transform.InverseTransformPoint(cube.transform.position).x;
+			if (cubeLocalX < _currentBlockingX)
 			{
-				SpriteRenderer[] renderers = electricBeamsGroup.GetComponentsInChildren<SpriteRenderer>();
-				foreach (var sr in renderers)
-				{
-					sr.enabled = _isElectricOn;
-				}
-			}
-
-			// 혹시 Top, Bottom, 원본 Middle이 그룹 바깥에 있을 경우를 대비해 확실하게 그림을 숨깁니다.
-			if (topBeam != null) topBeam.GetComponent<SpriteRenderer>().enabled = _isElectricOn;
-			if (bottomBeam != null) bottomBeam.GetComponent<SpriteRenderer>().enabled = _isElectricOn;
-			if (middleBeamTemplate != null) middleBeamTemplate.GetComponent<SpriteRenderer>().enabled = _isElectricOn;
-
-			// 파티클(불꽃) 제어
-			if (electricParticle != null)
-			{
-				if (_isElectricOn && !electricParticle.isPlaying) electricParticle.Play();
-				else if (!_isElectricOn && electricParticle.isPlaying)
-				{
-					electricParticle.Stop();
-					electricParticle.Clear(); // 끄는 즉시 남아있는 불꽃 찌꺼기도 깔끔하게 지움!
-				}
+				_currentBlockingX = cubeLocalX;
 			}
 		}
-	
+
+		// 2. 각 빔 조각들의 가시성 결정
+		// electricBeamsGroup의 localPosition (0.5)을 고려해야 합니다.
+		float groupOffsetX = electricBeamsGroup.transform.localPosition.x;
+
+		SpriteRenderer[] renderers = electricBeamsGroup.GetComponentsInChildren<SpriteRenderer>(true);
+		foreach (var sr in renderers)
+		{
+			// 각 조각의 부모(ElectricWall) 기준 실제 X 좌표 계산
+			float partLocalX = sr.transform.localPosition.x + groupOffsetX;
+
+			// 조각의 위치가 큐브보다 앞(작음)에 있으면 켭니다.
+			sr.enabled = (partLocalX < _currentBlockingX);
+		}
+
+		// 3. 파티클 위치 조정 (큐브가 막고 있다면 큐브 위치에서 스파크 발생)
+		if (electricParticle != null)
+		{
+			if (_cubesInRange.Count > 0)
+			{
+				if (!electricParticle.isPlaying) electricParticle.Play();
+				// 파티클 위치를 차단 지점으로 이동
+				electricParticle.transform.localPosition = new Vector3(_currentBlockingX, 0f, 0f);
+			}
+			else
+			{
+				// 막는 게 없으면 끝 지점에 배치하거나 끕니다 (기획에 따라 선택)
+				electricParticle.transform.localPosition = new Vector3(beamLength * tileSize, 0f, 0f);
+			}
+		}
+	}
 
 	private void KillAndRespawnPlayer(GameObject player)
 	{
