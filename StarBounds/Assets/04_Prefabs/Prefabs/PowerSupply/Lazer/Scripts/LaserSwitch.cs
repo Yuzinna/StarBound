@@ -1,90 +1,136 @@
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LaserSwitch : MonoBehaviour, IInteractable
 {
-	[Header("½ºÀ§Ä¡ on/off")]
+	[Header("ìŠ¤ìœ„ì¹˜ on/off")]
 	public bool isOn = false;
 
-	[Header("½ºÇÁ¶óÀÌÆ®")]
+	[Header("ìŠ¤í”„ë¼ì´íŠ¸")]
 	public SpriteRenderer spriteRenderer;
 	public Sprite switchOffSprite;
 	public Sprite switchOnSprite;
 
-	
-
-	[Header("½ºÀ§Ä¡¸¦ ´©¸¦ ¼ö ÀÖ´Â ·¹ÀÌ¾î")]
-	[Tooltip("ÇÃ·¹ÀÌ¾î¿Í Å¥ºêÀÇ ·¹ÀÌ¾î¸¦ ¸ğµÎ Ã¼Å©ÇØÁÖ¼¼¿ä.")]
+	[Header("ìŠ¤ìœ„ì¹˜ë¥¼ ëˆ„ë¥¼ ìˆ˜ ìˆëŠ” ë ˆì´ì–´")]
+	[Tooltip("í”Œë ˆì´ì–´ì™€ íë¸Œì˜ ë ˆì´ì–´ë¥¼ ëª¨ë‘ ì²´í¬í•´ì£¼ì„¸ìš”.")]
 	public LayerMask pressableLayers;
 
+	// ğŸ’¡ ì—¬ê¸°ì— ë”œë ˆì´ ë³€ìˆ˜ë§Œ ì¶”ê°€í–ˆìŠµë‹ˆë‹¤!
+	[Header("ë”œë ˆì´ ì„¤ì •")]
+	[Tooltip("ë°œì„ ë–¼ê³  ë ˆì´ì €ê°€ êº¼ì§ˆ ë•Œê¹Œì§€ì˜ ëŒ€ê¸° ì‹œê°„ (ì´ˆ)")]
+	public float offDelay = 1.0f;
+
 	private HashSet<Collider2D> _pressingObjects = new HashSet<Collider2D>();
-	// ÄÑ°í ²ø ·¹ÀÌÀú ¿ÀºêÁ§Æ®¸¦ ¿¬°áÇÒ º¯¼ö
+	// ì¼œê³  ëŒ ë ˆì´ì € ì˜¤ë¸Œì íŠ¸ë¥¼ ì—°ê²°í•  ë³€ìˆ˜
 	public Laser firstLaser;
 
+	// ğŸ’¡ ì½”ë£¨í‹´(íƒ€ì´ë¨¸)ì„ ê¸°ì–µí•  ë³€ìˆ˜ ì¶”ê°€
+	private Coroutine _offTimer;
 
 	private void Start()
 	{
 		UpdateVisual();
-		
 	}
+
 	public void Interact(PlayerLogic player)
 	{
 		isOn = !isOn;
 		UpdateVisual();
-
-		
 	}
+
 	private void UpdateVisual()
 	{
-		if(spriteRenderer != null)
+		if (spriteRenderer != null)
 		{
 			spriteRenderer.sprite = isOn ? switchOnSprite : switchOffSprite;
 		}
 	}
-	// ´©±º°¡ ½ºÀ§Ä¡ ¿µ¿ª¿¡ µé¾î¿ÔÀ» ¶§
+
+	// ëˆ„êµ°ê°€ ìŠ¤ìœ„ì¹˜ ì˜ì—­ì— ë“¤ì–´ì™”ì„ ë•Œ
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
-		if(((1 << collision.gameObject.layer)& pressableLayers )!=0)
+		if (((1 << collision.gameObject.layer) & pressableLayers) != 0)
 		{
-			_pressingObjects.Add(collision); // ¸ñ·Ï¿¡ Ãß°¡
+			_pressingObjects.Add(collision); // ëª©ë¡ì— ì¶”ê°€
 			CheckSwitchState();
-			firstLaser.gameObject.SetActive(true); // ·¹ÀÌÀú ÄÑ±â
 		}
 	}
-	// ´©±º°¡ ½ºÀ§Ä¡ ¿µ¿ª¿¡¼­ ³ª°¬À» ¶§
+
+	// ëˆ„êµ°ê°€ ìŠ¤ìœ„ì¹˜ ì˜ì—­ì—ì„œ ë‚˜ê°”ì„ ë•Œ
 	private void OnTriggerExit2D(Collider2D other)
 	{
-		// ³ª°£ ¹°Ã¼°¡ ¸ñ·Ï¿¡ ÀÖ´Ù¸é Á¦°Å
+		// ë‚˜ê°„ ë¬¼ì²´ê°€ ëª©ë¡ì— ìˆë‹¤ë©´ ì œê±°
 		if (_pressingObjects.Contains(other))
 		{
 			_pressingObjects.Remove(other);
 			CheckSwitchState();
-			firstLaser.TurnOffSequence(); // ·¹ÀÌÀú ²ô±â
 		}
 	}
-	//¾ÈÀüÀåÄ¡: ½ºÀ§Ä¡ À§¿¡¼­ Å¥ºê°¡ ÆÄ±«µÇ°Å³ª ºñÈ°¼ºÈ­µÇ´Â °æ¿ì¸¦ ´ëºñ
+
+	// ì•ˆì „ì¥ì¹˜: ìŠ¤ìœ„ì¹˜ ìœ„ì—ì„œ íë¸Œê°€ íŒŒê´´ë˜ê±°ë‚˜ ë¹„í™œì„±í™”ë˜ëŠ” ê²½ìš°ë¥¼ ëŒ€ë¹„
 	private void Update()
 	{
 		if (_pressingObjects.Count > 0)
 		{
-			// ¸ñ·Ï¿¡ ÀÖ´Â Äİ¶óÀÌ´õ Áß ÆÄ±«(null)µÇ¾ú°Å³ª ºñÈ°¼ºÈ­µÈ °ÍÀÌ ÀÖ´Ù¸é ¸ñ·Ï¿¡¼­ Á¦°Å
+			// ëª©ë¡ì— ìˆëŠ” ì½œë¼ì´ë” ì¤‘ íŒŒê´´(null)ë˜ì—ˆê±°ë‚˜ ë¹„í™œì„±í™”ëœ ê²ƒì´ ìˆë‹¤ë©´ ëª©ë¡ì—ì„œ ì œê±°
 			if (_pressingObjects.RemoveWhere(col => col == null || !col.gameObject.activeInHierarchy) > 0)
 			{
 				CheckSwitchState();
 			}
 		}
 	}
-	// ½ºÀ§Ä¡¸¦ ÄÓÁö ²øÁö °áÁ¤ÇÏ´Â ÇÙ½É ·ÎÁ÷
+
+	// ğŸ’¡ ë ˆì´ì €ë¥¼ ì¼œê³  ë„ëŠ” ë¡œì§ì„ íƒ€ì´ë¨¸ì™€ ì—°ë™ë˜ê²Œ ìˆ˜ì •í–ˆìŠµë‹ˆë‹¤!
 	private void CheckSwitchState()
 	{
-		// ´©¸£°í ÀÖ´Â ¹°Ã¼°¡ 1°³ ÀÌ»óÀÌ¸é ½ºÀ§Ä¡ ON
+		// ëˆ„ë¥´ê³  ìˆëŠ” ë¬¼ì²´ê°€ 1ê°œ ì´ìƒì´ë©´ ì¼œì ¸ì•¼ í•¨
 		bool shouldBeOn = _pressingObjects.Count > 0;
 
-		// »óÅÂ°¡ º¯ÇßÀ» ¶§¸¸ ½ÇÇà (ºÒÇÊ¿äÇÑ ¿¬»ê ¹æÁö)
-		if (isOn != shouldBeOn)
+		// 1. ìŠ¤ìœ„ì¹˜ê°€ ì¼œì ¸ì•¼ í•  ë•Œ (ëˆ„êµ°ê°€ ë°ŸìŒ)
+		if (shouldBeOn)
 		{
-			isOn = shouldBeOn;
-			UpdateVisual();
+			// êº¼ì§€ë ¤ê³  ì¹´ìš´íŠ¸ë‹¤ìš´ ì¤‘ì´ì—ˆë‹¤ë©´ ì·¨ì†Œ!
+			if (_offTimer != null)
+			{
+				StopCoroutine(_offTimer);
+				_offTimer = null;
+			}
+
+			if (!isOn)
+			{
+				isOn = true;
+				UpdateVisual();
+				if (firstLaser != null && !firstLaser.gameObject.activeSelf)
+				{
+					firstLaser.gameObject.SetActive(true); // ë ˆì´ì € ì¦‰ì‹œ ì¼œê¸°
+				}
+			}
 		}
+		// 2. ìŠ¤ìœ„ì¹˜ê°€ êº¼ì ¸ì•¼ í•  ë•Œ (ëª¨ë‘ ë°œì„ ë—Œ) -> ë°”ë¡œ ë„ì§€ ì•Šê³  ë”œë ˆì´ ì‹œì‘!
+		else if (!shouldBeOn && isOn)
+		{
+			if (_offTimer == null) // íƒ€ì´ë¨¸ê°€ ì•ˆ ëŒê³  ìˆì„ ë•Œë§Œ ì‹œì‘
+			{
+				_offTimer = StartCoroutine(DelayedOffRoutine());
+			}
+		}
+	}
+
+	// ğŸ’¡ ì§€ì •ëœ ì‹œê°„(offDelay)ì„ ê¸°ë‹¤ë ¸ë‹¤ê°€ ë ˆì´ì €ë¥¼ ë„ëŠ” ì½”ë£¨í‹´
+	private IEnumerator DelayedOffRoutine()
+	{
+		yield return new WaitForSeconds(offDelay);
+
+		// ì‹œê°„ì´ ë‹¤ ì§€ë‚˜ë©´ ë¹„ë¡œì†Œ ìŠ¤ìœ„ì¹˜ì™€ ë ˆì´ì € ë„ê¸°
+		isOn = false;
+		UpdateVisual();
+
+		if (firstLaser != null)
+		{
+			firstLaser.TurnOffSequence();
+		}
+
+		_offTimer = null; // íƒ€ì´ë¨¸ ì´ˆê¸°í™”
 	}
 }

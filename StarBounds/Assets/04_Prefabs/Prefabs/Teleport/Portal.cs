@@ -1,63 +1,86 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Portal : MonoBehaviour
 {
-	[Header("ÀÌÆåÆ®")]
-	public ParticleSystem teleportParticle; // ÀÎ½ºÆåÅÍ¿¡¼­ ¿¬°áÇÒ ÆÄÆ¼Å¬
-	[Header("¿¬°áµÉ ¹İ´ëÆí Æ÷Å»")]
+	[Header("ì´í™íŠ¸")]
+	public ParticleSystem teleportParticle; // ì¸ìŠ¤í™í„°ì—ì„œ ì—°ê²°í•  íŒŒí‹°í´
+	[Header("ì—°ê²°ë  ë°˜ëŒ€í¸ í¬íƒˆ")]
 	public Portal linkedPortal;
 
-
-	// [¿©±â Ãß°¡!] Æ÷Å» Àü¿ë È¿°úÀ½ º¯¼ö
-	[Header("»ç¿îµå")]
+	// í¬íƒˆ ì „ìš© íš¨ê³¼ìŒ ë³€ìˆ˜
+	[Header("ì‚¬ìš´ë“œ")]
 	public AudioClip teleportSfx;
-	[Range(0f, 1f)] public float sfxVolume = 1f; // º¼·ı Á¶Àı¿ë
-	// ¹«ÇÑ ÅÚ·¹Æ÷Æ®¸¦ ¸·±â À§ÇÑ ¾ÈÀüÀåÄ¡
+	[Range(0f, 1f)] public float sfxVolume = 1f; // ë³¼ë¥¨ ì¡°ì ˆìš©
+
+	// ğŸ’¡ [ì—¬ê¸° ì¶”ê°€!] ë¬´í•œ ë‚™í•˜ ì‹œ ë„ë‹¬í•  ìˆ˜ ìˆëŠ” ìµœëŒ€ ì†ë„ë¥¼ ì œí•œí•©ë‹ˆë‹¤.
+	[Header("í¬íƒˆ ë¬¼ë¦¬ ì„¤ì •")]
+	[Tooltip("ë¬´í•œ í…”ë ˆí¬íŠ¸ ì‹œ í—ˆìš©í•  ìµœëŒ€ ì†ë„ (ìˆ«ìë¥¼ ë‚®ì¶”ë©´ ë” ì²œì²œíˆ ë–¨ì–´ì§‘ë‹ˆë‹¤)")]
+	public float maxFallSpeed = 15f;
+
+	// ë¬´í•œ í…”ë ˆí¬íŠ¸ë¥¼ ë§‰ê¸° ìœ„í•œ ì•ˆì „ì¥ì¹˜
 	private bool canTeleport = true;
+
 	private void Awake()
 	{
 		teleportParticle = GetComponentInChildren<ParticleSystem>();
 	}
+
 	private void OnTriggerEnter2D(Collider2D col)
 	{
-		// ´êÀº ¿ÀºêÁ§Æ®°¡ ÇÃ·¹ÀÌ¾îÀÌ°í, Æ÷Å»ÀÌ ÄÑÁ®(canTeleport) ÀÖ´Ù¸é?
+		// ë‹¿ì€ ì˜¤ë¸Œì íŠ¸ê°€ í”Œë ˆì´ì–´ì´ê³ , í¬íƒˆì´ ì¼œì ¸(canTeleport) ìˆë‹¤ë©´?
 		if (canTeleport && (col.CompareTag("Player") || col.CompareTag("Cube")))
 		{
 			if (linkedPortal != null)
 			{
 				linkedPortal.StartCoroutine(linkedPortal.CooldownRoutine());
 
-				//³» Æ÷Å»(µé¾î°¡´Â °÷)°ú ¹İ´ëÆí Æ÷Å»(³ª¿À´Â °÷) ¾çÂÊ¿¡¼­ ÆÄÆ¼Å¬ ÅÍ¶ß¸®±â
+				//ë‚´ í¬íƒˆ(ë“¤ì–´ê°€ëŠ” ê³³)ê³¼ ë°˜ëŒ€í¸ í¬íƒˆ(ë‚˜ì˜¤ëŠ” ê³³) ì–‘ìª½ì—ì„œ íŒŒí‹°í´ í„°ëœ¨ë¦¬ê¸°
 				if (teleportParticle != null) teleportParticle.Play();
 				if (linkedPortal.teleportParticle != null) linkedPortal.teleportParticle.Play();
 
-				// 2. [¿©±â Ãß°¡!] SfxManager¸¦ ÀÌ¿ëÇØ ÅÚ·¹Æ÷Æ® È¿°úÀ½ 1È¸ Àç»ı!
+				// SfxManagerë¥¼ ì´ìš©í•´ í…”ë ˆí¬íŠ¸ íš¨ê³¼ìŒ 1íšŒ ì¬ìƒ!
 				if (teleportSfx != null && SfxManager.Instance != null)
 				{
-					SfxManager.Instance.PlaySfx(teleportSfx, sfxVolume,0.2f);
+					SfxManager.Instance.PlaySfx(teleportSfx, sfxVolume, 0.2f);
 				}
-				// µé¾î¿Â °Ô Å¥ºêÀÎÁö È®ÀÎ
+
+				// ë“¤ì–´ì˜¨ ê²Œ íë¸Œì¸ì§€ í™•ì¸
 				GravityObjectLogic gravityObj = col.GetComponent<GravityObjectLogic>();
 				if (gravityObj != null)
 				{
-					// Å¥ºê¶ó¸é ¹°¸® ¿£Áø Àü¿ë ¼ø°£ÀÌµ¿ ½ÇÇà!
+					// íë¸Œë¼ë©´ ë¬¼ë¦¬ ì—”ì§„ ì „ìš© ìˆœê°„ì´ë™ ì‹¤í–‰!
 					gravityObj.TeleportTo(linkedPortal.transform.position);
 				}
 				else
 				{
-					// ÇÃ·¹ÀÌ¾î´Â ±âÁ¸ ¹æ½Ä´ë·Î ÀÌµ¿
+					// í”Œë ˆì´ì–´ëŠ” ê¸°ì¡´ ë°©ì‹ëŒ€ë¡œ ì´ë™
 					col.transform.position = linkedPortal.transform.position;
+				}
+
+				// ==========================================
+				// ğŸ’¡ [ì—¬ê¸° ì¶”ê°€ë¨!] í…”ë ˆí¬íŠ¸ ì§í›„ ì†ë„ ì œí•œ (ë†€ì´ê¸°êµ¬ íš¨ê³¼)
+				// ==========================================
+				Rigidbody2D rb = col.GetComponent<Rigidbody2D>();
+				if (rb != null)
+				{
+					// í˜„ì¬ ë–¨ì–´ì§€ëŠ” Yì¶• ì†ë„ì˜ 'ì ˆëŒ“ê°’'ì´ maxFallSpeedë¥¼ ë„˜ì—ˆë‹¤ë©´?
+					if (Mathf.Abs(rb.linearVelocity.y) > maxFallSpeed)
+					{
+						// Xì¶• ì†ë„ëŠ” ê·¸ëŒ€ë¡œ ë‘ê³ , Yì¶• ì†ë„ëŠ” ë°©í–¥(+/-)ë§Œ ì‚´ë ¤ì„œ maxFallSpeedë¡œ ê³ ì •!
+						rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Sign(rb.linearVelocity.y) * maxFallSpeed);
+					}
 				}
 			}
 		}
 	}
-	// Æ÷Å»À» Àá½Ã ²°´Ù°¡ ÄÑ´Â Å¸ÀÌ¸Ó
+
+	// í¬íƒˆì„ ì ì‹œ ê»ë‹¤ê°€ ì¼œëŠ” íƒ€ì´ë¨¸
 	public IEnumerator CooldownRoutine()
 	{
-		canTeleport = false;                    // Æ÷Å» ÀÛµ¿ Á¤Áö
-		yield return new WaitForSeconds(0.5f);  // 0.5ÃÊ ´ë±â (ÀÌ ¼ıÀÚ·Î ÄğÅ¸ÀÓ Á¶Àı °¡´É)
-		canTeleport = true;                     // 0.5ÃÊ µÚ Æ÷Å» ´Ù½Ã ÀÛµ¿!
+		canTeleport = false;                    // í¬íƒˆ ì‘ë™ ì •ì§€
+		yield return new WaitForSeconds(0.5f);  // 0.5ì´ˆ ëŒ€ê¸° (ì´ ìˆ«ìë¡œ ì¿¨íƒ€ì„ ì¡°ì ˆ ê°€ëŠ¥)
+		canTeleport = true;                     // 0.5ì´ˆ ë’¤ í¬íƒˆ ë‹¤ì‹œ ì‘ë™!
 	}
 }

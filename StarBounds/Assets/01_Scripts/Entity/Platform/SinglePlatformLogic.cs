@@ -8,51 +8,59 @@ public class SinglePlatformLogic : MonoBehaviour
 	public float duration = 0.5f;
 	private void Awake()
 	{
-		// ÇÃ·§Æû ¿ÀºêÁ§Æ®¿¡ ºÎÂøµÈ Äİ¶óÀÌ´õ¸¦ °¡Á®¿É´Ï´Ù.
-		// (BoxCollider2D ¶Ç´Â EdgeCollider2D µîÀÌ µÉ ¼ö ÀÖ½À´Ï´Ù.)
+		
 		_platformCollider = GetComponent<BoxCollider2D>();
 		
 		if (_platformCollider == null)
 		{
-			Debug.LogError("PlatformLogic¿¡´Â Collider2D ÄÄÆ÷³ÍÆ®°¡ ÇÊ¿äÇÕ´Ï´Ù.");
+			Debug.LogError("PlatformLogicï¿½ï¿½ï¿½ï¿½ Collider2D ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Õ´Ï´ï¿½.");
 			enabled = false;
 		}
 	}
 	private void Start()
 	{
-		//Áß·Â ¹æÇâÀÌ ¹Ù²î¸é È£ÃâÇÒ ÇÔ¼ö
+		
 		GravityManager.Instance.OnGravityDirectionChanged += setInverseCollider;
 	}
 	public void setInverseCollider(eGravityDirection direction)
 	{
-		//Áß·Â ¹æÇâÀÌ °Å²Ù·Î ¹Ù²ñ
+		
 		if (direction == eGravityDirection.Inverse)
 		{
 			transform.localPosition = new Vector3(0, 0, 0);
 			transform.localScale = new Vector3(1, -1, 1);
 		}
-		//Áß·Â ¹æÇâÀÌ ³ë¸»·Î ¹Ù²ñ
+		//ï¿½ß·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ë¸»ï¿½ï¿½ ï¿½Ù²ï¿½
 		else if (direction == eGravityDirection.Normal)
 		{
 			transform.localPosition =  new Vector3(0, 0.133f, 0);
 			transform.localScale = Vector3.one;
 		}
 	}
-	/// <summary>
-	/// ÇÃ·¹ÀÌ¾î¿Í ÀÌ ÇÃ·§Æû °£ÀÇ Ãæµ¹À» ÀÏ½ÃÀûÀ¸·Î ºñÈ°¼ºÈ­ÇÕ´Ï´Ù.
-	/// </summary>
-	/// <param name="playerCollider">ÇÃ·¹ÀÌ¾îÀÇ Collider2D ÄÄÆ÷³ÍÆ®.</param>
-	/// <param name="duration">Ãæµ¹À» ºñÈ°¼ºÈ­ÇÒ ½Ã°£(ÃÊ).</param>
+	
 	public void DisableCollisionForDrop(Collider2D playerCollider)
 	{
 		if (playerCollider == null || _platformCollider == null) return;
 
-		// 1. ÇÃ·¹ÀÌ¾î¿Í ÇÃ·§Æû °£ÀÇ Ãæµ¹À» ¹«½Ã (Drop-Through ½ÃÀÛ)
+		// 1. ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½æµ¹ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (Drop-Through ï¿½ï¿½ï¿½ï¿½)
 		Physics2D.IgnoreCollision(playerCollider, _platformCollider, true);
 
-		//// 2. Àá½Ã ÈÄ Ãæµ¹À» ´Ù½Ã È°¼ºÈ­ÇÏ´Â ÄÚ·çÆ¾ ½ÃÀÛ
+		
 		//StartCoroutine(ReEnableCollisionCoroutine(playerCollider, duration));
 	}
-	
-	
+	// =========================================================
+	// ğŸ’¡ [í•µì‹¬] ì˜¤ë¸Œì íŠ¸ê°€ íŒŒê´´ë  ë•Œ ë¶ˆë¦¬ëŠ” ìœ ë‹ˆí‹° ë‚´ì¥ í•¨ìˆ˜
+	// =========================================================
+	private void OnDestroy()
+	{
+		// ë§µì´ ì¬ì‹œì‘ë˜ê±°ë‚˜ íŒŒê´´ë  ë•Œ, ë¶ˆì‚¬ì‹ ì¸ ë§¤ë‹ˆì €ì—ê²Œ "ë‚˜í•œí…Œ ë” ì´ìƒ ì—°ë½í•˜ì§€ ë§ˆ!" ë¼ê³  ëª…ë¶€ì—ì„œ ì§€ì›ë‹ˆë‹¤.
+		if (GravityManager.Instance != null)
+		{
+			GravityManager.Instance.OnGravityDirectionChanged -= setInverseCollider;
+
+			// (í˜¹ì‹œ ë¶€ìœ  ì´ë²¤íŠ¸ë„ êµ¬ë… ì¤‘ì´ë¼ë©´ ì•„ë˜ ì¤„ë„ ì¶”ê°€í•˜ì„¸ìš”!)
+			// GravityManager.Instance.OnFloatingStateChanged -= êµ¬ë…í•œí•¨ìˆ˜ì´ë¦„;
+		}
+	}
+
 }

@@ -1,99 +1,125 @@
-	using System.Collections;
-	using UnityEngine;
+using System.Collections;
+using UnityEngine;
 
-	public class Laser : MonoBehaviour
+public class Laser : MonoBehaviour
+{
+	[Header("ì´í™íŠ¸")]
+	public ParticleSystem hitSpark; // ë¶€ë”ªíˆëŠ” ê³³ì—ì„œ ìƒê¸¸ íŒŒí‹°í´
+
+	[Header("ì‚¬ìš´ë“œ")]
+	public AudioClip bounceSfx;      // ë¶€ë”ªí˜”ì„ ë•Œ ì¬ìƒí•  ë°˜ì‚¬ ì†Œë¦¬
+	private bool isBouncing = false; // ì†Œë¦¬ ì¤‘ë³µ ì¬ìƒ ë°©ì§€ë¥¼ ìœ„í•œ ìƒíƒœ ë³€ìˆ˜
+
+	//ë ˆì´ì € í”„ë¦¬íŒ¹
+	public Laser prefab;
+
+	// [ì¤‘ìš” 2] ì½”ë“œê°€ ì‹¤ì œë¡œ ë§Œë“¤ì–´ë‚¸ ë‹¤ìŒ ë ˆì´ì €ì˜ ì •ë³´ë¥¼ ì €ì¥ (Inspectorì— ì•ˆ ë³´ì´ê²Œ í•¨)
+	private Laser nextLaser;
+
+	public int bounce = 0;     // í˜„ì¬ íŠ•ê¸´ íšŸìˆ˜
+	public int maxBounce = 5;  // ìµœëŒ€ íŠ•ê¸¸ íšŸìˆ˜ (ë°˜ì‚¬ íšŸìˆ˜ ì œí•œ!)
+
+	private SpriteRenderer sr;
+	private BoxCollider2D bc;
+
+	// ë ˆì´ì €ê°€ ë¶€ë”ªí ë ˆì´ì–´ ì„¤ì •
+	private LayerMask hitLayers;
+	private float maxDist = 100f;
+
+	// [ì¶”ê°€] ë ˆì´ì € êº¼ì§ ì‹œí€€ìŠ¤ í™•ì¸ ë³€ìˆ˜
+	private bool isTurningOff = false;
+	// [ì¶”ê°€] í˜„ì¬ ë ˆì´ì €ê°€ ë‹¿ê³  ìˆëŠ” ìŠ¤ìœ„ì¹˜ ì •ë³´ë¥¼ ì €ì¥
+	private SwitchLogic currentSwitch;
+
+	private void Awake()
 	{
-		[Header("ÀÌÆåÆ®")]
-		public ParticleSystem hitSpark; // ÀÎ½ºÆåÅÍ¿¡¼­ ³ÖÀ» ÆÄÆ¼Å¬
+		GetReferences();
+	}
 
-		[Header("»ç¿îµå")]
-		public AudioClip bounceSfx;      // ÀÎ½ºÆåÅÍ¿¡¼­ ³ÖÀ» ¹İ»ç ¼Ò¸®
-		private bool isBouncing = false; // ¼Ò¸®°¡ ¿©·¯ ¹ø ³ª´Â °É ¸·´Â º¯¼ö
+	private void GetReferences()
+	{
+		sr = GetComponent<SpriteRenderer>();
+		bc = GetComponent<BoxCollider2D>();
 
-		//·¹ÀÌÀú ÇÁ¸®ÆÕ
-		public Laser prefab;
+		sr.drawMode = SpriteDrawMode.Tiled;
+		// [ìˆ˜ì •] "Switch" ë ˆì´ì–´ë„ ê°ì§€í•  ìˆ˜ ìˆê²Œ ì¶”ê°€!
+		hitLayers = LayerMask.GetMask("Ground", "Mirror", "Interactable", "Portal");
+		// [ìˆ˜ì • 1ìˆœìœ„ ì¶”ê°€!] ë‚´ ëª¸(ìì‹ ì˜¤ë¸Œì íŠ¸)ì— ë§¤ë‹¬ë ¤ ìˆëŠ” íŒŒí‹°í´ ì‹œìŠ¤í…œì„ ìë™ìœ¼ë¡œ ì°¾ì•„ì„œ í• ë‹¹!
+		hitSpark = GetComponentInChildren<ParticleSystem>();
+	}
 
-		// [º¯°æÁ¡ 2] ÄÚµå°¡ ½º½º·Î ¸¸µé¾î³½ ´ÙÀ½ ·¹ÀÌÀú¸¦ ±â¾ïÇØ µÑ º¯¼ö (Inspector¿¡ ¾È º¸¿©µµ µÊ)
-		private Laser nextLaser;
+	private void FixedUpdate()
+	{
+		// [ì¶”ê°€] ë ˆì´ì €ê°€ êº¼ì§€ëŠ” ì¤‘ì´ë¼ë©´ ì‘ë™ ì¤‘ë‹¨!
+		if (isTurningOff) return;
+		FormLaser();
+	}
 
-		public int bounce = 0;     // ÇöÀç Æ¨±ä È½¼ö
-		public int maxBounce = 5;  // ÃÖ´ë Æ¨±æ È½¼ö (°ÔÀÓ ¸ØÃã ¹æÁö!)
+	private void FormLaser()
+	{
+		RaycastHit2D ray = Physics2D.Raycast(transform.position, transform.right, maxDist, hitLayers);
+		float dist = ray.collider != null ? ray.distance : maxDist;
 
-		private SpriteRenderer sr;
-		private BoxCollider2D bc;
+		sr.size = new Vector2(dist, sr.size.y);
+		bc.size = new Vector2(dist, bc.size.y);
+		bc.offset = new Vector2(dist / 2f, bc.offset.y);
 
-		// ÃÖÀûÈ­ ¹× À¯Áöº¸¼ö¸¦ À§ÇÑ º¯¼ö Ä³½Ì
-		private LayerMask hitLayers;
-		private float maxDist = 100f;
+		SwitchLogic hitSwitch = null; // ì´ë²ˆ í”„ë ˆì„ì— ì°¾ì€ ìŠ¤ìœ„ì¹˜
 
-		// [Ãß°¡] ²¨Áö´Â ÁßÀÎÁö È®ÀÎÇÒ º¯¼ö
-		private bool isTurningOff = false;
-		// [Ãß°¡] ÇöÀç Àü·ÂÀ» °ø±Ş ÁßÀÎ ½ºÀ§Ä¡¸¦ ±â¾ïÇÒ º¯¼ö
-		private SwitchLogic currentSwitch;
-		private void Awake()
+		// ë¬´ì–¸ê°€ì— ë§ì•˜ì„ ë•Œ
+		if (ray.collider != null)
 		{
-			GetReferences();	
-		}
-		private void GetReferences()
-		{
-			sr = GetComponent<SpriteRenderer>();
-			bc = GetComponent<BoxCollider2D>();
-
-			sr.drawMode = SpriteDrawMode.Tiled;
-			// [¼öÁ¤] "Switch" ·¹ÀÌ¾îµµ ¸ÂÃâ ¼ö ÀÖ°Ô Ãß°¡!
-			hitLayers = LayerMask.GetMask("Ground", "Mirror", "Interactable","Portal");
-			// [¸¶¹ıÀÇ 1ÁÙ Ãß°¡!] ³» ¸ö(ÀÚ½Ä ¿ÀºêÁ§Æ®)¿¡ ´Ş·ÁÀÖ´Â ÆÄÆ¼Å¬ ½Ã½ºÅÛÀ» ½º½º·Î Ã£¾Æ¼­ ¿¬°á!
-			hitSpark = GetComponentInChildren<ParticleSystem>();
-
-		}
-		private void FixedUpdate()
-		{
-			// [Ãß°¡] ²¨Áö´Â ÁßÀÌ¸é »õ·Î »¸¾î³ª°¡´Â °è»ê ÁßÁö!
-			if (isTurningOff) return;
-			FormLaser();
-		}
-		private void FormLaser()
-		{
-			RaycastHit2D ray = Physics2D.Raycast(transform.position, transform.right, maxDist, hitLayers);
-			float dist = ray.collider != null ? ray.distance : maxDist;
-
-			sr.size = new Vector2(dist, sr.size.y);
-			bc.size = new Vector2(dist, bc.size.y);
-			bc.offset = new Vector2(dist / 2f, bc.offset.y);
-
-			SwitchLogic hitSwitch = null; // ÀÌ¹ø ÇÁ·¹ÀÓ¿¡ ¸ÂÀº ½ºÀ§Ä¡
-
-			// ¹«¾ğ°¡¿¡ ¸Â¾ÒÀ» ¶§
-			if (ray.collider != null)
+			// [íŒŒí‹°í´ ì¶”ê°€] ë¶€ë”ªíŒ ìœ„ì¹˜ë¡œ íŒŒí‹°í´ì„ ì´ë™ì‹œí‚¨ë‹¤!
+			if (hitSpark != null)
 			{
-				// [ÆÄÆ¼Å¬ Ãß°¡] ºÎµúÈù À§Ä¡·Î ÆÄÆ¼Å¬À» ¿Å±â°í ÄÑ±â!
-				if (hitSpark != null)
+				hitSpark.transform.position = ray.point; // ë¶€ë”ªíŒ ì§€ì ìœ¼ë¡œ ì´ë™
+				if (!hitSpark.isPlaying) hitSpark.Play(); // ë©ˆì¶°ìˆë‹¤ë©´ ì¬ìƒ
+				Debug.Log("íŒŒí‹°í´ ì¬ìƒ ì½”ë“œ ë“¤ì–´ê°!");
+			}
+
+			// 1. ê±°ìš¸ì— ë§ì•˜ì„ ë•Œ
+			if (ray.collider.CompareTag("Mirror"))
+			{
+				// [ì‚¬ìš´ë“œ ì²˜ë¦¬]
+				if (!isBouncing)
 				{
-					hitSpark.transform.position = ray.point; // ºÎµúÈù °÷À¸·Î ÀÌµ¿
-					if (!hitSpark.isPlaying) hitSpark.Play(); // ²¨Á®ÀÖÀ¸¸é Àç»ı
-					Debug.Log("ÆÄÆ¼Å¬ Àç»ı ¸í·É µé¾î°¨!");
+					isBouncing = true;
+					if (SfxManager.Instance != null && bounceSfx != null)
+						SfxManager.Instance.PlaySfx(bounceSfx, 1f, 0.2f);
 				}
-				// 1. °Å¿ï¿¡ ¸Â¾ÒÀ» ¶§
-				if (ray.collider.CompareTag("Mirror"))
+
+				// [ë°˜ì‚¬ ê³„ì‚°]
+				Vector2 inDir = transform.right;
+				Vector2 refDir = Vector2.Reflect(inDir, ray.normal);
+
+				if (Mathf.Abs(refDir.x) > Mathf.Abs(refDir.y))
+					refDir = new Vector2(Mathf.Sign(refDir.x), 0f);
+				else
+					refDir = new Vector2(0f, Mathf.Sign(refDir.y));
+
+				// [ë‹¤ìŒ ë ˆì´ì € ìƒì„±]
+				if (bounce < maxBounce)
 				{
-					// [»ç¿îµå Àç»ı]
-					if (!isBouncing)
+					if (nextLaser == null)
 					{
-						isBouncing = true;
-						if (SfxManager.Instance != null && bounceSfx != null)
-							SfxManager.Instance.PlaySfx(bounceSfx, 1f, 0.2f);
+						nextLaser = Instantiate(prefab);
+						nextLaser.bounce = this.bounce + 1;
 					}
+					nextLaser.gameObject.SetActive(true);
+					nextLaser.transform.position = ray.point + (refDir * 0.05f);
+					nextLaser.transform.right = refDir;
+				}
+			}
+			else if (ray.collider.CompareTag("Portal"))
+			{
+				isBouncing = false; // ê±°ìš¸ì´ ì•„ë‹ˆë¯€ë¡œ ë°˜ì‚¬ìŒì€ ëˆë‹¤
 
-					// [¹İ»ç °è»ê]
-					Vector2 inDir = transform.right;
-					Vector2 refDir = Vector2.Reflect(inDir, ray.normal);
+				// ë“¤ì–´ì˜¨ í¬íƒˆì˜ ìŠ¤í¬ë¦½íŠ¸ ê°€ì ¸ì˜¤ê¸°
+				Portal inPortal = ray.collider.GetComponent<Portal>();
 
-					if (Mathf.Abs(refDir.x) > Mathf.Abs(refDir.y))
-						refDir = new Vector2(Mathf.Sign(refDir.x), 0f);
-					else
-						refDir = new Vector2(0f, Mathf.Sign(refDir.y));
-
-					// [´ÙÀ½ ·¹ÀÌÀú »ı¼º]
+				// ì—°ê²°ëœ ë°˜ëŒ€í¸ í¬íƒˆì´ ìˆë‹¤ë©´?
+				if (inPortal != null && inPortal.linkedPortal != null)
+				{
 					if (bounce < maxBounce)
 					{
 						if (nextLaser == null)
@@ -102,123 +128,124 @@
 							nextLaser.bounce = this.bounce + 1;
 						}
 						nextLaser.gameObject.SetActive(true);
-						nextLaser.transform.position = ray.point + (refDir * 0.05f);
-						nextLaser.transform.right = refDir;
+
+						// 1. ìœ„ì¹˜: ë°˜ëŒ€í¸ í¬íƒˆ ìœ„ì¹˜ì—ì„œ, 'ì›ë˜ ë‚ ì•„ê°€ë˜ ë°©í–¥'ìœ¼ë¡œ ì‚´ì§ ë„ì›Œì„œ ìƒì„±
+						nextLaser.transform.position = inPortal.linkedPortal.transform.position + (transform.right * 0.6f);
+
+						// 2. ë°©í–¥: ë“¤ì–´ì˜¨ í¬íƒˆì˜ ê°ë„ì™€ ìƒê´€ì—†ì´, 'ì›ë˜ ë‚ ì•„ê°€ë˜ ë°©í–¥'ì„ ê·¸ëŒ€ë¡œ ìœ ì§€!
+						nextLaser.transform.right = transform.right;
 					}
-				}
-				else if (ray.collider.CompareTag("Portal"))
-				{
-					isBouncing = false; // °Å¿ïÀÌ ¾Æ´Ï¹Ç·Î ¹İ»çÀ½Àº ²ü´Ï´Ù
-
-					// ¸ÂÀº Æ÷Å»ÀÇ ½ºÅ©¸³Æ® °¡Á®¿À±â
-					Portal inPortal = ray.collider.GetComponent<Portal>();
-
-					// ¿¬°áµÈ ¹İ´ëÆí Æ÷Å»ÀÌ ÀÖ´Ù¸é?
-					if (inPortal != null && inPortal.linkedPortal != null)
-					{
-						if (bounce < maxBounce)
-						{
-							if (nextLaser == null)
-							{
-								nextLaser = Instantiate(prefab);
-								nextLaser.bounce = this.bounce + 1;
-							}
-							nextLaser.gameObject.SetActive(true);
-
-							// 1. À§Ä¡: ¹İ´ëÆí Æ÷Å» À§Ä¡¿¡¼­, '¿ø·¡ ³¯¾Æ°¡´ø ¹æÇâ(transform.right)'À¸·Î »ìÂ¦ ¹Ğ¾î¼­ »ı¼º
-							nextLaser.transform.position = inPortal.linkedPortal.transform.position + (transform.right * 0.6f);
-
-							// 2. ¹æÇâ: ¿À·»Áö Æ÷Å»ÀÇ ¹æÇâÀº ¹«½ÃÇÏ°í, '¿ø·¡ ³¯¾Æ°¡´ø ¹æÇâ'À» ±×´ë·Î ¹°·ÁÁÜ!
-							nextLaser.transform.right = transform.right;
-						}
-					}
-				}
-				// 2. ½ºÀ§Ä¡¿¡ ¸Â¾ÒÀ» ¶§
-				else if (ray.collider.CompareTag("Switch"))
-				{
-					isBouncing = false;
-					if (nextLaser != null) nextLaser.gameObject.SetActive(false); // ²¿¸® ÀÚ¸£±â
-
-					hitSwitch = ray.collider.GetComponent<SwitchLogic>();
-				}
-				// 3. ¶¥ÀÌ³ª ´Ù¸¥ º®¿¡ ¸Â¾ÒÀ» ¶§
-				else
-				{
-					isBouncing = false;
-					if (nextLaser != null) nextLaser.gameObject.SetActive(false); // ²¿¸® ÀÚ¸£±â
 				}
 			}
-			// Çã°ø¿¡ ½ò ¶§
+			// 2. ìŠ¤ìœ„ì¹˜ì— ë§ì•˜ì„ ë•Œ
+			else if (ray.collider.CompareTag("Switch"))
+			{
+				isBouncing = false;
+				if (nextLaser != null) nextLaser.gameObject.SetActive(false); // ë‹¤ìŒ ë ˆì´ì €ëŠ” ëˆë‹¤
+
+				hitSwitch = ray.collider.GetComponent<SwitchLogic>();
+			}
+			// 3. ë²½ì´ë‚˜ ë‹¤ë¥¸ ë¬¼ì²´ì— ë§ì•˜ì„ ë•Œ
 			else
 			{
 				isBouncing = false;
-				if (nextLaser != null) nextLaser.gameObject.SetActive(false); // ²¿¸® ÀÚ¸£±â
-				// [ÆÄÆ¼Å¬ ²ô±â]
-				if (hitSpark != null) hitSpark.Stop();
-			}
-
-			// --- Àü·Â °ø±Ş ÄÑ°í ²ô±â ·ÎÁ÷ ---
-			if (hitSwitch != currentSwitch)
-			{
-				if (currentSwitch != null) currentSwitch.SetLaserPower(false);
-				currentSwitch = hitSwitch;
-				if (currentSwitch != null) currentSwitch.SetLaserPower(true);
+				if (nextLaser != null) nextLaser.gameObject.SetActive(false); // ë‹¤ìŒ ë ˆì´ì €ëŠ” ëˆë‹¤
 			}
 		}
-		public void TurnOffSequence()
+		// í—ˆê³µì¼ ë•Œ
+		else
 		{
-			if (gameObject.activeInHierarchy)
-				StartCoroutine(TurnOffRoutine());
+			isBouncing = false;
+			if (nextLaser != null) nextLaser.gameObject.SetActive(false); // ë‹¤ìŒ ë ˆì´ì €ëŠ” ëˆë‹¤
+
+			// [íŒŒí‹°í´ ì¤‘ì§€]
+			if (hitSpark != null) hitSpark.Stop();
 		}
 
-		private IEnumerator TurnOffRoutine()
+		// --- ìŠ¤ìœ„ì¹˜ ì‘ë™ ì œì–´ ë¡œì§ ---
+		//if (hitSwitch != currentSwitch)
+		//{
+		//	if (currentSwitch != null) currentSwitch.SetLaserPower(false);
+		//	currentSwitch = hitSwitch;
+		//	if (currentSwitch != null) currentSwitch.SetLaserPower(true);
+		//}
+		
+		if (hitSwitch != currentSwitch)
 		{
-			isTurningOff = true; // 1. ·¹ÀÌÀú »¸¾î³ª°¡´Â °è»ê ¸ØÃã
-			sr.enabled = false;   // 2. ³» ÀÌ¹ÌÁö ¼û±è
-			bc.enabled = false;   // 3. ³» Ãæµ¹Ã¼ ¼û±è
-
-			// [Ãß°¡] ³»°¡ ²¨Áú ¶§, ¶§¸®°í ÀÖ´ø ½ºÀ§Ä¡°¡ ÀÖÀ¸¸é Àü·Â ²÷±â!
+			// 1. ë ˆì´ì €ê°€ ìŠ¤ìœ„ì¹˜ì—ì„œ ë–¨ì–´ì ¸ì„œ êº¼ì§ˆ ë•Œ!
 			if (currentSwitch != null)
 			{
+				// ë„ëŒ€ì²´ ëˆ„ê°€ ë ˆì´ì €ë¥¼ ë§‰ì•˜ëŠ”ì§€(ë˜ëŠ” í—ˆê³µì¸ì§€) ì´ë¦„ì„ ì•Œì•„ëƒ…ë‹ˆë‹¤.
+				string culprit = (ray.collider != null) ? ray.collider.gameObject.name : "í—ˆê³µ(ì•„ë¬´ê²ƒë„ ì—†ìŒ)";
+				Debug.LogWarning($"ğŸš¨ ë ˆì´ì € ëŠì–´ì§! ìŠ¤ìœ„ì¹˜({currentSwitch.name}) OFF! ë²”ì¸: {culprit}");
+
 				currentSwitch.SetLaserPower(false);
-				currentSwitch = null;
 			}
-			// [ÆÄÆ¼Å¬ ²ô±â] ·¹ÀÌÀú ²¨Áú ¶§ ºÒ²Éµµ °°ÀÌ ²û
-			if (hitSpark != null) hitSpark.Stop();
 
-			yield return new WaitForSeconds(0.05f); // 4. ¾ÆÁÖ Àá±ñ ´ë±â (¼ıÀÚ°¡ Å¬¼ö·Ï ´À¸®°Ô ²¨Áü)
+			currentSwitch = hitSwitch;
 
-			// 5. ´ÙÀ½ ·¹ÀÌÀú°¡ ÀÖÀ¸¸é °ÂÇÑÅ×µµ ²¨Áö¶ó°í ¸í·É (µµ¹Ì³ë!)
-			if (nextLaser != null)
-				nextLaser.TurnOffSequence();
-
-			gameObject.SetActive(false); // 6. ¿ÏÀü ºñÈ°¼ºÈ­
+			// 2. ë ˆì´ì €ê°€ ìŠ¤ìœ„ì¹˜ì— ë‹¿ì•„ì„œ ì¼œì§ˆ ë•Œ!
+			if (currentSwitch != null)
+			{
+				Debug.Log($"âœ… ë ˆì´ì € ì—°ê²°ë¨! ìŠ¤ìœ„ì¹˜({currentSwitch.name}) ON!");
+				currentSwitch.SetLaserPower(true);
+			}
 		}
+	}
 
-		// [»õ·Î Ãß°¡] ´Ù½Ã ¹ßÆÇÀ» ¹â¾Æ¼­ ÄÑÁú ¶§ ¿ø·¡ »óÅÂ·Î º¹±¸ÇØ ÁÖ´Â ÇÔ¼ö
-		private void OnEnable()
-		{
-
-			isTurningOff = false;
-			isBouncing = false; // [Ãß°¡] ´Ù½Ã ÄÑÁú ¶§ "°Å¿ï¿¡ ´êÀº Àû ¾øÀ½"À¸·Î ±â¾ï ¸®¼Â!
-
-			if (sr != null) sr.enabled = true;
-			if (bc != null) bc.enabled = true;
-		}
-	// ¿ÀºêÁ§Æ®°¡ SetActive(false)·Î ²¨Áö°Å³ª ÆÄ±«µÉ ¶§ À¯´ÏÆ¼°¡ '¹«Á¶°Ç' ¸¶Áö¸·À¸·Î ½ÇÇàÇØ ÁÖ´Â ÇÔ¼ö
-	private void OnDisable()
+	public void TurnOffSequence()
 	{
-		// 1. ³»°¡ Á×±â Àü¿¡ È¤½Ã ÄÑµĞ ½ºÀ§Ä¡°¡ ÀÖ´Ù¸é? ¹«Á¶°Ç Àü·ÂÀ» ²÷°í Á×´Â´Ù!
+		if (gameObject.activeInHierarchy)
+			StartCoroutine(TurnOffRoutine());
+	}
+
+	private IEnumerator TurnOffRoutine()
+	{
+		isTurningOff = true; // 1. ë ˆì´ì € ì‘ë™ ë¡œì§ ì¤‘ë‹¨
+		sr.enabled = false;   // 2. ë Œë”ëŸ¬ ë„ê¸°
+		bc.enabled = false;   // 3. ì¶©ëŒì²´ ë„ê¸°
+
+		// [ì¶”ê°€] ë ˆì´ì € êº¼ì§ˆ ë•Œ, ë‹¿ì•„ìˆë˜ ìŠ¤ìœ„ì¹˜ë„ êº¼ì§€ë„ë¡ ì²˜ë¦¬!
 		if (currentSwitch != null)
 		{
 			currentSwitch.SetLaserPower(false);
 			currentSwitch = null;
 		}
 
-		// 2. ÆÄÆ¼Å¬ ²ô±â (È¤½Ã ºÒ²ÉÀÌ Çã°ø¿¡ ³²´Â ¹ö±× ¹æÁö)
+		// [íŒŒí‹°í´ ì¤‘ì§€] ë ˆì´ì € ì‚¬ë¼ì§ˆ ë•Œ ê°™ì´ ì‚¬ë¼ì§
 		if (hitSpark != null) hitSpark.Stop();
 
-		// 3. ³» ²¿¸®(¹İ»çµÈ ´ÙÀ½ ·¹ÀÌÀú)°¡ Çã°ø¿¡ ³²¾ÆÀÖ´Ù¸é °Â³×µµ °­Á¦·Î ´Ù ²¨¹ö¸²!
+		yield return new WaitForSeconds(0.05f); // 4. ì§§ì€ ëŒ€ê¸° (ì—°ì‡„ì ìœ¼ë¡œ ì‚¬ë¼ì§€ëŠ” íš¨ê³¼)
+
+		// 5. ë‹¤ìŒ ë ˆì´ì €ê°€ ìˆë‹¤ë©´ ì¬ê·€ì ìœ¼ë¡œ ëˆë‹¤
+		if (nextLaser != null)
+			nextLaser.TurnOffSequence();
+
+		gameObject.SetActive(false); // 6. ì˜¤ë¸Œì íŠ¸ ë¹„í™œì„±í™”
+	}
+
+	private void OnEnable()
+	{
+		isTurningOff = false;
+		isBouncing = false; // [ì¶”ê°€] ë‹¤ì‹œ ì¼¤ ë•Œ ìƒíƒœ ì´ˆê¸°í™”!
+
+		if (sr != null) sr.enabled = true;
+		if (bc != null) bc.enabled = true;
+	}
+
+	private void OnDisable()
+	{
+		// 1. ë ˆì´ì € ë„ê¸° ì „ ë‹¿ì•„ìˆë˜ ìŠ¤ìœ„ì¹˜ê°€ ìˆë‹¤ë©´ ëˆë‹¤!
+		if (currentSwitch != null)
+		{
+			currentSwitch.SetLaserPower(false);
+			currentSwitch = null;
+		}
+
+		// 2. íŒŒí‹°í´ ì¤‘ì§€
+		if (hitSpark != null) hitSpark.Stop();
+
+		// 3. ìì‹ ë ˆì´ì €ë“¤ë„ ëª¨ë‘ ë¹„í™œì„±í™”
 		if (nextLaser != null)
 		{
 			nextLaser.gameObject.SetActive(false);
@@ -228,4 +255,3 @@
 		isBouncing = false;
 	}
 }
-

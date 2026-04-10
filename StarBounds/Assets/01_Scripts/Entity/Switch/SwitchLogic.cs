@@ -26,7 +26,8 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 
 	Transform Top;
 	private bool _isOn;
-
+	private bool _isLaserHitting = false; // 💡 [추가] 레이저가 현재 때리고 있는지만 따로 기억
+	
 	[Header("SFX")]
 	[SerializeField] private AudioClip switchOnClip;
 	[SerializeField] private AudioClip switchOffClip;
@@ -155,10 +156,16 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 	// ==========================================
 	public void SetLaserPower(bool powerOn)
 	{
-		if (_isOn == powerOn) return;
+		//if (_isOn == powerOn) return;
 
-		// 💡 레이저는 허락받지 않고 무조건 덮어쓰며 "잠가버립니다!"
-		ApplyLaserEffect(powerOn);
+		//// 💡 레이저는 허락받지 않고 무조건 덮어쓰며 "잠가버립니다!"
+		//ApplyLaserEffect(powerOn);
+
+		// 🚨 수정된 부분: 스위치의 전체 켜짐/꺼짐(_isOn)이 아니라, 레이저 상태만 독립적으로 확인!
+		if (_isLaserHitting == powerOn) return;
+
+		_isLaserHitting = powerOn; // 상태 업데이트
+		ApplyLaserEffect(powerOn); // 무조건 매니저에게 잠금/해제 명령 쏘기!
 	}
 
 	// =========================================================================
@@ -214,4 +221,5 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 		if (_isOn) Top.GetComponent<SpriteRenderer>().sprite = spriteOn[0];
 		else Top.GetComponent<SpriteRenderer>().sprite = spriteOff[0];
 	}
+
 }

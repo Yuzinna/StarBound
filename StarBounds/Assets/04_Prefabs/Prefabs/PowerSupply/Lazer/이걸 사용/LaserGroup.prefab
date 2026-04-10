@@ -119,6 +119,10 @@ PrefabInstance:
       value: laserSwitch
       objectReference: {fileID: 0}
     - target: {fileID: 2643738242003876684, guid: 07241ffdb4bd12a4a9f20b32f39cd8b6, type: 3}
+      propertyPath: offDelay
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2643738242003876684, guid: 07241ffdb4bd12a4a9f20b32f39cd8b6, type: 3}
       propertyPath: firstLaser
       value: 
       objectReference: {fileID: 879637393369785090}

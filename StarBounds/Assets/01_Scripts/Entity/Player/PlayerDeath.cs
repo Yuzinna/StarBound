@@ -18,16 +18,16 @@ public class PlayerDeath : MonoBehaviour
 
 		StartCoroutine(DeathRoutine());
 	}
+
 	private IEnumerator DeathRoutine()
 	{
 		Debug.Log("플레이어 사망");
 
-		//[여기 추가!] 죽는 순간 애니메이터의 Alive 파라미터를 false로 꺼줍니다!
+		// 죽는 순간 애니메이터의 Alive 파라미터를 false로 꺼줍니다!
 		Animator anim = GetComponent<Animator>();
 		if (anim != null) anim.SetBool("Alive", false);
 
 		// 1. 조작 및 이동 스크립트 끄기 (플레이어가 움직이지 못하게 막음)
-		// (사용 중인 이동 스크립트 이름이 다르면 아래 이름을 맞춰주세요!)
 		var input = GetComponent<PlayerInput>();
 		if (input != null) input.enabled = false;
 
@@ -35,21 +35,30 @@ public class PlayerDeath : MonoBehaviour
 		if (logic != null) logic.enabled = false;
 
 		// 2. 플레이어의 모든 콜라이더(충돌체) 끄기
-		// 이렇게 하면 바닥을 무시하고 화면 아래로 쭉 떨어집니다!
+		// (이것 때문에 천장을 뚫고 나갔던 겁니다!)
 		Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
 		foreach (var col in colliders)
 		{
 			col.enabled = false;
 		}
 
-		// 3. 물리 엔진 조작: 멈췄다가 위로 뿅! 튀어 오르기
+		// 3. 물리 엔진 조작: 멈췄다가 튀어 오르기
 		Rigidbody2D rb = GetComponent<Rigidbody2D>();
 		if (rb != null)
 		{
-			// 기존에 이동하던 관성(속도)을 0으로 싹 지우고
+			// 기존 관성 지우기
 			rb.linearVelocity = Vector2.zero;
-			// 위쪽으로 강한 힘을 줘서 튀어 오르게 만듭니다.
-			rb.AddForce(Vector2.up * deathJumpForce, ForceMode2D.Impulse);
+
+			// 💡 [핵심 해결] 현재 중력 방향에 따라 튕겨 오르는 방향을 결정합니다!
+			Vector2 jumpDirection = Vector2.up; // 기본은 바닥에서 위로 뿅!
+
+			if (GravityManager.Instance != null && GravityManager.Instance.CurrentDirection == eGravityDirection.Inverse)
+			{
+				jumpDirection = Vector2.down; // 반중력일 땐 천장에서 아래로 뿅!
+			}
+
+			// 결정된 방향으로 강하게 튕겨냅니다.
+			rb.AddForce(jumpDirection * deathJumpForce, ForceMode2D.Impulse);
 		}
 
 		// 4. 공중에 떴다가 화면 밖으로 떨어질 때까지 대기
