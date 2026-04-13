@@ -35,6 +35,7 @@ Transform:
   - {fileID: 6746853451126924790}
   - {fileID: 2398133012698126491}
   - {fileID: 1702380273929202120}
+  - {fileID: 5547529541923277032}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6293691243431236135
@@ -281,6 +282,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0740a24b1e78abd448780e865284b493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputManager
+--- !u!1 &6899299022717096306
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5547529541923277032}
+  - component: {fileID: 179933774838976258}
+  m_Layer: 0
+  m_Name: VFXManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5547529541923277032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6899299022717096306}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 215716938855183684}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &179933774838976258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6899299022717096306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5292e90fca0bbe45aa11b7715f33312, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VFXManager
+  jumpDustPrefab: {fileID: 384671062236127919, guid: f2a9b9caab4d9c94dba28524ccf4b4f2, type: 3}
+  landDustPrefab: {fileID: 3573590211174083701, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+  heavyLandDustPrefab: {fileID: 0}
 --- !u!1 &9155793267913987532
 GameObject:
   m_ObjectHideFlags: 0

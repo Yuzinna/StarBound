@@ -164,7 +164,7 @@
 //}
 using System;
 using UnityEngine;
-using UnityEngine.SceneManagement; // 💡 씬 로드 이벤트를 듣기 위해 추가!
+using UnityEngine.SceneManagement;
 
 public enum eGravityDirection
 {
@@ -174,7 +174,6 @@ public enum eGravityDirection
 
 public class GravityManager : MonoBehaviour
 {
-	// 싱글톤
 	public static GravityManager Instance { get; private set; }
 
 	public eGravityDirection CurrentDirection { get; private set; } = eGravityDirection.Normal;
@@ -182,11 +181,9 @@ public class GravityManager : MonoBehaviour
 	public float normalGravityScale { get; set; } = 3.0f;
 	public float floatingGravityScale { get; set; } = 0.1f;
 
-	// 이벤트
 	public event Action<eGravityDirection> OnGravityDirectionChanged;
 	public event Action<bool> OnFloatingStateChanged;
 
-	// 잠금 관리 변수
 	private int _directionLockCount = 0;
 	public bool IsDirectionLocked => _directionLockCount > 0;
 
@@ -202,43 +199,41 @@ public class GravityManager : MonoBehaviour
 		}
 		Instance = this;
 		DontDestroyOnLoad(gameObject);
-	}
 
-	// ==========================================
-	// 💡 [새로 추가됨] 맵이 다시 로드될 때를 감지하는 기능
-	// ==========================================
-	private void OnEnable()
-	{
+		// 💡 [수정됨] OnEnable이 아니라, 진짜 싱글톤 본체만 여기서 딱 한 번 구독하게 만듭니다. (중복 구독 버그 방지)
 		SceneManager.sceneLoaded += OnSceneLoaded;
 	}
 
-	private void OnDisable()
+	private void OnDestroy()
 	{
-		SceneManager.sceneLoaded -= OnSceneLoaded;
+		if (Instance == this)
+		{
+			SceneManager.sceneLoaded -= OnSceneLoaded;
+		}
 	}
 
 	private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
-		// 씬이 새로 시작될 때마다 무조건 초기화!
 		ResetGravityState();
 	}
 
 	private void ResetGravityState()
 	{
-		// 1. 상태를 기본값으로 되돌림
+		// 🚨 [핵심 해결책] 이전 씬의 유령 스위치들이 이벤트를 듣고 에러를 뿜지 못하도록, 
+		// 씬이 재시작되면 매니저에 연결된 모든 이벤트(구독자)를 가차 없이 초기화(null) 해버립니다!
+		OnGravityDirectionChanged = null;
+		OnFloatingStateChanged = null;
+
 		CurrentDirection = eGravityDirection.Normal;
 		IsFloatingEnabled = false;
 
-		// 2. 🚨 가장 중요한 부분: 죽기 직전에 레이저가 켜져서 잠겨있던 자물쇠를 모두 부숴버립니다!
 		_directionLockCount = 0;
 		_floatingLockCount = 0;
 
-		// 3. 맵에 새로 생성된 오브젝트들에게 기본 상태를 방송합니다.
 		ApplyToAllGravityObjects();
-		OnGravityDirectionChanged?.Invoke(CurrentDirection);
-		OnFloatingStateChanged?.Invoke(IsFloatingEnabled);
 
-		Debug.Log("🔄 맵 초기화 완료! 중력과 시스템 잠금이 기본 상태로 돌아갔습니다.");
+		// (이벤트를 날릴 필요도 없습니다. 새 스위치들은 Start()에서 이 정상화된 상태를 스스로 읽어갑니다.)
+		Debug.Log("🔄 맵 초기화 완료! 중력과 시스템 잠금이 완벽하게 포맷되었습니다.");
 	}
 
 	// ==========================================
