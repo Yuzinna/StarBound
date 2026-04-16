@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.Cinemachine; // 💡 시네머신 기능을 사용하기 위해 추가!
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
@@ -14,7 +15,6 @@ public class GravityCrusher : MonoBehaviour
 	[Header("사운드 & 파티클")]
 	public AudioClip smashSfx;
 	public AudioClip killSfx;
-	// 💡 [파티클 추가] 쿵쿵이 자식으로 달아둔 파티클 연결!
 	public ParticleSystem smashDustParticle;
 
 	private Rigidbody2D _rb;
@@ -23,10 +23,17 @@ public class GravityCrusher : MonoBehaviour
 	private bool _isSmashing = false;
 	private bool _isReturning = false;
 
+	// 💡 [카메라 쉐이크 추가] 임펄스 소스를 담을 변수
+	private CinemachineImpulseSource _impulseSource;
+
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
 		_col = GetComponent<BoxCollider2D>();
+
+		// 💡 시작할 때 쿵쿵이에 달려있는 임펄스 소스 컴포넌트를 가져옵니다.
+		_impulseSource = GetComponent<CinemachineImpulseSource>();
+
 		_rb.bodyType = RigidbodyType2D.Kinematic;
 		_startPos = transform.position;
 	}
@@ -72,7 +79,10 @@ public class GravityCrusher : MonoBehaviour
 			{
 				if (hit.collider.gameObject == this.gameObject) continue;
 
-				if (hit.collider.CompareTag("Player")) KillPlayer(hit.collider.gameObject);
+				if (hit.collider.CompareTag("Player"))
+				{
+					KillPlayer(hit.collider.gameObject);
+				}
 				else if (!hit.collider.isTrigger)
 				{
 					hitWall = true;
@@ -89,8 +99,18 @@ public class GravityCrusher : MonoBehaviour
 
 				if (smashSfx != null && SfxManager.Instance != null) SfxManager.Instance.PlaySfx(smashSfx, 1f);
 
-				// 💡 [파티클 재생] 부딪혔을 때 그냥 냅다 재생!
-				if (smashDustParticle != null) smashDustParticle.Play();
+				if (smashDustParticle != null)
+				{
+					float rotZ = (GravityManager.Instance.CurrentDirection == eGravityDirection.Inverse) ? 180f : 0f;
+					smashDustParticle.transform.rotation = Quaternion.Euler(0, 0, rotZ);
+					smashDustParticle.Play();
+				}
+
+				// 💡 [핵심 추가] 바닥을 찍는 순간, 임펄스 충격파를 쾅! 하고 발사합니다.
+				if (_impulseSource != null)
+				{
+					_impulseSource.GenerateImpulse();
+				}
 			}
 		}
 	}

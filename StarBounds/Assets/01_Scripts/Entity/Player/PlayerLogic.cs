@@ -1,6 +1,9 @@
 using UnityEngine;
+using Unity.Cinemachine; // 에러 발생 시 Unity.Cinemachine으로 변경
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(CinemachineImpulseSource))]
 public class PlayerLogic : MonoBehaviour
 {
 	#region [1. Variables / Settings]
@@ -40,14 +43,18 @@ public class PlayerLogic : MonoBehaviour
 	public AudioClip normalJumpSound;
 	public AudioClip floatingJumpSound;
 
-	// 💡 [파티클 추가] 자식으로 달아둔 파티클을 여기에 연결!
 	[Header("파티클 (자식 오브젝트)")]
-	public ParticleSystem jumpDustParticle;
 	public ParticleSystem landDustParticle;
+
+	[Header("추락 진동 설정")]
+	[Tooltip("이 거리 이상 추락해야 진동과 파티클이 발생합니다.")]
+	public float minFallDistanceForImpulse = 3f;
 
 	// --- State Variables ---
 	private Rigidbody2D _rb;
+	private Collider2D _col;
 	private IInteractable _currentInteractable;
+	private CinemachineImpulseSource _impulseSource;
 
 	[SerializeField] private bool _isGrounded;
 	[SerializeField] private bool _isPushing;
@@ -57,6 +64,10 @@ public class PlayerLogic : MonoBehaviour
 	private bool _jumpInputReceived = false;
 	private int _facingDir = 1;
 	private float _conveyorSpeed = 0f;
+
+	// 내부 계산용
+	private float _particleCooldownTimer;
+	private float _peakY; // 공중에서 도달한 가장 높은/낮은 Y 지점
 
 	private static readonly int AnimHashSpeed = Animator.StringToHash("Speed");
 	private static readonly int AnimHashIsGrounded = Animator.StringToHash("IsGrounded");
@@ -69,6 +80,9 @@ public class PlayerLogic : MonoBehaviour
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
+		_col = GetComponent<Collider2D>();
+		_impulseSource = GetComponent<CinemachineImpulseSource>();
+
 		if (_animator == null) _animator = GetComponent<Animator>();
 		if (_spriteRenderer == null) _spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -83,12 +97,12 @@ public class PlayerLogic : MonoBehaviour
 		{
 			ApplyGravityAndFloatingState(GravityManager.Instance.CurrentDirection, GravityManager.Instance.IsFloatingEnabled);
 		}
+		_peakY = transform.position.y;
 	}
 
 	private void Update()
 	{
 		if (GameManager.Instance != null && GameManager.Instance.IsPaused) return;
-
 		UpdateDirectionVisuals();
 		UpdateAnimation();
 	}
@@ -98,14 +112,50 @@ public class PlayerLogic : MonoBehaviour
 		if (GameManager.Instance != null && GameManager.Instance.IsPaused) return;
 		if (_rb == null) return;
 
-		// 💡 [착지 파티클] 이전 프레임 기억
+		if (_particleCooldownTimer > 0f) _particleCooldownTimer -= Time.fixedDeltaTime;
+
 		bool previousGrounded = _isGrounded;
 		_isGrounded = GroundCheck();
 
-		// 방금 땅에 닿았고, 속도가 좀 빠를 때만 파티클 재생
-		if (!previousGrounded && _isGrounded && Mathf.Abs(_rb.linearVelocity.y) > 2f)
+		if (!_isGrounded)
 		{
-			if (landDustParticle != null) landDustParticle.Play();
+			// 공중에 떠 있는 동안 중력 방향에 따라 가장 높은(또는 낮은) 지점을 갱신
+			if (_gravityDirection == 1f)
+			{
+				_peakY = Mathf.Max(_peakY, transform.position.y);
+			}
+			else
+			{
+				_peakY = Mathf.Min(_peakY, transform.position.y);
+			}
+		}
+		else
+		{
+			// 착지하는 순간
+			if (!previousGrounded)
+			{
+				float fallDistance = Mathf.Abs(transform.position.y - _peakY);
+
+				if (fallDistance >= minFallDistanceForImpulse && _particleCooldownTimer <= 0f)
+				{
+					if (landDustParticle != null)
+					{
+						landDustParticle.transform.position = _col.bounds.center;
+						float rotZ = (_gravityDirection == -1f) ? 180f : 0f;
+						landDustParticle.transform.rotation = Quaternion.Euler(0, 0, rotZ);
+						landDustParticle.Play();
+					}
+
+					if (_impulseSource != null)
+					{
+						_impulseSource.GenerateImpulse();
+					}
+
+					_particleCooldownTimer = 0.2f;
+				}
+			}
+			// 땅에 닿아 있는 동안은 현재 위치를 피크 지점으로 초기화
+			_peakY = transform.position.y;
 		}
 
 		bool hasMoveInput = Mathf.Abs(_moveX) > 0.01f;
@@ -119,26 +169,34 @@ public class PlayerLogic : MonoBehaviour
 	#region [3. Input Methods]
 	public void OnInputJump()
 	{
-		if (GameManager.Instance != null && GameManager.Instance.IsPaused) return;
-		_jumpInputReceived = true;
+		if (GameManager.Instance != null && !GameManager.Instance.IsPaused)
+		{
+			_jumpInputReceived = true;
+		}
 	}
 
 	public void OnInputInteract()
 	{
-		if (GameManager.Instance != null && GameManager.Instance.IsPaused) return;
-		if (_currentInteractable != null) _currentInteractable.Interact(this);
+		if (GameManager.Instance != null && !GameManager.Instance.IsPaused && _currentInteractable != null)
+		{
+			_currentInteractable.Interact(this);
+		}
 	}
 
 	public void OnInputDropThrough()
 	{
 		if (!_isGrounded) return;
+
 		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
 		RaycastHit2D hit = Physics2D.Raycast(rayStart, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
 
 		if (hit.collider != null)
 		{
 			SinglePlatformLogic platform = hit.collider.GetComponent<SinglePlatformLogic>();
-			if (platform != null) platform.DisableCollisionForDrop(GetComponent<Collider2D>());
+			if (platform != null)
+			{
+				platform.DisableCollisionForDrop(GetComponent<Collider2D>());
+			}
 		}
 	}
 	#endregion
@@ -161,7 +219,10 @@ public class PlayerLogic : MonoBehaviour
 					audioSourceLoop.Play();
 				}
 			}
-			else if (audioSourceLoop.isPlaying) audioSourceLoop.Stop();
+			else if (audioSourceLoop.isPlaying)
+			{
+				audioSourceLoop.Stop();
+			}
 		}
 	}
 
@@ -169,9 +230,6 @@ public class PlayerLogic : MonoBehaviour
 	{
 		if (_isGrounded && _jumpInputReceived)
 		{
-			// 💡 [점프 파티클 재생]
-			if (jumpDustParticle != null) jumpDustParticle.Play();
-
 			_rb.linearVelocity = new Vector2(_rb.linearVelocity.x, 0f);
 			_rb.AddForce(Vector2.up * _gravityDirection * CurrentJumpForce, ForceMode2D.Impulse);
 
@@ -191,38 +249,57 @@ public class PlayerLogic : MonoBehaviour
 		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
 		Vector2 size = new Vector2(0.7f, 0.1f);
 		RaycastHit2D hit = Physics2D.BoxCast(rayStart, size, 0f, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
+
 		return hit.collider != null;
 	}
 	#endregion
 
-	#region [5. Visuals & Gravity & Collision (생략 없이 원본 유지)]
+	#region [5. Visuals & Gravity & Collision]
 	public void ApplyGravityAndFloatingState(eGravityDirection direction, bool isFloating)
 	{
 		if (_rb == null) return;
+
 		if (direction == eGravityDirection.Normal)
 		{
 			_gravityDirection = 1f;
 			_rb.gravityScale = GravityManager.Instance.normalGravityScale;
-			if (_spriteRenderer != null) _spriteRenderer.transform.localScale = Vector3.one;
+			if (_spriteRenderer != null)
+			{
+				_spriteRenderer.transform.localScale = Vector3.one;
+			}
 		}
 		else
 		{
 			_gravityDirection = -1f;
 			_rb.gravityScale = -GravityManager.Instance.normalGravityScale;
-			if (_spriteRenderer != null) _spriteRenderer.transform.localScale = new Vector3(1f, -1f, 1f);
+			if (_spriteRenderer != null)
+			{
+				_spriteRenderer.transform.localScale = new Vector3(1f, -1f, 1f);
+			}
 		}
 	}
 
 	private void UpdateDirectionVisuals()
 	{
-		if (_moveX > 0.01f) _facingDir = 1;
-		else if (_moveX < -0.01f) _facingDir = -1;
-		if (_spriteRenderer != null) _spriteRenderer.flipX = (_facingDir == -1);
+		if (_moveX > 0.01f)
+		{
+			_facingDir = 1;
+		}
+		else if (_moveX < -0.01f)
+		{
+			_facingDir = -1;
+		}
+
+		if (_spriteRenderer != null)
+		{
+			_spriteRenderer.flipX = (_facingDir == -1);
+		}
 	}
 
 	private void UpdateAnimation()
 	{
 		if (_animator == null) return;
+
 		float speedX = Mathf.Abs(_moveX * moveSpeed);
 		float speedY = _rb.linearVelocity.y * _gravityDirection;
 
@@ -251,25 +328,40 @@ public class PlayerLogic : MonoBehaviour
 		}
 	}
 
-	private void OnCollisionEnter2D(Collision2D other) { UpdateConveyorSpeed(other); }
+	private void OnCollisionEnter2D(Collision2D other)
+	{
+		UpdateConveyorSpeed(other);
+	}
 
 	private void OnCollisionExit2D(Collision2D other)
 	{
 		int layerMask = 1 << other.gameObject.layer;
-		if ((layerMask & pushableLayers) != 0) _isCollidingWithPushable = false;
-		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null) _conveyorSpeed = 0f;
+		if ((layerMask & pushableLayers) != 0)
+		{
+			_isCollidingWithPushable = false;
+		}
+
+		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null)
+		{
+			_conveyorSpeed = 0f;
+		}
 	}
 
 	private void UpdateConveyorSpeed(Collision2D collision)
 	{
 		SurfaceEffector2D effector = collision.gameObject.GetComponent<SurfaceEffector2D>();
-		if (effector != null) _conveyorSpeed = effector.speed;
+		if (effector != null)
+		{
+			_conveyorSpeed = effector.speed;
+		}
 	}
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
 		if (((1 << collision.gameObject.layer) & interactLayer) != 0)
+		{
 			_currentInteractable = collision.gameObject.GetComponent<IInteractable>();
+		}
 	}
 
 	private void OnTriggerExit2D(Collider2D collision)
@@ -277,7 +369,10 @@ public class PlayerLogic : MonoBehaviour
 		if (((1 << collision.gameObject.layer) & interactLayer) != 0)
 		{
 			var interactable = collision.GetComponent<IInteractable>();
-			if (interactable == _currentInteractable) _currentInteractable = null;
+			if (interactable == _currentInteractable)
+			{
+				_currentInteractable = null;
+			}
 		}
 	}
 	#endregion

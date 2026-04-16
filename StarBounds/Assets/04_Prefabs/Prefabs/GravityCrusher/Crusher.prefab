@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 4111033588658518383}
   - component: {fileID: 2749060291120122987}
   - component: {fileID: 6132821425190701210}
-  m_Layer: 0
+  - component: {fileID: 6144696644496324327}
+  m_Layer: 6
   m_Name: Crusher
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32,7 +33,8 @@ Transform:
   m_LocalPosition: {x: 3.63, y: -0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6257253653914309779}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5655933294984106339
@@ -140,6 +142,7 @@ MonoBehaviour:
     m_Bits: 8
   smashSfx: {fileID: 0}
   killSfx: {fileID: 0}
+  smashDustParticle: {fileID: 1793726360099749620}
 --- !u!61 &6132821425190701210
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -186,3 +189,127 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.8848722, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &6144696644496324327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6279209735742156654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineImpulseSource
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 2
+    CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ImpulseDuration: 0.2
+    ImpulseType: 3
+    DissipationRate: 0.25
+    RawSignal: {fileID: 11400000, guid: 69ac3640b321a7d49bcfc8497e9a7469, type: 2}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      AttackTime: 0
+      SustainTime: 0.1
+      DecayTime: 0.2
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 100
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 6, y: 7, z: 0}
+--- !u!1001 &9027220265530254383
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6772712934061694580}
+    m_Modifications:
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3573590211174083701, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_Name
+      value: LandGroundParticle
+      objectReference: {fileID: 0}
+    - target: {fileID: 3573590211174083701, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+--- !u!198 &1793726360099749620 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7323901507858635483, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+  m_PrefabInstance: {fileID: 9027220265530254383}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6257253653914309779 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3139319051599261884, guid: 254b505a7c8faf14a8d0ab40c9e9c3f2, type: 3}
+  m_PrefabInstance: {fileID: 9027220265530254383}
+  m_PrefabAsset: {fileID: 0}

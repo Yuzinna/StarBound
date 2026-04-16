@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 3477636581913233240}
   - component: {fileID: 9887256962413831}
   - component: {fileID: 287304935597127973}
+  - component: {fileID: 1645393835744532558}
   m_Layer: 3
   m_Name: PlayerOrigin
   m_TagString: Player
@@ -162,8 +163,8 @@ MonoBehaviour:
   walkSound: {fileID: 0}
   normalJumpSound: {fileID: 0}
   floatingJumpSound: {fileID: 0}
-  jumpDustParticle: {fileID: 2916054934327557713}
   landDustParticle: {fileID: 5072013085018842173}
+  minFallDistanceForImpulse: 2.2
   _isGrounded: 0
   _isPushing: 0
   _moveX: 0
@@ -455,6 +456,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDeath
   deathJumpForce: 10
   reloadDelay: 2
+--- !u!114 &1645393835744532558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6348978538754500559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineImpulseSource
+  ImpulseDefinition:
+    ImpulseChannel: 1
+    ImpulseShape: 2
+    CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    ImpulseDuration: 0.2
+    ImpulseType: 3
+    DissipationRate: 0.25
+    RawSignal: {fileID: 11400000, guid: 69ac3640b321a7d49bcfc8497e9a7469, type: 2}
+    AmplitudeGain: 1
+    FrequencyGain: 1
+    RepeatMode: 0
+    Randomize: 1
+    TimeEnvelope:
+      AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      AttackTime: 0
+      SustainTime: 0.1
+      DecayTime: 0.2
+      ScaleWithImpact: 1
+      HoldForever: 0
+    ImpactRadius: 100
+    DirectionMode: 0
+    DissipationMode: 2
+    DissipationDistance: 1000
+    PropagationSpeed: 343
+  DefaultVelocity: {x: 3, y: 4, z: 0}
 --- !u!1 &7383255000596795554
 GameObject:
   m_ObjectHideFlags: 0
@@ -614,11 +668,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f2a9b9caab4d9c94dba28524ccf4b4f2, type: 3}
---- !u!198 &2916054934327557713 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 4365609591356042860, guid: f2a9b9caab4d9c94dba28524ccf4b4f2, type: 3}
-  m_PrefabInstance: {fileID: 1504811715610464317}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8630393634333634523 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7144814576141434854, guid: f2a9b9caab4d9c94dba28524ccf4b4f2, type: 3}
