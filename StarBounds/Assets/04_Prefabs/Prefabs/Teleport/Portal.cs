@@ -22,11 +22,18 @@ public class Portal : MonoBehaviour
 	// 무한 텔레포트를 막기 위한 안전장치
 	private bool canTeleport = true;
 
+	public Space RotationSpace = Space.Self;
+	//포탈이 회전하는 속도
+	public Vector3 RotationSpeed = new Vector3(0f, 0f, 100f);
 	private void Awake()
 	{
 		teleportParticle = GetComponentInChildren<ParticleSystem>();
 	}
 
+	private void Update()
+	{
+		transform.Rotate(RotationSpeed * Time.deltaTime, RotationSpace);
+	}
 	private void OnTriggerEnter2D(Collider2D col)
 	{
 		// 닿은 오브젝트가 플레이어이고, 포탈이 켜져(canTeleport) 있다면?

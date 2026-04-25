@@ -249,6 +249,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ClearDoor
       objectReference: {fileID: 0}
+    - target: {fileID: 2862961026775532137, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
+      propertyPath: nextSceneName
+      value: map1-5
+      objectReference: {fileID: 0}
     - target: {fileID: 8045887152775931217, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.2296832
@@ -538,7 +542,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_Size.y
-      value: 18.813133
+      value: 20.7407
       objectReference: {fileID: 0}
     - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_Offset.x
@@ -546,7 +550,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_Offset.y
-      value: -6.077692
+      value: -6.3530583
       objectReference: {fileID: 0}
     - target: {fileID: 5792337273466498535, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1153,7 +1157,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1178,7 +1182,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.595235, y: 2.8821168, z: -26.015638}
+  m_LocalPosition: {x: -12.595242, y: 4.556462, z: -26.015638}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

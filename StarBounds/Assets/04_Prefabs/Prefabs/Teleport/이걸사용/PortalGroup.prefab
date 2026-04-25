@@ -110,6 +110,8 @@ MonoBehaviour:
   teleportSfx: {fileID: 8300000, guid: 553e2453fa68dc844a634042dd5a8e37, type: 3}
   sfxVolume: 1
   maxFallSpeed: 6
+  RotationSpace: 1
+  RotationSpeed: {x: 0, y: 0, z: 100}
 --- !u!61 &3247905576228516096
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -266,6 +268,8 @@ MonoBehaviour:
   teleportSfx: {fileID: 8300000, guid: 553e2453fa68dc844a634042dd5a8e37, type: 3}
   sfxVolume: 1
   maxFallSpeed: 6
+  RotationSpace: 1
+  RotationSpeed: {x: 0, y: 0, z: 100}
 --- !u!61 &8334539745637986555
 BoxCollider2D:
   m_ObjectHideFlags: 0

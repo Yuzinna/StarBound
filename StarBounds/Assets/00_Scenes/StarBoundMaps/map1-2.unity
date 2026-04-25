@@ -397,7 +397,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -422,7 +422,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.9317331, y: -0.11839628, z: -26.015638}
+  m_LocalPosition: {x: -2.2347336, y: 2.6356466, z: -26.015638}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -475,6 +475,22 @@ PrefabInstance:
     - target: {fileID: 655104355831661795, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Size.x
+      value: 59.843178
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Size.y
+      value: 24.368923
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Offset.x
+      value: 0.48700714
+      objectReference: {fileID: 0}
+    - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: m_Offset.y
+      value: 0.26854658
       objectReference: {fileID: 0}
     - target: {fileID: 5792337273466498535, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9283,6 +9299,10 @@ PrefabInstance:
     - target: {fileID: 1206961838669282889, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
       propertyPath: m_Name
       value: ClearDoor
+      objectReference: {fileID: 0}
+    - target: {fileID: 2862961026775532137, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
+      propertyPath: nextSceneName
+      value: map1-3
       objectReference: {fileID: 0}
     - target: {fileID: 8045887152775931217, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
       propertyPath: m_LocalPosition.x
