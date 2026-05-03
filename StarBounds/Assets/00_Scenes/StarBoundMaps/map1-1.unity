@@ -290,6 +290,56 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 674667e8b531f924c9594a3071ad55d9, type: 3}
+--- !u!1 &215503348
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 215503350}
+  - component: {fileID: 215503349}
+  m_Layer: 0
+  m_Name: Stage1Entry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &215503349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 215503348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef395059f7a5c0b4eaf76e5db31cea83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Stage1Entry
+  landPoint: {fileID: 829052535}
+  initialFallSpeed: 10
+  gravityAcceleration: 20
+  maxFallSpeed: 40
+  fallRotationSpeed: 720
+  lookAroundTime: 1.5
+--- !u!4 &215503350
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 215503348}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.5376, y: 5.16776, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &433903660
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -304,11 +354,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3853826471327208601, guid: b2ebaa5412bc55347b4a4cc68ffc4ca7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -16.398092
+      value: -16.43
       objectReference: {fileID: 0}
     - target: {fileID: 3853826471327208601, guid: b2ebaa5412bc55347b4a4cc68ffc4ca7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.2191362
+      value: 14.33
       objectReference: {fileID: 0}
     - target: {fileID: 3853826471327208601, guid: b2ebaa5412bc55347b4a4cc68ffc4ca7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -551,7 +601,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 9
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -576,7 +626,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.13573956, y: 4.904249, z: -26.015638}
+  m_LocalPosition: {x: 0.13573956, y: 2.9042492, z: -26.015638}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -816,6 +866,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
+--- !u!1 &829052534
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 829052535}
+  m_Layer: 0
+  m_Name: LandPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &829052535
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829052534}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -16.38, y: -2.88, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &887130417
 GameObject:
   m_ObjectHideFlags: 0
@@ -22085,6 +22166,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: cinemachine
       objectReference: {fileID: 0}
+    - target: {fileID: 2345963116671355486, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: Lens.OrthographicSize
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_Size.x
       value: 62.771603
@@ -22165,3 +22250,5 @@ SceneRoots:
   - {fileID: 628967110}
   - {fileID: 127764915}
   - {fileID: 1035697898}
+  - {fileID: 215503350}
+  - {fileID: 829052535}

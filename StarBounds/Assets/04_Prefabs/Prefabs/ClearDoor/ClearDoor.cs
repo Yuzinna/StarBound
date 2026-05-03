@@ -6,6 +6,9 @@ public class ClearDoor : MonoBehaviour
 {
 	[Header("클리어 연출")]
 	[SerializeField] private ParticleSystem unlockParticle;
+	[SerializeField] private SpriteRenderer glowLeft;
+	[SerializeField] private SpriteRenderer glowRight;
+
 
 	[Header("사운드")]
 	public AudioClip unlockSfx;
@@ -52,11 +55,14 @@ public class ClearDoor : MonoBehaviour
 		if (unlockParticle != null)
 		{
 			unlockParticle.Play();
+			glowLeft.gameObject.SetActive(true);
+			glowRight.gameObject.SetActive(true);
 		}
 
 		if (unlockSfx != null && SfxManager.Instance != null)
 		{
 			SfxManager.Instance.PlaySfx(unlockSfx);
+			
 		}
 	}
 

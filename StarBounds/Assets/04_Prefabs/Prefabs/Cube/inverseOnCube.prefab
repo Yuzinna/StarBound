@@ -111,7 +111,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 6200000, guid: 688b4230d57538f4e88e9f6712cf7ab6, type: 2}
+  m_Material: {fileID: 6200000, guid: 2a7729bc31029e845acea3ae5ec6717f, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -132,7 +132,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: 688b4230d57538f4e88e9f6712cf7ab6, type: 2}
+  m_Material: {fileID: 6200000, guid: 2a7729bc31029e845acea3ae5ec6717f, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -181,20 +181,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GravityObjectLogic
   ignoreInverseGravity: 0
-  ascendSpeed: 4
-  floatingDrag: 2
-  surfaceGap: 0.5
-  surfaceRayDistance: 100
   standableLayers:
     serializedVersion: 2
     m_Bits: 320
-  useWave: 1
-  waveAmplitude: 0.1
-  waveFrequency: 1
   landThudClip: {fileID: 0}
   landVolume: 0.8
   landMinImpactSpeed: 1.2
-  landOffset: 0.6
   landDustParticle: {fileID: 3213881921954975051}
 --- !u!114 &1101285780989676734
 MonoBehaviour:

@@ -76,6 +76,7 @@ public class GameManager : MonoBehaviour
 			if (rb != null) rb.linearVelocity = Vector2.zero;
 		}
 		SetupCamera(_playerInstance.transform);
+		
 	}
 	//public void InitGame()
 	//{

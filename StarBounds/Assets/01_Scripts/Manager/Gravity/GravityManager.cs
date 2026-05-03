@@ -328,12 +328,14 @@ public class GravityManager : MonoBehaviour
 		var objects = FindObjectsByType<GravityObjectLogic>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 		foreach (var obj in objects)
 		{
-			obj.ApplyGravityAndFloatingState(CurrentDirection, IsFloatingEnabled);
+			// 🚨 [수정됨] 큐브의 바뀐 함수 이름(ApplyGravityState)으로 호출합니다.
+			obj.ApplyGravityState(CurrentDirection, IsFloatingEnabled);
 		}
 
 		var players = FindObjectsByType<PlayerLogic>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 		foreach (var player in players)
 		{
+			// 플레이어는 기존 함수 이름 그대로 둡니다.
 			player.ApplyGravityAndFloatingState(CurrentDirection, IsFloatingEnabled);
 		}
 	}

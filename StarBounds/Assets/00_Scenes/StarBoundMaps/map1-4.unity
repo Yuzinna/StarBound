@@ -536,6 +536,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: cinemachine
       objectReference: {fileID: 0}
+    - target: {fileID: 2345963116671355486, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
+      propertyPath: Lens.OrthographicSize
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4267217489567811596, guid: 22cedcf13b8d15249b6c1d090e10b975, type: 3}
       propertyPath: m_Size.x
       value: 37.379494
@@ -1157,7 +1161,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1182,7 +1186,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.595242, y: 4.556462, z: -26.015638}
+  m_LocalPosition: {x: -12.595236, y: 6.515487, z: -26.015638}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

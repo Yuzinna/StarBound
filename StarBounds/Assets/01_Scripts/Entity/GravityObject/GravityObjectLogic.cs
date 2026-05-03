@@ -1,5 +1,161 @@
-﻿using UnityEngine;
-using Unity.Cinemachine; // 💡 시네머신 사용 (에러 시 Unity.Cinemachine으로 변경)
+﻿//using UnityEngine;
+//using Unity.Cinemachine;
+
+//[RequireComponent(typeof(Rigidbody2D))]
+//[RequireComponent(typeof(Collider2D))]
+//public class GravityObjectLogic : MonoBehaviour
+//{
+//	private Rigidbody2D _rb;
+//	private Collider2D _col;
+//	private CinemachineImpulseSource _impulseSource;
+
+//	[Header("특수 설정")]
+//	[SerializeField] private bool ignoreInverseGravity = false;
+//	[SerializeField] private LayerMask standableLayers;
+
+//	// 상태 관리
+//	private bool _isPushable; // 💡 이제 매니저의 저중력 신호를 "밀기 가능(Pushable)" 신호로 씁니다.
+//	private eGravityDirection _currentDirection;
+
+//	// 컨베이어 및 움직이는 발판 관련
+//	private float _conveyorSpeed = 0f;
+//	private bool _isTouchingMovingBlock = false;
+
+//	[Header("SFX & VFX - Landing")]
+//	[SerializeField] private AudioClip landThudClip;
+//	[SerializeField, Range(0f, 1f)] private float landVolume = 0.8f;
+//	[SerializeField] private float landMinImpactSpeed = 1.2f;
+//	[SerializeField] private ParticleSystem landDustParticle;
+
+//	private void Awake()
+//	{
+//		_rb = GetComponent<Rigidbody2D>();
+//		_col = GetComponent<Collider2D>();
+//		_impulseSource = GetComponent<CinemachineImpulseSource>();
+//	}
+
+//	private void Start()
+//	{
+//		if (GravityManager.Instance == null) return;
+//		SyncGravityState();
+//	}
+
+//	private void FixedUpdate()
+//	{
+//		if (GravityManager.Instance == null) return;
+
+//		SyncGravityState();
+//		HandlePhysicsAndConstraints();
+//	}
+
+//	private void SyncGravityState()
+//	{
+//		eGravityDirection targetDir = GravityManager.Instance.CurrentDirection;
+//		bool targetPushable = GravityManager.Instance.IsFloatingEnabled;
+
+//		if (ignoreInverseGravity) targetDir = eGravityDirection.Normal;
+
+//		if (targetDir != _currentDirection || targetPushable != _isPushable)
+//		{
+//			ApplyGravityState(targetDir, targetPushable);
+//		}
+//	}
+
+//	// 🚨 매니저에서 호출하는 함수 이름 유지
+//	public void ApplyGravityState(eGravityDirection direction, bool isLowGravity)
+//	{
+//		_currentDirection = direction;
+//		_isPushable = isLowGravity; // 저중력 = 밀 수 있음
+
+//		float gScale = GravityManager.Instance.normalGravityScale;
+//		_rb.gravityScale = (direction == eGravityDirection.Normal) ? gScale : -gScale;
+
+//		// 💡 [핵심] 질량(Mass)이나 마찰력을 바꾸는 코드가 싹 사라졌습니다! 팝콘 빠이빠이!
+//	}
+
+//	private void HandlePhysicsAndConstraints()
+//	{
+//		// 1. 회전은 항상 고정
+//		RigidbodyConstraints2D constraints = RigidbodyConstraints2D.FreezeRotation;
+
+//		if (!_isPushable)
+//		{
+//			// 🚨 [스위치 OFF] 밀 수 없는 상태: X축을 아예 잠가버림 (절대 못 밈)
+//			// 단, 컨베이어 벨트나 움직이는 발판 위에 있을 때는 잠그면 발판을 못 따라가므로 예외 처리!
+//			if (_conveyorSpeed == 0f && !_isTouchingMovingBlock)
+//			{
+//				constraints |= RigidbodyConstraints2D.FreezePositionX;
+//			}
+//		}
+//		// [스위치 ON] 상태라면 X축이 잠기지 않으므로 자유롭게 밀 수 있음!
+
+//		_rb.constraints = constraints;
+
+//		// 컨베이어 벨트 이동 처리
+//		if (_conveyorSpeed != 0f)
+//		{
+//			_rb.linearVelocity = new Vector2(_conveyorSpeed, _rb.linearVelocity.y);
+//		}
+//	}
+
+//	private void OnCollisionEnter2D(Collision2D other)
+//	{
+//		UpdateConveyorSpeed(other);
+//		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
+
+//		CheckLandingEffect(other);
+//	}
+
+//	private void CheckLandingEffect(Collision2D other)
+//	{
+//		int mask = 1 << other.gameObject.layer;
+//		if ((standableLayers.value & mask) != 0)
+//		{
+//			float impact = other.relativeVelocity.magnitude;
+//			if (impact >= landMinImpactSpeed)
+//			{
+//				if (SfxManager.Instance != null && landThudClip != null)
+//					SfxManager.Instance.PlayThudOnce(landThudClip, landVolume, 0.6f);
+
+//				if (landDustParticle != null)
+//				{
+//					landDustParticle.transform.position = _col.bounds.center;
+//					float rotZ = (_currentDirection == eGravityDirection.Inverse) ? 180f : 0f;
+//					landDustParticle.transform.rotation = Quaternion.Euler(0, 0, rotZ);
+//					landDustParticle.Play();
+//				}
+
+//				if (_impulseSource != null) _impulseSource.GenerateImpulse();
+//			}
+//		}
+//	}
+
+//	private void OnCollisionStay2D(Collision2D other)
+//	{
+//		UpdateConveyorSpeed(other);
+//		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
+//	}
+
+//	private void OnCollisionExit2D(Collision2D other)
+//	{
+//		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null) _conveyorSpeed = 0f;
+//		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = false;
+//	}
+
+//	private void UpdateConveyorSpeed(Collision2D collision)
+//	{
+//		SurfaceEffector2D effector = collision.gameObject.GetComponent<SurfaceEffector2D>();
+//		if (effector != null) _conveyorSpeed = effector.speed;
+//	}
+
+//	public void TeleportTo(Vector2 newPosition)
+//	{
+//		_rb.position = newPosition;
+//		_rb.linearVelocity = Vector2.zero;
+//	}
+//}
+using UnityEngine;
+using Unity.Cinemachine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
@@ -7,77 +163,34 @@ public class GravityObjectLogic : MonoBehaviour
 {
 	private Rigidbody2D _rb;
 	private Collider2D _col;
-
-	// 💡 [카메라 쉐이크 추가] 임펄스 소스 변수
 	private CinemachineImpulseSource _impulseSource;
 
-	// ==========================================
-	// 💡 [새로 추가된 특수 기믹 설정!]
-	// ==========================================
-	[Header("특수 큐브 설정")]
-	[Tooltip("체크하면 중력 반전(Inverse)을 무시하고 항상 아래로만 떨어집니다. (부유 상태는 정상 작동)")]
+	[Header("특수 설정")]
 	[SerializeField] private bool ignoreInverseGravity = false;
-
-	[Header("Floating 설정")]
-	[SerializeField] private float ascendSpeed = 2f;
-	[SerializeField] private float floatingDrag = 2f;
-
-	[Header("Floating Gap / Surface")]
-	[SerializeField] private float surfaceGap = 0.05f;
-	[SerializeField] private float surfaceRayDistance = 5f;
 	[SerializeField] private LayerMask standableLayers;
 
-	[Header("Floating Wave")]
-	[SerializeField] private bool useWave = true;
-	[SerializeField] private float waveAmplitude = 0.1f;
-	[SerializeField] private float waveFrequency = 1f;
-
-	// 상태 관리
-	private bool _isFloating;
+	private bool _isPushable;
 	private eGravityDirection _currentDirection;
-	private enum FloatingState { None, Ascending, Waving }
-	private FloatingState _floatingState = FloatingState.None;
-
-	// Floating 기준 데이터
-	private Vector2 _floatCenter;
-	private Collider2D _surfaceCollider;
-	private Vector2 _surfaceLocalOffset;
-	private float _waveTime;
-	private float _waveOffset;
-
-	// 컨베이어 벨트 관련
 	private float _conveyorSpeed = 0f;
+	private bool _isTouchingMovingBlock = false;
 
 	[Header("SFX & VFX - Landing")]
 	[SerializeField] private AudioClip landThudClip;
 	[SerializeField, Range(0f, 1f)] private float landVolume = 0.8f;
 	[SerializeField] private float landMinImpactSpeed = 1.2f;
-	[SerializeField] private float landOffset = 0.6f;
-
-	// 💡 큐브 자식으로 달아둘 먼지 파티클!
 	[SerializeField] private ParticleSystem landDustParticle;
-
-	private bool _isTouchingMovingBlock = false;
 
 	private void Awake()
 	{
 		_rb = GetComponent<Rigidbody2D>();
 		_col = GetComponent<Collider2D>();
-
-		// 💡 시작할 때 큐브에 달린 임펄스 소스를 가져옵니다!
 		_impulseSource = GetComponent<CinemachineImpulseSource>();
 	}
 
 	private void Start()
 	{
 		if (GravityManager.Instance == null) return;
-
-		eGravityDirection targetDir = GravityManager.Instance.CurrentDirection;
-		if (ignoreInverseGravity) targetDir = eGravityDirection.Normal;
-
-		_currentDirection = targetDir;
-		_isFloating = GravityManager.Instance.IsFloatingEnabled;
-		ApplyGravityAndFloatingState(_currentDirection, _isFloating);
+		SyncGravityState();
 	}
 
 	private void FixedUpdate()
@@ -85,175 +198,160 @@ public class GravityObjectLogic : MonoBehaviour
 		if (GravityManager.Instance == null) return;
 
 		SyncGravityState();
-		HandlePhysicsAndConveyor();
-
-		if (_isFloating)
-		{
-			UpdateFloatingPosition();
-			switch (_floatingState)
-			{
-				case FloatingState.Ascending:
-					HandleAscending();
-					break;
-				case FloatingState.Waving:
-					HandleWaving();
-					break;
-			}
-		}
-	}
-
-	public void TeleportTo(Vector2 newPosition)
-	{
-		_rb.position = newPosition;
-		transform.position = newPosition;
-		_rb.linearVelocity = Vector2.zero;
-
-		if (_isFloating)
-		{
-			Physics2D.SyncTransforms();
-			_surfaceCollider = null;
-			_floatCenter = ComputeFloatCenterAndCacheSurface(_currentDirection);
-			_floatingState = FloatingState.Ascending;
-			_waveTime = 0f;
-		}
-	}
-
-	private void HandlePhysicsAndConveyor()
-	{
-		if (_isFloating)
-		{
-			_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-		}
-		else
-		{
-			if (_conveyorSpeed != 0)
-			{
-				_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-				_rb.linearVelocity = new Vector2(_conveyorSpeed, _rb.linearVelocity.y);
-			}
-			else if (_isTouchingMovingBlock)
-			{
-				_rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-			}
-			else
-			{
-				_rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
-			}
-		}
+		HandlePhysicsAndConstraints();
 	}
 
 	private void SyncGravityState()
 	{
 		eGravityDirection targetDir = GravityManager.Instance.CurrentDirection;
-		bool targetFloating = GravityManager.Instance.IsFloatingEnabled;
+		bool targetPushable = GravityManager.Instance.IsFloatingEnabled;
 
-		if (ignoreInverseGravity)
-		{
-			targetDir = eGravityDirection.Normal;
-		}
+		if (ignoreInverseGravity) targetDir = eGravityDirection.Normal;
 
-		if (targetDir != _currentDirection || targetFloating != _isFloating)
+		if (targetDir != _currentDirection || targetPushable != _isPushable)
 		{
-			ApplyGravityAndFloatingState(targetDir, targetFloating);
+			ApplyGravityState(targetDir, targetPushable);
 		}
 	}
 
-	public void ApplyGravityAndFloatingState(eGravityDirection direction, bool isFloating)
+	public void ApplyGravityState(eGravityDirection direction, bool isLowGravity)
 	{
-		if (ignoreInverseGravity) direction = eGravityDirection.Normal;
-
 		_currentDirection = direction;
-		_isFloating = isFloating;
+		_isPushable = isLowGravity;
 
-		if (_isFloating)
+		float gScale = GravityManager.Instance.normalGravityScale;
+		_rb.gravityScale = (direction == eGravityDirection.Normal) ? gScale : -gScale;
+	}
+
+	// ==========================================
+	// 🚨 [추가됨] 젠가 물리 법칙을 위한 감지 로직 🚨
+	// ==========================================
+
+	// 1. 내가 지금 '진짜 바닥(땅)'에 닿아있는지 확인 (다른 큐브 위면 false)
+	private bool IsRestingOnFloor()
+	{
+		Vector2 origin = _col.bounds.center;
+		Vector2 size = new Vector2(_col.bounds.size.x * 0.9f, 0.1f);
+		float distance = (_col.bounds.size.y / 2f) + 0.05f;
+		Vector2 dir = (_currentDirection == eGravityDirection.Normal) ? Vector2.down : Vector2.up;
+
+		RaycastHit2D hit = Physics2D.BoxCast(origin, size, 0f, dir, distance, standableLayers);
+
+		if (hit.collider != null)
 		{
-			_floatingState = FloatingState.Ascending;
-			_rb.gravityScale = 0f;
-			_rb.linearVelocity = Vector2.zero;
-			_rb.linearDamping = floatingDrag;
-			_floatCenter = ComputeFloatCenterAndCacheSurface(direction);
-			_waveTime = 0f;
-			_waveOffset = Random.Range(0f, 10f);
+			// 내 아래에 있는 게 또 다른 큐브라면, 나는 탑 중간에 있는 거임 -> 바닥 아님!
+			if (hit.collider.GetComponent<GravityObjectLogic>() != null) return false;
+
+			return true; // 다른 큐브가 아니라면 진짜 바닥(Ground)임!
+		}
+		return false;
+	}
+
+	// 2. 플레이어가 나를 직접 터치(밀고) 있는지 확인
+	private bool IsTouchedByPlayer()
+	{
+		Vector2 origin = _col.bounds.center;
+		Vector2 size = new Vector2(_col.bounds.size.x + 0.1f, _col.bounds.size.y * 0.8f);
+
+		Collider2D[] hits = Physics2D.OverlapBoxAll(origin, size, 0f);
+		foreach (var h in hits)
+		{
+			if (h.CompareTag("Player")) return true;
+		}
+		return false;
+	}
+
+	private void HandlePhysicsAndConstraints()
+	{
+		RigidbodyConstraints2D constraints = RigidbodyConstraints2D.FreezeRotation;
+
+		if (!_isPushable)
+		{
+			// [스위치 OFF] 
+			if (_conveyorSpeed == 0f && !_isTouchingMovingBlock)
+			{
+				constraints |= RigidbodyConstraints2D.FreezePositionX;
+			}
 		}
 		else
 		{
-			_floatingState = FloatingState.None;
-			_surfaceCollider = null;
-			float g = GravityManager.Instance.normalGravityScale;
-			_rb.gravityScale = (direction == eGravityDirection.Normal) ? g : -g;
-			_rb.linearDamping = 0f;
-		}
-	}
+			// [스위치 ON - 저중력 상태]
+			bool isRestingOnFloor = IsRestingOnFloor();
+			bool isTouchedByPlayer = IsTouchedByPlayer();
 
-	private void UpdateFloatingPosition()
-	{
-		if (_surfaceCollider != null)
+			// 🚨 핵심 규칙 🚨
+			// 내가 맨 아래 깔려있는 큐브(바닥)인데, 플레이어가 날 직접 밀지 않는다면 -> 엑스칼리버처럼 바닥에 X축 영구 고정!
+			if (isRestingOnFloor && !isTouchedByPlayer)
+			{
+				if (_conveyorSpeed == 0f && !_isTouchingMovingBlock)
+				{
+					constraints |= RigidbodyConstraints2D.FreezePositionX;
+				}
+			}
+			// 그 외(공중, 탑 중간, 플레이어가 직접 미는 중)라면 X축 자유롭게 냅둠
+		}
+
+		_rb.constraints = constraints;
+
+		if (_conveyorSpeed != 0f)
 		{
-			_floatCenter = (Vector2)_surfaceCollider.transform.position + _surfaceLocalOffset;
+			_rb.linearVelocity = new Vector2(_conveyorSpeed, _rb.linearVelocity.y);
 		}
 	}
 
-	private void HandleAscending()
-	{
-		Vector2 pos = _rb.position;
-		float newY = Mathf.MoveTowards(pos.y, _floatCenter.y, ascendSpeed * Time.fixedDeltaTime);
-		_rb.MovePosition(new Vector2(pos.x, newY));
-
-		if (Mathf.Abs(newY - _floatCenter.y) < 0.01f)
-		{
-			_floatingState = FloatingState.Waving;
-		}
-	}
-
-	private void HandleWaving()
-	{
-		if (!useWave) return;
-		_waveTime += Time.fixedDeltaTime;
-		Vector2 normal = (_currentDirection == eGravityDirection.Normal) ? Vector2.up : Vector2.down;
-		float wave = Mathf.Sin((_waveTime + _waveOffset) * waveFrequency * Mathf.PI * 2f) * waveAmplitude;
-
-		_rb.MovePosition(new Vector2(_rb.position.x, _floatCenter.y + normal.y * wave));
-	}
-
+	// ==========================================
+	// 기존 충돌 처리 유지
+	// ==========================================
 	private void OnCollisionEnter2D(Collision2D other)
 	{
 		UpdateConveyorSpeed(other);
-
 		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
+		CheckLandingEffect(other);
+	}
 
-		if (!_isFloating)
+	private void CheckLandingEffect(Collision2D other)
+	{
+		int mask = 1 << other.gameObject.layer;
+		if ((standableLayers.value & mask) != 0)
 		{
-			int mask = 1 << other.gameObject.layer;
-			if ((standableLayers.value & mask) != 0)
+			float impact = other.relativeVelocity.magnitude;
+			if (impact >= landMinImpactSpeed)
 			{
-				float impact = other.relativeVelocity.magnitude;
+				// 🚨 [핵심 수정] 충돌 방향을 검사합니다.
+				bool isVerticalLanding = false;
 
-				if (impact >= landMinImpactSpeed)
+				foreach (ContactPoint2D contact in other.contacts)
 				{
-					// 1. 소리 재생
-					if (SfxManager.Instance != null && landThudClip != null)
+					// contact.normal.y 는 부딪힌 표면이 어느 방향을 바라보는지 나타냅니다.
+					// 일반 중력일 때: 바닥이 나를 향해 위(Up, y가 양수)로 밀어냅니다.
+					if (_currentDirection == eGravityDirection.Normal && contact.normal.y > 0.5f)
 					{
-						SfxManager.Instance.PlayThudOnce(landThudClip, landVolume, landOffset);
+						isVerticalLanding = true;
+						break;
 					}
-
-					// 2. 파티클 재생
-					if (landDustParticle != null && other.contactCount > 0)
+					// 역중력일 때: 천장이 나를 향해 아래(Down, y가 음수)로 밀어냅니다.
+					else if (_currentDirection == eGravityDirection.Inverse && contact.normal.y < -0.5f)
 					{
-						// 큐브의 정중앙(배꼽) 위치로 지정
-						landDustParticle.transform.position = _col.bounds.center;
+						isVerticalLanding = true;
+						break;
+					}
+				}
 
-						// 2D 게임에서는 X축이 아니라 Z축을 돌려야 화면에 보입니다!
+				// 수직으로(위/아래) 착지한 게 맞을 때만 이펙트와 진동을 발생시킵니다!
+				if (isVerticalLanding)
+				{
+					if (SfxManager.Instance != null && landThudClip != null)
+						SfxManager.Instance.PlayThudOnce(landThudClip, landVolume, 0.6f);
+
+					if (landDustParticle != null)
+					{
+						landDustParticle.transform.position = _col.bounds.center;
 						float rotZ = (_currentDirection == eGravityDirection.Inverse) ? 180f : 0f;
 						landDustParticle.transform.rotation = Quaternion.Euler(0, 0, rotZ);
-
 						landDustParticle.Play();
 					}
 
-					// 💡 [핵심 추가] 3. 카메라 화면 흔들림(충격파) 발사! 💥
-					if (_impulseSource != null)
-					{
-						_impulseSource.GenerateImpulse();
-					}
+					if (_impulseSource != null) _impulseSource.GenerateImpulse();
 				}
 			}
 		}
@@ -267,38 +365,19 @@ public class GravityObjectLogic : MonoBehaviour
 
 	private void OnCollisionExit2D(Collision2D other)
 	{
-		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null)
-		{
-			_conveyorSpeed = 0f;
-		}
+		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null) _conveyorSpeed = 0f;
 		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = false;
 	}
 
 	private void UpdateConveyorSpeed(Collision2D collision)
 	{
 		SurfaceEffector2D effector = collision.gameObject.GetComponent<SurfaceEffector2D>();
-		if (effector != null)
-		{
-			_conveyorSpeed = effector.speed;
-		}
+		if (effector != null) _conveyorSpeed = effector.speed;
 	}
 
-	private Vector2 ComputeFloatCenterAndCacheSurface(eGravityDirection direction)
+	public void TeleportTo(Vector2 newPosition)
 	{
-		Vector2 gravityDir = (direction == eGravityDirection.Normal) ? Vector2.down : Vector2.up;
-		RaycastHit2D[] hits = Physics2D.RaycastAll(_col.bounds.center, gravityDir, surfaceRayDistance, standableLayers);
-
-		foreach (var h in hits)
-		{
-			if (h.collider != null && h.collider != _col)
-			{
-				_surfaceCollider = h.collider;
-				float halfHeight = _col.bounds.extents.y;
-				Vector2 center = h.point - gravityDir * (halfHeight + surfaceGap);
-				_surfaceLocalOffset = center - (Vector2)_surfaceCollider.transform.position;
-				return center;
-			}
-		}
-		return _rb.position;
+		_rb.position = newPosition;
+		_rb.linearVelocity = Vector2.zero;
 	}
 }

@@ -263,18 +263,24 @@ public class PlayerLogic : MonoBehaviour
 		{
 			_gravityDirection = 1f;
 			_rb.gravityScale = GravityManager.Instance.normalGravityScale;
+
 			if (_spriteRenderer != null)
 			{
-				_spriteRenderer.transform.localScale = Vector3.one;
+				// 💡 [수정됨] 현재 스케일을 가져와서 절댓값(원래 크기)으로 유지합니다.
+				Vector3 currentScale = _spriteRenderer.transform.localScale;
+				_spriteRenderer.transform.localScale = new Vector3(Mathf.Abs(currentScale.x), Mathf.Abs(currentScale.y), Mathf.Abs(currentScale.z));
 			}
 		}
 		else
 		{
 			_gravityDirection = -1f;
 			_rb.gravityScale = -GravityManager.Instance.normalGravityScale;
+
 			if (_spriteRenderer != null)
 			{
-				_spriteRenderer.transform.localScale = new Vector3(1f, -1f, 1f);
+				// 💡 [수정됨] 현재 스케일을 가져와서 Y축만 마이너스로 뒤집고 크기는 유지합니다.
+				Vector3 currentScale = _spriteRenderer.transform.localScale;
+				_spriteRenderer.transform.localScale = new Vector3(Mathf.Abs(currentScale.x), -Mathf.Abs(currentScale.y), Mathf.Abs(currentScale.z));
 			}
 		}
 	}
