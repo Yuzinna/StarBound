@@ -1,160 +1,4 @@
-﻿//using UnityEngine;
-//using Unity.Cinemachine;
-
-//[RequireComponent(typeof(Rigidbody2D))]
-//[RequireComponent(typeof(Collider2D))]
-//public class GravityObjectLogic : MonoBehaviour
-//{
-//	private Rigidbody2D _rb;
-//	private Collider2D _col;
-//	private CinemachineImpulseSource _impulseSource;
-
-//	[Header("특수 설정")]
-//	[SerializeField] private bool ignoreInverseGravity = false;
-//	[SerializeField] private LayerMask standableLayers;
-
-//	// 상태 관리
-//	private bool _isPushable; // 💡 이제 매니저의 저중력 신호를 "밀기 가능(Pushable)" 신호로 씁니다.
-//	private eGravityDirection _currentDirection;
-
-//	// 컨베이어 및 움직이는 발판 관련
-//	private float _conveyorSpeed = 0f;
-//	private bool _isTouchingMovingBlock = false;
-
-//	[Header("SFX & VFX - Landing")]
-//	[SerializeField] private AudioClip landThudClip;
-//	[SerializeField, Range(0f, 1f)] private float landVolume = 0.8f;
-//	[SerializeField] private float landMinImpactSpeed = 1.2f;
-//	[SerializeField] private ParticleSystem landDustParticle;
-
-//	private void Awake()
-//	{
-//		_rb = GetComponent<Rigidbody2D>();
-//		_col = GetComponent<Collider2D>();
-//		_impulseSource = GetComponent<CinemachineImpulseSource>();
-//	}
-
-//	private void Start()
-//	{
-//		if (GravityManager.Instance == null) return;
-//		SyncGravityState();
-//	}
-
-//	private void FixedUpdate()
-//	{
-//		if (GravityManager.Instance == null) return;
-
-//		SyncGravityState();
-//		HandlePhysicsAndConstraints();
-//	}
-
-//	private void SyncGravityState()
-//	{
-//		eGravityDirection targetDir = GravityManager.Instance.CurrentDirection;
-//		bool targetPushable = GravityManager.Instance.IsFloatingEnabled;
-
-//		if (ignoreInverseGravity) targetDir = eGravityDirection.Normal;
-
-//		if (targetDir != _currentDirection || targetPushable != _isPushable)
-//		{
-//			ApplyGravityState(targetDir, targetPushable);
-//		}
-//	}
-
-//	// 🚨 매니저에서 호출하는 함수 이름 유지
-//	public void ApplyGravityState(eGravityDirection direction, bool isLowGravity)
-//	{
-//		_currentDirection = direction;
-//		_isPushable = isLowGravity; // 저중력 = 밀 수 있음
-
-//		float gScale = GravityManager.Instance.normalGravityScale;
-//		_rb.gravityScale = (direction == eGravityDirection.Normal) ? gScale : -gScale;
-
-//		// 💡 [핵심] 질량(Mass)이나 마찰력을 바꾸는 코드가 싹 사라졌습니다! 팝콘 빠이빠이!
-//	}
-
-//	private void HandlePhysicsAndConstraints()
-//	{
-//		// 1. 회전은 항상 고정
-//		RigidbodyConstraints2D constraints = RigidbodyConstraints2D.FreezeRotation;
-
-//		if (!_isPushable)
-//		{
-//			// 🚨 [스위치 OFF] 밀 수 없는 상태: X축을 아예 잠가버림 (절대 못 밈)
-//			// 단, 컨베이어 벨트나 움직이는 발판 위에 있을 때는 잠그면 발판을 못 따라가므로 예외 처리!
-//			if (_conveyorSpeed == 0f && !_isTouchingMovingBlock)
-//			{
-//				constraints |= RigidbodyConstraints2D.FreezePositionX;
-//			}
-//		}
-//		// [스위치 ON] 상태라면 X축이 잠기지 않으므로 자유롭게 밀 수 있음!
-
-//		_rb.constraints = constraints;
-
-//		// 컨베이어 벨트 이동 처리
-//		if (_conveyorSpeed != 0f)
-//		{
-//			_rb.linearVelocity = new Vector2(_conveyorSpeed, _rb.linearVelocity.y);
-//		}
-//	}
-
-//	private void OnCollisionEnter2D(Collision2D other)
-//	{
-//		UpdateConveyorSpeed(other);
-//		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
-
-//		CheckLandingEffect(other);
-//	}
-
-//	private void CheckLandingEffect(Collision2D other)
-//	{
-//		int mask = 1 << other.gameObject.layer;
-//		if ((standableLayers.value & mask) != 0)
-//		{
-//			float impact = other.relativeVelocity.magnitude;
-//			if (impact >= landMinImpactSpeed)
-//			{
-//				if (SfxManager.Instance != null && landThudClip != null)
-//					SfxManager.Instance.PlayThudOnce(landThudClip, landVolume, 0.6f);
-
-//				if (landDustParticle != null)
-//				{
-//					landDustParticle.transform.position = _col.bounds.center;
-//					float rotZ = (_currentDirection == eGravityDirection.Inverse) ? 180f : 0f;
-//					landDustParticle.transform.rotation = Quaternion.Euler(0, 0, rotZ);
-//					landDustParticle.Play();
-//				}
-
-//				if (_impulseSource != null) _impulseSource.GenerateImpulse();
-//			}
-//		}
-//	}
-
-//	private void OnCollisionStay2D(Collision2D other)
-//	{
-//		UpdateConveyorSpeed(other);
-//		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = true;
-//	}
-
-//	private void OnCollisionExit2D(Collision2D other)
-//	{
-//		if (other.gameObject.GetComponent<SurfaceEffector2D>() != null) _conveyorSpeed = 0f;
-//		if (other.gameObject.GetComponent<MovingBlock>() != null) _isTouchingMovingBlock = false;
-//	}
-
-//	private void UpdateConveyorSpeed(Collision2D collision)
-//	{
-//		SurfaceEffector2D effector = collision.gameObject.GetComponent<SurfaceEffector2D>();
-//		if (effector != null) _conveyorSpeed = effector.speed;
-//	}
-
-//	public void TeleportTo(Vector2 newPosition)
-//	{
-//		_rb.position = newPosition;
-//		_rb.linearVelocity = Vector2.zero;
-//	}
-//}
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Cinemachine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -178,6 +22,12 @@ public class GravityObjectLogic : MonoBehaviour
 	[SerializeField] private AudioClip landThudClip;
 	[SerializeField, Range(0f, 1f)] private float landVolume = 0.8f;
 	[SerializeField] private float landMinImpactSpeed = 1.2f;
+
+	//[추가됨] 연기가 나기 위한 최소 낙하 거리 (유니티 화면에서 조절 가능!)
+	[SerializeField] private float minFallDistanceForEffect = 1.5f;
+
+	//[추가됨] 공중에 있을 때 가장 높았던(또는 낮았던) Y 좌표를 기억할 변수
+	private float _peakY;
 	[SerializeField] private ParticleSystem landDustParticle;
 
 	private void Awake()
@@ -199,6 +49,21 @@ public class GravityObjectLogic : MonoBehaviour
 
 		SyncGravityState();
 		HandlePhysicsAndConstraints();
+
+		// 🚨 [추가됨] 낙하 높이 추적 로직
+		// Y축 속도가 0.05 이상이라는 건 허공을 날거나 떨어지고 있다는 뜻!
+		if (Mathf.Abs(_rb.linearVelocity.y) > 0.05f)
+		{
+			if (_currentDirection == eGravityDirection.Normal)
+				_peakY = Mathf.Max(_peakY, transform.position.y); // 떨어지기 전 가장 높은 곳 기억
+			else
+				_peakY = Mathf.Min(_peakY, transform.position.y); // 역중력일 땐 가장 낮은 곳 기억
+		}
+		else
+		{
+			// 땅에 가만히 멈춰있을 때는 피크 높이를 현재 높이로 초기화
+			_peakY = transform.position.y;
+		}
 	}
 
 	private void SyncGravityState()
@@ -315,21 +180,22 @@ public class GravityObjectLogic : MonoBehaviour
 		if ((standableLayers.value & mask) != 0)
 		{
 			float impact = other.relativeVelocity.magnitude;
-			if (impact >= landMinImpactSpeed)
+
+			// 🚨 [추가됨] 내가 기억해둔 최고점(_peakY)과 지금 부딪힌 위치의 거리 차이를 계산
+			float fallDistance = Mathf.Abs(transform.position.y - _peakY);
+
+			// 🚨 [수정됨] 충돌 속도도 높고, 낙하 거리도 기준치(1.5f) 이상일 때만 실행!
+			if (impact >= landMinImpactSpeed && fallDistance >= minFallDistanceForEffect)
 			{
-				// 🚨 [핵심 수정] 충돌 방향을 검사합니다.
 				bool isVerticalLanding = false;
 
 				foreach (ContactPoint2D contact in other.contacts)
 				{
-					// contact.normal.y 는 부딪힌 표면이 어느 방향을 바라보는지 나타냅니다.
-					// 일반 중력일 때: 바닥이 나를 향해 위(Up, y가 양수)로 밀어냅니다.
 					if (_currentDirection == eGravityDirection.Normal && contact.normal.y > 0.5f)
 					{
 						isVerticalLanding = true;
 						break;
 					}
-					// 역중력일 때: 천장이 나를 향해 아래(Down, y가 음수)로 밀어냅니다.
 					else if (_currentDirection == eGravityDirection.Inverse && contact.normal.y < -0.5f)
 					{
 						isVerticalLanding = true;
@@ -337,7 +203,6 @@ public class GravityObjectLogic : MonoBehaviour
 					}
 				}
 
-				// 수직으로(위/아래) 착지한 게 맞을 때만 이펙트와 진동을 발생시킵니다!
 				if (isVerticalLanding)
 				{
 					if (SfxManager.Instance != null && landThudClip != null)
@@ -352,6 +217,9 @@ public class GravityObjectLogic : MonoBehaviour
 					}
 
 					if (_impulseSource != null) _impulseSource.GenerateImpulse();
+
+					// 🚨 [추가됨] 한 번 쿵! 찍었으면 바로 거리를 초기화해서 중복 발생 방지
+					_peakY = transform.position.y;
 				}
 			}
 		}

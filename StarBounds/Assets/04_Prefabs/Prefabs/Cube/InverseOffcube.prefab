@@ -153,7 +153,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 0.9, y: 0.9}
-  m_EdgeRadius: 0
+  m_EdgeRadius: 0.05
 --- !u!50 &-7087241554805473205
 Rigidbody2D:
   serializedVersion: 5
@@ -168,7 +168,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0.03
   m_GravityScale: 1
   m_Material: {fileID: 6200000, guid: 2a7729bc31029e845acea3ae5ec6717f, type: 2}
   m_IncludeLayers:
@@ -200,6 +200,7 @@ MonoBehaviour:
   landThudClip: {fileID: 8300000, guid: a7e20eafbf2a52f4b88fcef030c3e81f, type: 3}
   landVolume: 0.8
   landMinImpactSpeed: 1.2
+  minFallDistanceForEffect: 1.5
   landDustParticle: {fileID: 6017113840178605086}
 --- !u!114 &4218438378192475692
 MonoBehaviour:

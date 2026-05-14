@@ -167,7 +167,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 0.9, y: 0.9}
-  m_EdgeRadius: 0
+  m_EdgeRadius: 0.03
 --- !u!114 &5542155842923453778
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,6 +187,7 @@ MonoBehaviour:
   landThudClip: {fileID: 0}
   landVolume: 0.8
   landMinImpactSpeed: 1.2
+  minFallDistanceForEffect: 1.5
   landDustParticle: {fileID: 3213881921954975051}
 --- !u!114 &1101285780989676734
 MonoBehaviour:

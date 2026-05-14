@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3367582556308444410}
   - component: {fileID: 1351585858229450795}
   - component: {fileID: 2140339904883651141}
-  - component: {fileID: 3247905576228516096}
+  - component: {fileID: 7178900150378137108}
   m_Layer: 12
   m_Name: PortalOrange
   m_TagString: Portal
@@ -112,8 +112,8 @@ MonoBehaviour:
   maxFallSpeed: 6
   RotationSpace: 1
   RotationSpeed: {x: 0, y: 0, z: 100}
---- !u!61 &3247905576228516096
-BoxCollider2D:
+--- !u!70 &7178900150378137108
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -147,17 +147,8 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Size: {x: 0.7, y: 0.7}
+  m_Direction: 0
 --- !u!1 &3546502276967140922
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,7 +160,7 @@ GameObject:
   - component: {fileID: 2127957887135683690}
   - component: {fileID: 839241927786759430}
   - component: {fileID: 7475657928936522270}
-  - component: {fileID: 8334539745637986555}
+  - component: {fileID: 772427848541767055}
   m_Layer: 12
   m_Name: PortalBlue
   m_TagString: Portal
@@ -270,8 +261,8 @@ MonoBehaviour:
   maxFallSpeed: 6
   RotationSpace: 1
   RotationSpeed: {x: 0, y: 0, z: 100}
---- !u!61 &8334539745637986555
-BoxCollider2D:
+--- !u!70 &772427848541767055
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -305,17 +296,8 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Size: {x: 0.7, y: 0.7}
+  m_Direction: 0
 --- !u!1 &5630781745406958400
 GameObject:
   m_ObjectHideFlags: 0

@@ -36,7 +36,7 @@ public class Portal : MonoBehaviour
 	}
 	private void OnTriggerEnter2D(Collider2D col)
 	{
-		// 닿은 오브젝트가 플레이어이고, 포탈이 켜져(canTeleport) 있다면?
+		// 닿은 오브젝트가 플레이어이거나 큐브이고, 포탈이 켜져(canTeleport) 있다면?
 		if (canTeleport && (col.CompareTag("Player") || col.CompareTag("Cube")))
 		{
 			if (linkedPortal != null)
@@ -53,29 +53,70 @@ public class Portal : MonoBehaviour
 					SfxManager.Instance.PlaySfx(teleportSfx, sfxVolume, 0.2f);
 				}
 
+				// ==========================================
+				// 🚨 [여기가 추가된 핵심 로직!] 안전한 도착 지점(destPos) 찾기
+				// ==========================================
+				Vector2 destPos = linkedPortal.transform.position;
+				Vector2 checkSize = new Vector2(0.8f, 0.8f); // 겹침을 검사할 박스 크기
+
+				// 중력 방향에 따라 위로 쌓을지 아래로 쌓을지 결정
+				float stackOffset = 1.0f; // 기본은 위로(+1) 
+				if (GravityManager.Instance != null && GravityManager.Instance.CurrentDirection == eGravityDirection.Inverse)
+				{
+					stackOffset = -1.0f; // 역중력이면 아래로(-1)
+				}
+
+				int safetyCount = 0;
+				// 빈 공간을 찾을 때까지 최대 10번 반복해서 위로 올리며 검사합니다. (큐브가 여러 개 쌓여있을 때를 대비)
+				while (safetyCount < 10)
+				{
+					bool isOccupied = false;
+					Collider2D[] overlaps = Physics2D.OverlapBoxAll(destPos, checkSize, 0f);
+
+					foreach (Collider2D over in overlaps)
+					{
+						// 나 자신은 제외, 포탈 같은 트리거 제외하고, 다른 '플레이어'나 '큐브'가 있다면?
+						if (over.gameObject != col.gameObject && !over.isTrigger)
+						{
+							if (over.CompareTag("Cube") || over.CompareTag("Player"))
+							{
+								isOccupied = true;
+								break;
+							}
+						}
+					}
+
+					if (isOccupied)
+					{
+						destPos.y += stackOffset; // 자리가 꽉 찼네? 한 칸 위(혹은 아래)로 올려서 다시 검사!
+						safetyCount++;
+					}
+					else
+					{
+						break; // 자리 비었음! 루프 탈출!
+					}
+				}
+				// ==========================================
+
 				// 들어온 게 큐브인지 확인
 				GravityObjectLogic gravityObj = col.GetComponent<GravityObjectLogic>();
 				if (gravityObj != null)
 				{
-					// 큐브라면 물리 엔진 전용 순간이동 실행!
-					gravityObj.TeleportTo(linkedPortal.transform.position);
+					// 🚨 [수정됨] 무작정 포탈 위치가 아니라, 방금 계산한 '안전한 위치(destPos)'로 이동!
+					gravityObj.TeleportTo(destPos);
 				}
 				else
 				{
-					// 플레이어는 기존 방식대로 이동
-					col.transform.position = linkedPortal.transform.position;
+					// 🚨 [수정됨] 플레이어도 안전한 위치(destPos)로 이동!
+					col.transform.position = destPos;
 				}
 
-				// ==========================================
-				// 💡 [여기 추가됨!] 텔레포트 직후 속도 제한 (놀이기구 효과)
-				// ==========================================
+				// 텔레포트 직후 속도 제한 (놀이기구 효과)
 				Rigidbody2D rb = col.GetComponent<Rigidbody2D>();
 				if (rb != null)
 				{
-					// 현재 떨어지는 Y축 속도의 '절댓값'이 maxFallSpeed를 넘었다면?
 					if (Mathf.Abs(rb.linearVelocity.y) > maxFallSpeed)
 					{
-						// X축 속도는 그대로 두고, Y축 속도는 방향(+/-)만 살려서 maxFallSpeed로 고정!
 						rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Sign(rb.linearVelocity.y) * maxFallSpeed);
 					}
 				}
