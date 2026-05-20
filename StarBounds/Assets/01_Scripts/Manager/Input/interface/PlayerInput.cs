@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class PlayerInput : BaseInput,Platformer.IPlayerActions
 {
 	private PlayerLogic plLogic;
-	private PauseUI pauseUi;
+	private PauseMenuLogic pauseUi;
 
 	private bool _isCallbackRegistered = false;
 	private void OnEnable()
@@ -53,7 +53,7 @@ public class PlayerInput : BaseInput,Platformer.IPlayerActions
 	}
 	private void Start()
 	{
-		pauseUi = FindAnyObjectByType<PauseUI>();
+		pauseUi = FindAnyObjectByType<PauseMenuLogic>();
 	}
 	private void OnDisable()
 	{

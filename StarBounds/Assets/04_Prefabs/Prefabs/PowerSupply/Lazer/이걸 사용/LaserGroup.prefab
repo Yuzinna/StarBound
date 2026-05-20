@@ -126,6 +126,10 @@ PrefabInstance:
       propertyPath: firstLaser
       value: 
       objectReference: {fileID: 879637393369785090}
+    - target: {fileID: 2643738242003876684, guid: 07241ffdb4bd12a4a9f20b32f39cd8b6, type: 3}
+      propertyPath: bumpCollider
+      value: 
+      objectReference: {fileID: 7313197135727721877}
     - target: {fileID: 2949851036759778262, guid: 07241ffdb4bd12a4a9f20b32f39cd8b6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.83
@@ -174,5 +178,10 @@ PrefabInstance:
 --- !u!4 &209753520788286939 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2949851036759778262, guid: 07241ffdb4bd12a4a9f20b32f39cd8b6, type: 3}
+  m_PrefabInstance: {fileID: 3028328066089438733}
+  m_PrefabAsset: {fileID: 0}
+--- !u!60 &7313197135727721877 stripped
+PolygonCollider2D:
+  m_CorrespondingSourceObject: {fileID: 5727305872022909848, guid: 07241ffdb4bd12a4a9f20b32f39cd8b6, type: 3}
   m_PrefabInstance: {fileID: 3028328066089438733}
   m_PrefabAsset: {fileID: 0}

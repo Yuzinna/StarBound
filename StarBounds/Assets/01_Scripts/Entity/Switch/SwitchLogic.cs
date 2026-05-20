@@ -40,7 +40,8 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 	// =========================================================================
 	private void Awake()
 	{
-		Top = transform.Find("Top");
+		Top = transform;
+		transform.Find("Top");
 	}
 
 	private void Start()
@@ -129,7 +130,8 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 	{
 		if (GravityManager.Instance == null) return;
 
-		if (!CheckInteractionCondition(GravityManager.Instance.CurrentDirection))
+		// 🚨 [여기 수정!] 플레이어(코기)가 직접 누른 게 아니라 불꽃(null)이 밟은 거라면 방향 체크를 무시합니다!
+		if (player != null && !CheckInteractionCondition(GravityManager.Instance.CurrentDirection))
 		{
 			Debug.LogWarning($"[SwitchLogic-{switchType}] 스위치 방향이 중력과 맞지 않아 누를 수 없습니다.");
 			return;

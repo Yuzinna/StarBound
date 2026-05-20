@@ -53,7 +53,7 @@ public class PlayerLogic : MonoBehaviour
 	// --- State Variables ---
 	private Rigidbody2D _rb;
 	private Collider2D _col;
-	private IInteractable _currentInteractable;
+	
 	private CinemachineImpulseSource _impulseSource;
 
 	[SerializeField] private bool _isGrounded;
@@ -177,9 +177,35 @@ public class PlayerLogic : MonoBehaviour
 
 	public void OnInputInteract()
 	{
-		if (GameManager.Instance != null && !GameManager.Instance.IsPaused && _currentInteractable != null)
+		if (GameManager.Instance != null && GameManager.Instance.IsPaused) return;
+
+		// 1. 코기 중심에서 반경 1.5f 내의 모든 '상호작용 물체'를 스캔합니다. (1.5f는 필요시 조절 가능)
+		Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.5f, interactLayer);
+
+		if (hits.Length == 0) return; // 주변에 아무것도 없으면 취소
+
+		IInteractable closestInteractable = null;
+		float minDistance = float.MaxValue;
+
+		// 2. 스캔된 물체들을 하나씩 확인해서 코기랑 '가장 가까운' 녀석 딱 하나를 찾습니다!
+		foreach (Collider2D hit in hits)
 		{
-			_currentInteractable.Interact(this);
+			IInteractable interactable = hit.GetComponent<IInteractable>();
+			if (interactable != null)
+			{
+				float distance = Vector2.Distance(transform.position, hit.transform.position);
+				if (distance < minDistance)
+				{
+					minDistance = distance;
+					closestInteractable = interactable;
+				}
+			}
+		}
+
+		// 3. 찾은 가장 가까운 타겟에게만 상호작용(말걸기 or 스위치 누르기)을 실행합니다.
+		if (closestInteractable != null)
+		{
+			closestInteractable.Interact(this);
 		}
 	}
 
@@ -247,7 +273,11 @@ public class PlayerLogic : MonoBehaviour
 	private bool GroundCheck()
 	{
 		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
-		Vector2 size = new Vector2(0.7f, 0.1f);
+
+		// 🚨 수정됨: 고정값 0.7f 대신, 플레이어 콜라이더 가로 길이의 80%만 사용합니다!
+		float boxWidth = _col.bounds.size.x * 0.8f;
+		Vector2 size = new Vector2(boxWidth, 0.1f);
+
 		RaycastHit2D hit = Physics2D.BoxCast(rayStart, size, 0f, Vector2.down * _gravityDirection, groundCheckDistance, standableLayers);
 
 		return hit.collider != null;
@@ -362,24 +392,6 @@ public class PlayerLogic : MonoBehaviour
 		}
 	}
 
-	private void OnTriggerEnter2D(Collider2D collision)
-	{
-		if (((1 << collision.gameObject.layer) & interactLayer) != 0)
-		{
-			_currentInteractable = collision.gameObject.GetComponent<IInteractable>();
-		}
-	}
-
-	private void OnTriggerExit2D(Collider2D collision)
-	{
-		if (((1 << collision.gameObject.layer) & interactLayer) != 0)
-		{
-			var interactable = collision.GetComponent<IInteractable>();
-			if (interactable == _currentInteractable)
-			{
-				_currentInteractable = null;
-			}
-		}
-	}
+	
 	#endregion
 }

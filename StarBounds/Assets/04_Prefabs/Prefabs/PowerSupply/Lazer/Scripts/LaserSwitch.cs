@@ -12,24 +12,33 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 	public Sprite switchOffSprite;
 	public Sprite switchOnSprite;
 
+	[Header("물리적 턱 (스위치 높이)")]
+	[Tooltip("스위치가 튀어나왔을 때 큐브가 타고 올라갈 콜라이더")]
+	public Collider2D bumpCollider;
+
 	[Header("스위치를 누를 수 있는 레이어")]
-	[Tooltip("플레이어와 큐브의 레이어를 모두 체크해주세요.")]
 	public LayerMask pressableLayers;
 
-	// 💡 여기에 딜레이 변수만 추가했습니다!
 	[Header("딜레이 설정")]
 	[Tooltip("발을 떼고 레이저가 꺼질 때까지의 대기 시간 (초)")]
 	public float offDelay = 1.0f;
 
-	private HashSet<Collider2D> _pressingObjects = new HashSet<Collider2D>();
-	// 켜고 끌 레이저 오브젝트를 연결할 변수
-	public Laser firstLaser;
+	// 💡 [핵심] 그냥 목록이 아니라, "콜라이더가 진짜 나갔는지" 검사하기 위한 딕셔너리로 변경!
+	private Dictionary<Collider2D, float> _pressingObjects = new Dictionary<Collider2D, float>();
 
-	// 💡 코루틴(타이머)을 기억할 변수 추가
+	public Laser firstLaser;
 	private Coroutine _offTimer;
+
+	private bool _wasFloatingEnabled;
+	private eGravityDirection _lastGravityDirection;
 
 	private void Start()
 	{
+		if (GravityManager.Instance != null)
+		{
+			_wasFloatingEnabled = GravityManager.Instance.IsFloatingEnabled;
+			_lastGravityDirection = GravityManager.Instance.CurrentDirection;
+		}
 		UpdateVisual();
 	}
 
@@ -37,60 +46,145 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 	{
 		isOn = !isOn;
 		UpdateVisual();
+		if (isOn) TurnOnLaser();
+		else TurnOffLaser();
 	}
 
 	private void UpdateVisual()
 	{
 		if (spriteRenderer != null)
-		{
 			spriteRenderer.sprite = isOn ? switchOnSprite : switchOffSprite;
-		}
+
+		if (bumpCollider != null)
+			bumpCollider.enabled = !isOn;
 	}
 
-	// 누군가 스위치 영역에 들어왔을 때
+	// ==========================================
+	// 🚨 1. 충돌 시작 (방어막 가동)
+	// ==========================================
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
 		if (((1 << collision.gameObject.layer) & pressableLayers) != 0)
 		{
-			_pressingObjects.Add(collision); // 목록에 추가
+			// 방금 Exit로 나갔다고 찍혔던 놈이 0.1초 만에 다시 들어왔다면?
+			// "아, 버그로 튕긴 거구나!" 하고 퇴출 취소!
+			if (_pressingObjects.ContainsKey(collision))
+			{
+				_pressingObjects[collision] = 0f; // 나갈 준비 취소
+			}
+			else
+			{
+				_pressingObjects.Add(collision, 0f); // 새 멤버 등록
+			}
+
 			CheckSwitchState();
 		}
 	}
 
-	// 누군가 스위치 영역에서 나갔을 때
+	// ==========================================
+	// 🚨 2. 충돌 종료 (바로 안 빼고 대기표 발급!)
+	// ==========================================
 	private void OnTriggerExit2D(Collider2D other)
 	{
-		// 나간 물체가 목록에 있다면 제거
-		if (_pressingObjects.Contains(other))
+		if (_pressingObjects.ContainsKey(other))
 		{
-			_pressingObjects.Remove(other);
+			// 유니티 버그일 수 있으니 즉시 삭제하지 않고, "너 나갈 거면 0.1초 뒤에 나가라"며 시간을 기록함.
+			_pressingObjects[other] = Time.time;
+		}
+	}
+
+	// ==========================================
+	// 🚨 3. 실시간 검사 및 찌꺼기 청소
+	// ==========================================
+	private void Update()
+	{
+		bool needCheck = false;
+		List<Collider2D> toRemove = new List<Collider2D>();
+
+		foreach (var kvp in _pressingObjects)
+		{
+			Collider2D col = kvp.Key;
+			float exitTime = kvp.Value;
+
+			// 1. 진짜 부서졌거나 꺼진 물체는 즉각 청소
+			if (col == null || !col.gameObject.activeInHierarchy)
+			{
+				toRemove.Add(col);
+				needCheck = true;
+				continue;
+			}
+
+			// 2. 버그 방어막: Exit가 찍힌 지 0.15초가 지났다면? "아, 진짜로 밖으로 나간 게 맞구나!" 확정 삭제
+			if (exitTime > 0f && (Time.time - exitTime > 0.15f))
+			{
+				toRemove.Add(col);
+				needCheck = true;
+			}
+		}
+
+		// 확정된 놈들만 리스트에서 진짜로 삭제!
+		foreach (Collider2D col in toRemove)
+		{
+			_pressingObjects.Remove(col);
+		}
+
+		// 중력 변화 검사
+		if (GravityManager.Instance != null)
+		{
+			if (_wasFloatingEnabled != GravityManager.Instance.IsFloatingEnabled ||
+				_lastGravityDirection != GravityManager.Instance.CurrentDirection)
+			{
+				_wasFloatingEnabled = GravityManager.Instance.IsFloatingEnabled;
+				_lastGravityDirection = GravityManager.Instance.CurrentDirection;
+				needCheck = true;
+			}
+		}
+
+		if (needCheck)
+		{
 			CheckSwitchState();
 		}
 	}
 
-	// 안전장치: 스위치 위에서 큐브가 파괴되거나 비활성화되는 경우를 대비
-	private void Update()
+	private bool HasValidWeightPressing()
 	{
-		if (_pressingObjects.Count > 0)
+		// "나갈 예정(ExitTime > 0)"인 애들 빼고 진짜로 밟고 있는 애들이 있는지 확인
+		bool hasRealPresser = false;
+
+		foreach (var kvp in _pressingObjects)
 		{
-			// 목록에 있는 콜라이더 중 파괴(null)되었거나 비활성화된 것이 있다면 목록에서 제거
-			if (_pressingObjects.RemoveWhere(col => col == null || !col.gameObject.activeInHierarchy) > 0)
+			if (kvp.Value > 0f) continue; // 얘는 곧 나갈 애니까 무시
+
+			Collider2D col = kvp.Key;
+			GravityObjectLogic cube = col.GetComponentInParent<GravityObjectLogic>();
+
+			if (cube != null)
 			{
-				CheckSwitchState();
+				if (!GravityManager.Instance.IsFloatingEnabled && cube.GetComponent<Rigidbody2D>().gravityScale > 0)
+				{
+					hasRealPresser = true;
+					break;
+				}
+			}
+			else
+			{
+				if (!GravityManager.Instance.IsFloatingEnabled && GravityManager.Instance.CurrentDirection == eGravityDirection.Normal)
+				{
+					hasRealPresser = true;
+					break;
+				}
 			}
 		}
+
+		return hasRealPresser;
 	}
 
-	// 💡 레이저를 켜고 끄는 로직을 타이머와 연동되게 수정했습니다!
 	private void CheckSwitchState()
 	{
-		// 누르고 있는 물체가 1개 이상이면 켜져야 함
-		bool shouldBeOn = _pressingObjects.Count > 0;
+		bool shouldBeOn = HasValidWeightPressing();
 
-		// 1. 스위치가 켜져야 할 때 (누군가 밟음)
 		if (shouldBeOn)
 		{
-			// 꺼지려고 카운트다운 중이었다면 취소!
 			if (_offTimer != null)
 			{
 				StopCoroutine(_offTimer);
@@ -101,36 +195,42 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 			{
 				isOn = true;
 				UpdateVisual();
-				if (firstLaser != null && !firstLaser.gameObject.activeSelf)
-				{
-					firstLaser.gameObject.SetActive(true); // 레이저 즉시 켜기
-				}
+				TurnOnLaser();
 			}
 		}
-		// 2. 스위치가 꺼져야 할 때 (모두 발을 뗌) -> 바로 끄지 않고 딜레이 시작!
 		else if (!shouldBeOn && isOn)
 		{
-			if (_offTimer == null) // 타이머가 안 돌고 있을 때만 시작
+			if (_offTimer == null)
 			{
 				_offTimer = StartCoroutine(DelayedOffRoutine());
 			}
 		}
 	}
 
-	// 💡 지정된 시간(offDelay)을 기다렸다가 레이저를 끄는 코루틴
+	private void TurnOnLaser()
+	{
+		if (firstLaser != null) firstLaser.gameObject.SetActive(true);
+	}
+
+	private void TurnOffLaser()
+	{
+		if (firstLaser != null) firstLaser.TurnOffSequence();
+	}
+
 	private IEnumerator DelayedOffRoutine()
 	{
 		yield return new WaitForSeconds(offDelay);
 
-		// 시간이 다 지나면 비로소 스위치와 레이저 끄기
-		isOn = false;
-		UpdateVisual();
-
-		if (firstLaser != null)
+		// 오프 딜레이가 다 끝났는데도 누군가 밟고 있다면? 끄지 않음!
+		if (HasValidWeightPressing())
 		{
-			firstLaser.TurnOffSequence();
+			_offTimer = null;
+			yield break;
 		}
 
-		_offTimer = null; // 타이머 초기화
+		isOn = false;
+		UpdateVisual();
+		TurnOffLaser();
+		_offTimer = null;
 	}
 }

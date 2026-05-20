@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 	private GameObject _playerInstance;
 
 	// --- [새로 추가된 일시정지 변수들] ---
-	public bool IsPaused { get; private set; } // 현재 멈춰있는가?
+	public bool IsPaused { get;  set; } // 현재 멈춰있는가?
 	public event Action<bool> OnPauseToggled;  // 멈추거나 풀릴 때 UI에게 알려줄 이벤트
 
 	// [추가] 마지막으로 플레이했던 씬의 이름을 기억해 둘 변수
