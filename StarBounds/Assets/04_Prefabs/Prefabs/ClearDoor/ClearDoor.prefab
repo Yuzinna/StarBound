@@ -4935,8 +4935,8 @@ MonoBehaviour:
   unlockParticle: {fileID: 5408063745521494995}
   glowLeft: {fileID: 8632310724981389495}
   glowRight: {fileID: 1654236270304753962}
-  unlockSfx: {fileID: 0}
-  clearSfx: {fileID: 0}
+  unlockSfx: {fileID: 8300000, guid: 42b1691875cf8bf4eb31319a4d4ea35d, type: 3}
+  clearSfx: {fileID: 8300000, guid: a2148c7fed878c643b757240015060f1, type: 3}
   nextSceneName: 
 --- !u!1 &1491389600956770799
 GameObject:

@@ -21,7 +21,7 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 
 	[Header("딜레이 설정")]
 	[Tooltip("발을 떼고 레이저가 꺼질 때까지의 대기 시간 (초)")]
-	public float offDelay = 1.0f;
+	public float offDelay = 2.0f;
 
 	// 💡 [핵심] 그냥 목록이 아니라, "콜라이더가 진짜 나갔는지" 검사하기 위한 딕셔너리로 변경!
 	private Dictionary<Collider2D, float> _pressingObjects = new Dictionary<Collider2D, float>();

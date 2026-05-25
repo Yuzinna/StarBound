@@ -150,5 +150,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 584c3fbdf394e4740936e28bddabbfae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DoorKey
-  getSfx: {fileID: 8300000, guid: 585664daf4221f845b50ad55c0d0d7fd, type: 3}
+  getSfx: {fileID: 8300000, guid: 04655abb4eb36d947b9f74344e39957a, type: 3}
   volume: 1
