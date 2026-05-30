@@ -8,6 +8,9 @@ public class PlayerDeath : MonoBehaviour
 	public float deathJumpForce = 15f; // 위로 뿅! 튀어오르는 힘
 	public float reloadDelay = 2.0f;   // 떨어지고 나서 재시작될 때까지 기다리는 시간
 
+	[Header("사운드")] // [추가됨] 데스 사운드를 넣을 공간
+	public AudioClip deathSfx;
+
 	private bool _isDead = false;
 
 	public void Die()
@@ -23,6 +26,12 @@ public class PlayerDeath : MonoBehaviour
 	{
 		Debug.Log("플레이어 사망");
 
+		// 🎵 [추가됨] 플레이어가 죽는 순간 사운드 재생!
+		if (deathSfx != null && SfxManager.Instance != null)
+		{
+			SfxManager.Instance.PlaySfx(deathSfx);
+		}
+
 		// 죽는 순간 애니메이터의 Alive 파라미터를 false로 꺼줍니다!
 		Animator anim = GetComponent<Animator>();
 		if (anim != null) anim.SetBool("Alive", false);
@@ -35,7 +44,6 @@ public class PlayerDeath : MonoBehaviour
 		if (logic != null) logic.enabled = false;
 
 		// 2. 플레이어의 모든 콜라이더(충돌체) 끄기
-		// (이것 때문에 천장을 뚫고 나갔던 겁니다!)
 		Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
 		foreach (var col in colliders)
 		{
@@ -49,7 +57,6 @@ public class PlayerDeath : MonoBehaviour
 			// 기존 관성 지우기
 			rb.linearVelocity = Vector2.zero;
 
-			// 💡 [핵심 해결] 현재 중력 방향에 따라 튕겨 오르는 방향을 결정합니다!
 			Vector2 jumpDirection = Vector2.up; // 기본은 바닥에서 위로 뿅!
 
 			if (GravityManager.Instance != null && GravityManager.Instance.CurrentDirection == eGravityDirection.Inverse)

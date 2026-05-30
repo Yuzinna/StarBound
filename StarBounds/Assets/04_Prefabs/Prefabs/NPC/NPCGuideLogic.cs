@@ -32,7 +32,8 @@ public class NPCGuideLogic : MonoBehaviour, IInteractable
 	private SpriteRenderer _spriteRenderer;
 	private Transform _playerTransform;
 	private Coroutine _typingCoroutine;
-
+	[Header("사운드")]
+	[SerializeField] private AudioClip dialogueStartSFX;
 	private void Awake()
 	{
 		_spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -83,6 +84,10 @@ public class NPCGuideLogic : MonoBehaviour, IInteractable
 		if (_isWaitingToTalk)
 		{
 			_isWaitingToTalk = false;
+			if (dialogueStartSFX != null)
+			{
+				SfxManager.Instance.PlaySfx(dialogueStartSFX);
+			}
 			ShowDialogue();
 			return;
 		}

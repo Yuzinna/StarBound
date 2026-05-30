@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement; // [추가] 씬 이동을 위해 반드시 필요합니다!
+
+// [수정] SceneManager는 이제 SimpleLoadingManager 안에서 쓰이므로 여기서는 지워도 됩니다.
+// using UnityEngine.SceneManagement; 
 
 [RequireComponent(typeof(Collider2D))]
 public class ClearDoor : MonoBehaviour
@@ -9,12 +11,10 @@ public class ClearDoor : MonoBehaviour
 	[SerializeField] private SpriteRenderer glowLeft;
 	[SerializeField] private SpriteRenderer glowRight;
 
-
 	[Header("사운드")]
 	public AudioClip unlockSfx;
 	public AudioClip clearSfx;
 
-	// [여기 추가!] 다음으로 이동할 스테이지(씬)의 이름
 	[Header("다음 스테이지 설정")]
 	[SerializeField] private string nextSceneName;
 
@@ -62,7 +62,6 @@ public class ClearDoor : MonoBehaviour
 		if (unlockSfx != null && SfxManager.Instance != null)
 		{
 			SfxManager.Instance.PlaySfx(unlockSfx);
-			
 		}
 	}
 
@@ -76,11 +75,13 @@ public class ClearDoor : MonoBehaviour
 				SfxManager.Instance.PlaySfx(clearSfx);
 			}
 
-			// 2. [수정됨] 다음 씬으로 실제로 이동!
+			// 2. [수정됨] 로딩 씬을 거쳐서 다음 씬으로 이동!
 			if (!string.IsNullOrEmpty(nextSceneName))
 			{
-				Debug.Log($"[{nextSceneName}] 씬으로 이동합니다!");
-				SceneManager.LoadScene(nextSceneName);
+				Debug.Log($"[ClearDoor] 로딩 화면을 거쳐 [{nextSceneName}] 씬으로 이동합니다!");
+
+				// 여기가 핵심입니다! 우리가 만든 매니저를 호출합니다.
+				SimpleLoadingManager.LoadScene(nextSceneName);
 			}
 			else
 			{

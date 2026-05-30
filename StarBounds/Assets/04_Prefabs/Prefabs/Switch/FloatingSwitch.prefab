@@ -52,8 +52,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 3c68d015ee180e14b9ce07fd7f2c91d6, type: 3}
   spriteOff:
   - {fileID: 21300104, guid: c896ec8f9ab9e458284e703b0e96c024, type: 3}
-  switchOnClip: {fileID: 0}
-  switchOffClip: {fileID: 0}
+  switchOnClip: {fileID: 8300000, guid: 76d9bd627a5d6c6439591776f94c96e7, type: 3}
+  switchOffClip: {fileID: 8300000, guid: 4c78eb18f18a6d542960f18ae5e34d08, type: 3}
   errorClip: {fileID: 0}
   sfxVolume: 1
 --- !u!61 &-7566334738636999832

@@ -184,7 +184,7 @@ MonoBehaviour:
   standableLayers:
     serializedVersion: 2
     m_Bits: 320
-  landThudClip: {fileID: 0}
+  landThudClip: {fileID: 8300000, guid: a7e20eafbf2a52f4b88fcef030c3e81f, type: 3}
   landVolume: 0.8
   landMinImpactSpeed: 1.2
   minFallDistanceForEffect: 1.5

@@ -285,6 +285,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Init
       objectReference: {fileID: 0}
+    - target: {fileID: 3447354557353955744, guid: 674667e8b531f924c9594a3071ad55d9, type: 3}
+      propertyPath: m_Volume
+      value: 0.263
+      objectReference: {fileID: 0}
+    - target: {fileID: 8732602692385369814, guid: 674667e8b531f924c9594a3071ad55d9, type: 3}
+      propertyPath: menuBgm
+      value: 
+      objectReference: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -903,7 +911,7 @@ Transform:
   m_GameObject: {fileID: 829052534}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -16.38, y: -3.01, z: 0}
+  m_LocalPosition: {x: -16.38, y: -2.91, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

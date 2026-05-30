@@ -13,7 +13,7 @@ public class DoorKey : MonoBehaviour // 이름을 DoorKey로 변경!
 		{
  			if (getSfx != null && SfxManager.Instance != null)
 			{
-				SfxManager.Instance.PlaySfx(getSfx, volume);
+				SfxManager.Instance.PlaySfx(getSfx, volume,0.2f);
 			}
 
 			ClearDoor door = FindAnyObjectByType<ClearDoor>();

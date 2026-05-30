@@ -163,6 +163,7 @@ MonoBehaviour:
   walkSound: {fileID: 0}
   normalJumpSound: {fileID: 0}
   floatingJumpSound: {fileID: 0}
+  hardLandSound: {fileID: 8300000, guid: f3c7b724d4d54cb4ba34decb51303261, type: 3}
   landDustParticle: {fileID: 5072013085018842173}
   minFallDistanceForImpulse: 2.2
   _isGrounded: 0
@@ -408,8 +409,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6a32a98a46397847835dc0d5120d22b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDeath
-  deathJumpForce: 10
+  deathJumpForce: 10.08
   reloadDelay: 2
+  deathSfx: {fileID: 8300000, guid: 18f875ce0cb36204f9ea943ef92061f0, type: 3}
 --- !u!114 &1645393835744532558
 MonoBehaviour:
   m_ObjectHideFlags: 0

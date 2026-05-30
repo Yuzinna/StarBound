@@ -141,6 +141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SfxManager
   thudCooldown: 0.1
+  _volume: 0.5
 --- !u!82 &5139014853122698470
 AudioSource:
   m_ObjectHideFlags: 0
@@ -154,7 +155,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.506
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -375,9 +376,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMManager
   menuBgm: {fileID: 8300000, guid: 50d2b1eb54a30a54a9b5bb75301c19db, type: 3}
-  mapBgm: {fileID: 8300000, guid: f46bfdbfa7355c54f853a46a43f17e97, type: 3}
-  menuVolume: 0.8
-  mapVolume: 0.8
+  mapBgm: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
+  menuVolume: 0.2
+  mapVolume: 0.2
   mapScenePrefix: Map
   bgmSource: {fileID: 3447354557353955744}
 --- !u!82 &3447354557353955744
@@ -393,7 +394,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0

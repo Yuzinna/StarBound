@@ -188,6 +188,7 @@ MonoBehaviour:
   maxBubbleWidth: 500
   textLayoutElement: {fileID: 2424381141040914900}
   typingSpeed: 0.05
+  dialogueStartSFX: {fileID: 8300000, guid: 9af620ccc9a861642b238123451ff41e, type: 3}
 --- !u!1 &1907025455049052041
 GameObject:
   m_ObjectHideFlags: 0

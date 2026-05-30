@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class SfxManager : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class SfxManager : MonoBehaviour
 	[Header("Debounce")]
 	[SerializeField] private float thudCooldown = 0.1f;
 	private float _lastThudTime = -999f;
-
+	[SerializeField] private float _volume = 1;
 	private void Awake()
 	{
 		if (Instance != null)
@@ -32,7 +33,7 @@ public class SfxManager : MonoBehaviour
 		// 2. 오디오 소스 컴포넌트 추가 및 설정
 		AudioSource tempSource = sfxObj.AddComponent<AudioSource>();
 		tempSource.clip = clip;
-		tempSource.volume = volume;
+		tempSource.volume = volume*_volume;
 
 		// 3. 시작 위치(offset) 조절
 		if (offset > 0f)
@@ -58,6 +59,6 @@ public class SfxManager : MonoBehaviour
 		_lastThudTime = Time.time;
 
 		// 쿨타임 통과했으면, 위에서 만든 PlaySfx를 그대로 가져다 씁니다!
-		PlaySfx(clip, volume, offset);
+		PlaySfx(clip, volume*_volume, offset);
 	}
 }

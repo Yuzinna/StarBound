@@ -42,6 +42,7 @@ public class PlayerLogic : MonoBehaviour
 	public AudioClip walkSound;
 	public AudioClip normalJumpSound;
 	public AudioClip floatingJumpSound;
+	public AudioClip hardLandSound; // 🎵 [추가됨] 강하게 착지할 때 재생할 충돌 사운드
 
 	[Header("파티클 (자식 오브젝트)")]
 	public ParticleSystem landDustParticle;
@@ -53,7 +54,7 @@ public class PlayerLogic : MonoBehaviour
 	// --- State Variables ---
 	private Rigidbody2D _rb;
 	private Collider2D _col;
-	
+
 	private CinemachineImpulseSource _impulseSource;
 
 	[SerializeField] private bool _isGrounded;
@@ -149,6 +150,20 @@ public class PlayerLogic : MonoBehaviour
 					if (_impulseSource != null)
 					{
 						_impulseSource.GenerateImpulse();
+					}
+
+					// 🎵 [추가됨] 강한 추락 시 사운드 재생
+					if (hardLandSound != null)
+					{
+						// SfxManager가 존재하면 우선 사용, 없으면 플레이어의 AudioSource 사용
+						if (SfxManager.Instance != null)
+						{
+							SfxManager.Instance.PlaySfx(hardLandSound);
+						}
+						else if (audioSourceSFX != null)
+						{
+							audioSourceSFX.PlayOneShot(hardLandSound);
+						}
 					}
 
 					_particleCooldownTimer = 0.2f;
@@ -274,7 +289,6 @@ public class PlayerLogic : MonoBehaviour
 	{
 		Vector2 rayStart = transform.TransformPoint(groundCheckOffset);
 
-		// 🚨 수정됨: 고정값 0.7f 대신, 플레이어 콜라이더 가로 길이의 80%만 사용합니다!
 		float boxWidth = _col.bounds.size.x * 0.8f;
 		Vector2 size = new Vector2(boxWidth, 0.1f);
 
@@ -296,7 +310,6 @@ public class PlayerLogic : MonoBehaviour
 
 			if (_spriteRenderer != null)
 			{
-				// 💡 [수정됨] 현재 스케일을 가져와서 절댓값(원래 크기)으로 유지합니다.
 				Vector3 currentScale = _spriteRenderer.transform.localScale;
 				_spriteRenderer.transform.localScale = new Vector3(Mathf.Abs(currentScale.x), Mathf.Abs(currentScale.y), Mathf.Abs(currentScale.z));
 			}
@@ -308,7 +321,6 @@ public class PlayerLogic : MonoBehaviour
 
 			if (_spriteRenderer != null)
 			{
-				// 💡 [수정됨] 현재 스케일을 가져와서 Y축만 마이너스로 뒤집고 크기는 유지합니다.
 				Vector3 currentScale = _spriteRenderer.transform.localScale;
 				_spriteRenderer.transform.localScale = new Vector3(Mathf.Abs(currentScale.x), -Mathf.Abs(currentScale.y), Mathf.Abs(currentScale.z));
 			}
@@ -391,7 +403,5 @@ public class PlayerLogic : MonoBehaviour
 			_conveyorSpeed = effector.speed;
 		}
 	}
-
-	
 	#endregion
 }
