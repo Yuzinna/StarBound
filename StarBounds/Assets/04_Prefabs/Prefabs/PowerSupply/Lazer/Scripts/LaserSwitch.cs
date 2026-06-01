@@ -50,13 +50,28 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 		else TurnOffLaser();
 	}
 
+	// ==========================================
+	// 💡 비주얼 및 자식 콜라이더 상태 제어
+	// ==========================================
 	private void UpdateVisual()
 	{
 		if (spriteRenderer != null)
 			spriteRenderer.sprite = isOn ? switchOnSprite : switchOffSprite;
 
 		if (bumpCollider != null)
-			bumpCollider.enabled = !isOn;
+		{
+			if (GravityManager.Instance != null)
+			{
+				// 🔄 [수정됨] 
+				// 플로팅 상태면 콜라이더를 켜서(true) 큐브가 못 누르게 물리적으로 막음
+				// 플로팅 상태가 아니면 콜라이더를 꺼서(false) 큐브가 아래로 밟고 내려가 누를 수 있게 함
+				bumpCollider.enabled = GravityManager.Instance.IsFloatingEnabled;
+			}
+			else
+			{
+				bumpCollider.enabled = !isOn;
+			}
+		}
 	}
 
 	// ==========================================
@@ -66,8 +81,6 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 	{
 		if (((1 << collision.gameObject.layer) & pressableLayers) != 0)
 		{
-			// 방금 Exit로 나갔다고 찍혔던 놈이 0.1초 만에 다시 들어왔다면?
-			// "아, 버그로 튕긴 거구나!" 하고 퇴출 취소!
 			if (_pressingObjects.ContainsKey(collision))
 			{
 				_pressingObjects[collision] = 0f; // 나갈 준비 취소
@@ -88,7 +101,6 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 	{
 		if (_pressingObjects.ContainsKey(other))
 		{
-			// 유니티 버그일 수 있으니 즉시 삭제하지 않고, "너 나갈 거면 0.1초 뒤에 나가라"며 시간을 기록함.
 			_pressingObjects[other] = Time.time;
 		}
 	}
@@ -106,7 +118,6 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 			Collider2D col = kvp.Key;
 			float exitTime = kvp.Value;
 
-			// 1. 진짜 부서졌거나 꺼진 물체는 즉각 청소
 			if (col == null || !col.gameObject.activeInHierarchy)
 			{
 				toRemove.Add(col);
@@ -114,7 +125,6 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 				continue;
 			}
 
-			// 2. 버그 방어막: Exit가 찍힌 지 0.15초가 지났다면? "아, 진짜로 밖으로 나간 게 맞구나!" 확정 삭제
 			if (exitTime > 0f && (Time.time - exitTime > 0.15f))
 			{
 				toRemove.Add(col);
@@ -122,7 +132,6 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 			}
 		}
 
-		// 확정된 놈들만 리스트에서 진짜로 삭제!
 		foreach (Collider2D col in toRemove)
 		{
 			_pressingObjects.Remove(col);
@@ -136,6 +145,9 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 			{
 				_wasFloatingEnabled = GravityManager.Instance.IsFloatingEnabled;
 				_lastGravityDirection = GravityManager.Instance.CurrentDirection;
+
+				// 💡 [추가] 중력/플로팅 상태가 바뀌는 순간 자식 콜라이더 켜고 끄기를 즉시 반영합니다.
+				UpdateVisual();
 				needCheck = true;
 			}
 		}
@@ -148,12 +160,11 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 
 	private bool HasValidWeightPressing()
 	{
-		// "나갈 예정(ExitTime > 0)"인 애들 빼고 진짜로 밟고 있는 애들이 있는지 확인
 		bool hasRealPresser = false;
 
 		foreach (var kvp in _pressingObjects)
 		{
-			if (kvp.Value > 0f) continue; // 얘는 곧 나갈 애니까 무시
+			if (kvp.Value > 0f) continue;
 
 			Collider2D col = kvp.Key;
 			GravityObjectLogic cube = col.GetComponentInParent<GravityObjectLogic>();
@@ -221,7 +232,6 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 	{
 		yield return new WaitForSeconds(offDelay);
 
-		// 오프 딜레이가 다 끝났는데도 누군가 밟고 있다면? 끄지 않음!
 		if (HasValidWeightPressing())
 		{
 			_offTimer = null;
