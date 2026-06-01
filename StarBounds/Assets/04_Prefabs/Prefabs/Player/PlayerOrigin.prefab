@@ -165,7 +165,7 @@ MonoBehaviour:
   floatingJumpSound: {fileID: 0}
   hardLandSound: {fileID: 8300000, guid: f3c7b724d4d54cb4ba34decb51303261, type: 3}
   landDustParticle: {fileID: 5072013085018842173}
-  minFallDistanceForImpulse: 2.2
+  minFallDistanceForImpulse: 2.1
   _isGrounded: 0
   _isPushing: 0
   _moveX: 0

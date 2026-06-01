@@ -32,12 +32,22 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 	private bool _wasFloatingEnabled;
 	private eGravityDirection _lastGravityDirection;
 
+	[Header("스위치 눌림 연출 설정")]
+	[Tooltip("스위치가 눌렸을 때 bumpCollider가 내려갈 고도 (유니티 단위)")]
+	public float pressedYOffset = -0.2f;
+	private Vector3 _initialColliderPos;
 	private void Start()
 	{
 		if (GravityManager.Instance != null)
 		{
 			_wasFloatingEnabled = GravityManager.Instance.IsFloatingEnabled;
 			_lastGravityDirection = GravityManager.Instance.CurrentDirection;
+		}
+
+		// 💡 시작할 때 bumpCollider의 원래 로컬 위치를 기억해 둡니다.
+		if (bumpCollider != null)
+		{
+			_initialColliderPos = bumpCollider.transform.localPosition;
 		}
 		UpdateVisual();
 	}
@@ -60,16 +70,21 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 
 		if (bumpCollider != null)
 		{
-			if (GravityManager.Instance != null)
+			// 🚨 일반 벽으로 평생 고정합니다. 
+			// 이렇게 해야 큐브가 옆에서 올 때 파묻히지 않고 폴리곤 경사를 타고 "위로" 올라섭니다.
+			bumpCollider.enabled = true;
+			bumpCollider.isTrigger = false;
+
+			// 💡 [핵심 추가] 스위치 상태에 따라 콜라이더의 높이를 실시간으로 조절합니다.
+			if (isOn)
 			{
-				// 🔄 [수정됨] 
-				// 플로팅 상태면 콜라이더를 켜서(true) 큐브가 못 누르게 물리적으로 막음
-				// 플로팅 상태가 아니면 콜라이더를 꺼서(false) 큐브가 아래로 밟고 내려가 누를 수 있게 함
-				bumpCollider.enabled = GravityManager.Instance.IsFloatingEnabled;
+				// 스위치가 눌렸으면 원래 위치에서 pressedYOffset만큼 아래로 내립니다.
+				bumpCollider.transform.localPosition = _initialColliderPos + new Vector3(0, pressedYOffset, 0);
 			}
 			else
 			{
-				bumpCollider.enabled = !isOn;
+				// 스위치가 안 눌렸으면 원래 높이로 복구합니다.
+				bumpCollider.transform.localPosition = _initialColliderPos;
 			}
 		}
 	}
@@ -160,6 +175,13 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 
 	private bool HasValidWeightPressing()
 	{
+		// 🚨 [핵심 추가] 중력이 플로팅 상태라면, 위에 큐브가 수백 개가 올라와 있어도 
+		// 무조건 무시하고 즉시 false를 반환해서 스위치가 안 눌리게 만듭니다.
+		if (GravityManager.Instance != null && GravityManager.Instance.IsFloatingEnabled)
+		{
+			return false;
+		}
+
 		bool hasRealPresser = false;
 
 		foreach (var kvp in _pressingObjects)
@@ -169,17 +191,10 @@ public class LaserSwitch : MonoBehaviour, IInteractable
 			Collider2D col = kvp.Key;
 			GravityObjectLogic cube = col.GetComponentInParent<GravityObjectLogic>();
 
+			// 이제 여기는 일반 중력 상태일 때만 실행됩니다.
 			if (cube != null)
 			{
-				if (!GravityManager.Instance.IsFloatingEnabled && cube.GetComponent<Rigidbody2D>().gravityScale > 0)
-				{
-					hasRealPresser = true;
-					break;
-				}
-			}
-			else
-			{
-				if (!GravityManager.Instance.IsFloatingEnabled && GravityManager.Instance.CurrentDirection == eGravityDirection.Normal)
+				if (cube.GetComponent<Rigidbody2D>().gravityScale > 0)
 				{
 					hasRealPresser = true;
 					break;

@@ -215,7 +215,13 @@ public class SwitchLogic : MonoBehaviour, IInteractable
 		if (SfxManager.Instance == null) return;
 
 		var clip = isOn ? switchOnClip : switchOffClip;
-		SfxManager.Instance.PlaySfx(clip, sfxVolume, 0.5f);
+		Debug.Log($"[스위치 사운드 요청] IsOn: {isOn} / 재생하려는 클립: {(clip != null ? clip.name : "없음")}");
+		
+		if (clip != null)
+		{
+			SfxManager.Instance.PlaySfx(clip, sfxVolume);
+		}
+
 	}
 
 	private void UpdateVisual()

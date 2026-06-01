@@ -1,13 +1,15 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.Rendering;
 
 public class SfxManager : MonoBehaviour
 {
 	public static SfxManager Instance { get; private set; }
 
-	// (ÀÌÁ¦ ´ÜÀÏ sfxSource º¯¼ö´Â ¾È ½áµµ µË´Ï´Ù!)
+	// (ì´ì œ ë‹¨ì¼ sfxSource ë³€ìˆ˜ëŠ” ì•ˆ ì¨ë„ ë©ë‹ˆë‹¤!)
+	[SerializeField] private AudioSource defaultSource; // ğŸ’¡ ì¸ìŠ¤í™í„°ì—ì„œ SfxManagerì— ê³ ì •ìœ¼ë¡œ ë‹¬ì•„ë‘˜ ì˜¤ë””ì˜¤ ì†ŒìŠ¤
 
 	[Header("Debounce")]
+
 	[SerializeField] private float thudCooldown = 0.1f;
 	private float _lastThudTime = -999f;
 	[SerializeField] private float _volume = 1;
@@ -20,45 +22,45 @@ public class SfxManager : MonoBehaviour
 		}
 		Instance = this;
 		DontDestroyOnLoad(gameObject);
+
+		// ë§Œì•½ ì¸ìŠ¤í™í„°ì—ì„œ í• ë‹¹ ì•ˆ í–ˆìœ¼ë©´ ìë™ìœ¼ë¡œ ì¶”ê°€
+		if (defaultSource == null)
+			defaultSource = gameObject.AddComponent<AudioSource>();
 	}
 
 	public void PlaySfx(AudioClip clip, float volume = 1f, float offset = 0f)
 	{
 		if (clip == null) return;
 
-		// 1. ¼Ò¸®¸¦ ³¾ '1È¸¿ë ÀÓ½Ã ½ºÇÇÄ¿(ºó °ÔÀÓ ¿ÀºêÁ§Æ®)' »ı¼º
-		GameObject sfxObj = new GameObject("TempSfx_" + clip.name);
-		sfxObj.transform.SetParent(transform); // ¸Å´ÏÀú ÀÚ½ÄÀ¸·Î ±ò²ûÇÏ°Ô Á¤¸®
-
-		// 2. ¿Àµğ¿À ¼Ò½º ÄÄÆ÷³ÍÆ® Ãß°¡ ¹× ¼³Á¤
-		AudioSource tempSource = sfxObj.AddComponent<AudioSource>();
-		tempSource.clip = clip;
-		tempSource.volume = volume*_volume;
-
-		// 3. ½ÃÀÛ À§Ä¡(offset) Á¶Àı
-		if (offset > 0f)
+		// ì˜¤í”„ì…‹ì´ í•„ìš” ì—†ëŠ” ëŒ€ë¶€ë¶„ì˜ ê²½ìš°: ì˜¤ë¸Œì íŠ¸ ìƒì„± ì—†ì´ ì •ì„ëŒ€ë¡œ ê²¹ì³ì„œ ì¬ìƒ!
+		if (offset == 0f)
 		{
-			tempSource.time = Mathf.Clamp(offset, 0f, clip.length - 0.01f);
+			defaultSource.PlayOneShot(clip, volume * _volume);
 		}
-
-		// 4. ¼Ò¸® Àç»ı!
-		tempSource.Play();
-
-		// 5. ¼Ò¸® ±æÀÌ°¡ ³¡³ª¸é ÀÓ½Ã ½ºÇÇÄ¿¸¦ ÀÚµ¿À¸·Î »èÁ¦ (¸Ş¸ğ¸® ³¶ºñ ¹æÁö!)
-		Destroy(sfxObj, clip.length - offset);
+		else
+		{
+			// ì˜¤í”„ì…‹ì´ ì •ë§ í•„ìš”í•œ íŠ¹ë³„í•œ ì‚¬ìš´ë“œë§Œ ì„ì‹œ ì˜¤ë¸Œì íŠ¸ ìƒì„± (ê¸°ì¡´ ë¡œì§ ìœ ì§€)
+			GameObject sfxObj = new GameObject("TempSfx_Offset_" + clip.name);
+			sfxObj.transform.SetParent(transform);
+			AudioSource tempSource = sfxObj.AddComponent<AudioSource>();
+			tempSource.clip = clip;
+			tempSource.volume = volume * _volume;
+			tempSource.time = Mathf.Clamp(offset, 0f, clip.length - 0.01f);
+			tempSource.Play();
+			Destroy(sfxObj, clip.length - offset);
+		}
 	}
-
 	public void PlayThudOnce(AudioClip clip, float volume = 1f, float offset = 0f)
 	{
 		if (clip == null) return;
 
-		// ÄğÅ¸ÀÓ Ã¼Å©
+		// ì¿¨íƒ€ì„ ì²´í¬
 		if (Time.time - _lastThudTime < thudCooldown)
 			return;
 
 		_lastThudTime = Time.time;
 
-		// ÄğÅ¸ÀÓ Åë°úÇßÀ¸¸é, À§¿¡¼­ ¸¸µç PlaySfx¸¦ ±×´ë·Î °¡Á®´Ù ¾¹´Ï´Ù!
+		// ì¿¨íƒ€ì„ í†µê³¼í–ˆìœ¼ë©´, ìœ„ì—ì„œ ë§Œë“  PlaySfxë¥¼ ê·¸ëŒ€ë¡œ ê°€ì ¸ë‹¤ ì”ë‹ˆë‹¤!
 		PlaySfx(clip, volume*_volume, offset);
 	}
 }

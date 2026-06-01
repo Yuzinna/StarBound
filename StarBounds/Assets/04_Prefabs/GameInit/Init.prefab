@@ -140,6 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7695c59c4bb461e40850941865b1de15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SfxManager
+  defaultSource: {fileID: 0}
   thudCooldown: 0.1
   _volume: 0.5
 --- !u!82 &5139014853122698470
@@ -375,7 +376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1ffb82d73bdc584a883964f82fc0701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMManager
-  menuBgm: {fileID: 8300000, guid: 50d2b1eb54a30a54a9b5bb75301c19db, type: 3}
+  menuBgm: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
   mapBgm: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
   menuVolume: 0.2
   mapVolume: 0.2

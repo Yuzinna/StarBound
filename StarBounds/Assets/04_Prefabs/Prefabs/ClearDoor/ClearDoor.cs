@@ -78,10 +78,19 @@ public class ClearDoor : MonoBehaviour
 			// 2. [수정됨] 로딩 씬을 거쳐서 다음 씬으로 이동!
 			if (!string.IsNullOrEmpty(nextSceneName))
 			{
-				Debug.Log($"[ClearDoor] 로딩 화면을 거쳐 [{nextSceneName}] 씬으로 이동합니다!");
+				Debug.Log($"[ClearDoor] 페이드 아웃을 시작하며 [{nextSceneName}] 로딩 시퀀스에 진입합니다.");
 
-				// 여기가 핵심입니다! 우리가 만든 매니저를 호출합니다.
-				SimpleLoadingManager.LoadScene(nextSceneName);
+				// 💡 싱글톤 인스턴스가 있는지 체크하고 페이드 연동 함수를 호출합니다.
+				if (SceneTransitionManager.Instance != null)
+				{
+					SceneTransitionManager.Instance.FadeOutToLoadingScene(nextSceneName);
+				}
+				else
+				{
+					// 혹시 모를 예외 상황(페이드 매니저가 없을 때)을 대비해 기존 로직을 백업으로 둡니다.
+					SimpleLoadingManager.LoadScene(nextSceneName);
+				}
+
 			}
 			else
 			{
