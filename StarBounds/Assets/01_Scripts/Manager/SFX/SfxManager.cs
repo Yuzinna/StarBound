@@ -12,7 +12,7 @@ public class SfxManager : MonoBehaviour
 
 	[SerializeField] private float thudCooldown = 0.1f;
 	private float _lastThudTime = -999f;
-	[SerializeField] private float _volume = 1;
+	[SerializeField] public float _volume = 1;
 	private void Awake()
 	{
 		if (Instance != null)

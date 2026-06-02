@@ -9,19 +9,27 @@ public class PauseMenuLogic : MonoBehaviour
 	public GameObject pauseMenuUI;
 
 	[Header("사운드 설정")]
-	public Slider volumeSlider; // 중앙에 배치할 볼륨 슬라이더
+	public Slider BgmSlider; // 중앙에 배치할 브금 슬라이더
+	public Slider SfxSlider; // 중앙에 배치할 효과음 슬라이더
 
 	private bool _isPaused = false;
 
 	private void Start()
 	{
 		// 1. 시작할 때 슬라이더의 위치를 현재 게임의 실제 볼륨과 똑같이 맞춰줍니다.
-		if (volumeSlider != null)
+		if (BgmSlider != null)
 		{
-			volumeSlider.value = AudioListener.volume;
+			BgmSlider.value = BgmManager.Instance._volume;
 
 			// 슬라이더를 마우스로 움직일 때마다 SetVolume 함수가 자동으로 실행되도록 연결!
-			volumeSlider.onValueChanged.AddListener(SetVolume);
+			BgmSlider.onValueChanged.AddListener(SetBgm);
+		}
+		if (SfxSlider != null)
+		{
+			SfxSlider.value = SfxManager.Instance._volume;
+
+			// 슬라이더를 마우스로 움직일 때마다 SetVolume 함수가 자동으로 실행되도록 연결!
+			SfxSlider.onValueChanged.AddListener(SetSfx);
 		}
 
 		// 2. 게임 시작 시 일시정지 UI는 숨겨둡니다.
@@ -75,9 +83,14 @@ public class PauseMenuLogic : MonoBehaviour
 	}
 
 	// [볼륨 슬라이더용] 마스터 볼륨 조절
-	private void SetVolume(float volume)
+	private void SetBgm(float volume)
 	{
-		// AudioListener.volume은 유니티 게임 전체의 최종 볼륨을 조절합니다 (0.0 ~ 1.0)
-		AudioListener.volume = volume;
+		// BgmManager의 마스터 볼륨을 조절하고 실시간으로 반영합니다.
+		BgmManager.Instance.SetMasterVolume(volume);
+	}
+	private void SetSfx(float volume)
+	{
+		
+		SfxManager.Instance._volume = volume;
 	}
 }
