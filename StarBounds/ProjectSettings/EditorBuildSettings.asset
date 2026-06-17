@@ -6,8 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/00_Scenes/LoadingScene.unity
+    path: Assets/00_Scenes/Loading/LoadingScene.unity
     guid: 7cc60dcbb39779440937a114f0cd5e7f
+  - enabled: 1
+    path: Assets/00_Scenes/Synopsis.unity
+    guid: 330b8f756d6659c4e96d1a84f851d303
   - enabled: 1
     path: Assets/00_Scenes/StarBoundMaps/StarBoundMaps/map1-1.unity
     guid: 51ae018db48d0ff42841a5c76e30ec3b

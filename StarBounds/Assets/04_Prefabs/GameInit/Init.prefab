@@ -36,6 +36,7 @@ Transform:
   - {fileID: 2398133012698126491}
   - {fileID: 1702380273929202120}
   - {fileID: 5547529541923277032}
+  - {fileID: 8094439188518197999}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6293691243431236135
@@ -284,6 +285,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0740a24b1e78abd448780e865284b493, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputManager
+--- !u!1 &6147962230712872715
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8094439188518197999}
+  - component: {fileID: 574683886291693077}
+  m_Layer: 0
+  m_Name: SceneTransitionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8094439188518197999
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6147962230712872715}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 215716938855183684}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &574683886291693077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6147962230712872715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22b31e1192a898045a7c9224a2ecdfff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneTransitionManager
+  fadeOverlayPrefab: {fileID: 822113897903071181, guid: 08afe2d7ceeb9b34fa6a10166c43007c, type: 3}
+  fadeDuration: 0.5
 --- !u!1 &6899299022717096306
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,6 +425,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BGMManager
   menuBgm: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
   mapBgm: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
+  _volume: 0.5
   menuVolume: 0.2
   mapVolume: 0.2
   mapScenePrefix: Map

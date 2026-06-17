@@ -11,6 +11,7 @@ public enum GameState
 	StageClear, // 스테이지 클리어 연출 중
 	GameOver    // 사망 연출 중
 }
+
 public class GameManager : MonoBehaviour
 {
 	public static GameManager Instance { get; private set; }
@@ -19,25 +20,34 @@ public class GameManager : MonoBehaviour
 	public GameObject playerPrefab;
 	private GameObject _playerInstance;
 
-	// --- [새로 추가된 일시정지 변수들] ---
-	public bool IsPaused { get;  set; } // 현재 멈춰있는가?
+	// --- [일시정지 변수들] ---
+	public bool IsPaused { get; set; } // 현재 멈춰있는가?
 	public event Action<bool> OnPauseToggled;  // 멈추거나 풀릴 때 UI에게 알려줄 이벤트
 
-	// [추가] 마지막으로 플레이했던 씬의 이름을 기억해 둘 변수
+	// 마지막으로 플레이했던 씬의 이름을 기억해 둘 변수
 	public string lastPlayedScene { get; private set; } = "";
+
 	private void Awake()
 	{
-		if(Instance == null)
+		if (Instance == null)
 		{
 			Instance = this;
 			DontDestroyOnLoad(gameObject);
 
+			// 💡 [추가] 최초 게임 실행 시 세이브 데이터의 기본 판을 짭니다.
+			// 만약 "LastPlayedStage" 키가 아예 없다면(게임 최초 실행) 0으로 초기화해 둡니다.
+			if (!PlayerPrefs.HasKey("LastPlayedStage"))
+			{
+				PlayerPrefs.SetInt("LastPlayedStage", 0); // 0은 저장된 기록이 없다는 뜻
+				PlayerPrefs.Save();
+			}
 		}
 		else
 		{
 			Destroy(gameObject);
 		}
 	}
+
 	private void OnEnable()
 	{
 		SceneManager.sceneLoaded += OnSceneLoaded;
@@ -47,11 +57,13 @@ public class GameManager : MonoBehaviour
 	{
 		SceneManager.sceneLoaded -= OnSceneLoaded;
 	}
+
 	private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 	{
 		// 씬이 켜질 때마다 플레이어를 스폰하고 카메라를 세팅합니다.
 		SpawnPlayerAndSetupCamera();
 	}
+
 	private void SpawnPlayerAndSetupCamera()
 	{
 		if (playerPrefab == null) return;
@@ -59,6 +71,20 @@ public class GameManager : MonoBehaviour
 		// 3. 스타트 지점 찾기
 		GameObject startObj = GameObject.FindWithTag("PlayerStart");
 		if (startObj == null) return; // 스타트 지점이 없는 씬(예: 메인화면)이면 무시
+
+		// 💡 [추가] 플레이어가 스폰되는 실제 게임 맵이므로, 현재 스테이지 번호를 자동 저장합니다!
+		string sceneName = SceneManager.GetActiveScene().name;
+		if (sceneName.StartsWith("Stage")) // 씬 이름이 "Stage1", "Stage2" 등인 경우
+		{
+			string stageNumStr = sceneName.Replace("Stage", ""); // "Stage" 글자를 지워 숫지만 남김
+			if (int.TryParse(stageNumStr, out int currentStage))
+			{
+				// 현재 진입한 스테이지 번호를 저장하여 메인 메뉴의 '이어하기'와 연동합니다.
+				PlayerPrefs.SetInt("LastPlayedStage", currentStage);
+				PlayerPrefs.Save();
+				Debug.Log($"[GameManager] 자동 저장 완료! 현재 스테이지: Stage {currentStage}");
+			}
+		}
 
 		Vector3 spawnPos = startObj.transform.position + Vector3.up;
 
@@ -76,42 +102,8 @@ public class GameManager : MonoBehaviour
 			if (rb != null) rb.linearVelocity = Vector2.zero;
 		}
 		SetupCamera(_playerInstance.transform);
-		
 	}
-	//public void InitGame()
-	//{
-	//	if (playerPrefab == null)
-	//	{
-	//		Debug.LogError("[GameManager] 플레이어 프리팹이 없습니다!");
-	//		return;
-	//	}
 
-	//	var startObj = GameObject.FindWithTag("PlayerStart");
-	//	if (startObj == null)
-	//	{
-	//		Debug.LogWarning("[GameManager] PlayerStart 태그를 찾을 수 없어 플레이어를 소환하지 않습니다. (UI 씬일 수 있음)");
-	//		return;
-	//	}
-
-	//	Vector3 spawnPos = startObj.transform.position + Vector3.up;
-
-	//	if (_playerInstance == null)
-	//	{
-	//		_playerInstance = Instantiate(playerPrefab, spawnPos, Quaternion.identity);
-	//	}
-	//	else
-	//	{
-	//		_playerInstance.transform.position = spawnPos;
-
-	//		// 물리 관성 초기화 (재시작 시 날아가는 버그 방지)
-	//		Rigidbody2D rb = _playerInstance.GetComponent<Rigidbody2D>();
-	//		if (rb != null) rb.linearVelocity = Vector2.zero;
-	//	}
-
-	//	SetupCamera(_playerInstance.transform);
-		
-	//}
-	
 	private void SetupCamera(Transform playerTransform)
 	{
 		CinemachineCamera virtualCam = GameObject.FindAnyObjectByType<CinemachineCamera>();
@@ -134,7 +126,8 @@ public class GameManager : MonoBehaviour
 
 		Debug.Log(IsPaused ? "게임 일시 정지" : "게임 재개");
 	}
-	// (보너스) R키 누를 때 매니저가 씬 재시작을 전담하게 만들면 좋습니다.
+
+	// R키 누를 때 매니저가 씬 재시작을 전담하게 만들면 좋습니다.
 	public void RestartCurrentStage()
 	{
 		// 씬을 다시 부를 때는 반드시 시간을 원상복구(1f) 해줘야 합니다!
@@ -142,6 +135,7 @@ public class GameManager : MonoBehaviour
 		IsPaused = false;
 		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 	}
+
 	public void LoadMainMenu()
 	{
 		//메인 메뉴로 넘어가기 직전에, 현재 씬의 이름을 매니저 수첩에 적어둡니다!
@@ -152,7 +146,7 @@ public class GameManager : MonoBehaviour
 		Time.timeScale = 1f;
 		IsPaused = false;
 
-		// "MainMenu"라는 이름의 씬을 불러옵니다. (나중에 씬 이름을 이렇게 지어주세요!)
+		// "MainMenu"라는 이름의 씬을 불러옵니다.
 		SceneManager.LoadScene("MainMenu");
 	}
 }

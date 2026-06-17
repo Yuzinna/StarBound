@@ -385,10 +385,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: ClearDoor
       objectReference: {fileID: 0}
-    - target: {fileID: 2862961026775532137, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
-      propertyPath: nextSceneName
-      value: map1-2
-      objectReference: {fileID: 0}
     - target: {fileID: 8045887152775931217, guid: ba9eca92d27c81e45a55fc7787cbfbf8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 18.715809
@@ -1602,29 +1598,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2664592090194769556, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3313308003704978266, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
-      propertyPath: m_Alpha
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4001187377353267482, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
-      propertyPath: fadeCanvasGroup
-      value: 
-      objectReference: {fileID: 1513118039}
-    - target: {fileID: 4275197109556627575, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4787517875347460486, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
       propertyPath: m_Name
       value: Canvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 4787517875347460486, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6182603623561708815, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
       propertyPath: m_Pivot.x
@@ -12783,11 +12759,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7840343401764829936, guid: 948ae1bb86ba5a74ca462a52b5372894, type: 3}
   m_PrefabInstance: {fileID: 1495695964}
   m_PrefabAsset: {fileID: 0}
---- !u!225 &1513118039 stripped
-CanvasGroup:
-  m_CorrespondingSourceObject: {fileID: 3313308003704978266, guid: a3bb7d929cd3b504bbc3c28114f2b19a, type: 3}
-  m_PrefabInstance: {fileID: 760170354}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1516905624
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22788,12 +22759,7 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 8732602692385369814, guid: 674667e8b531f924c9594a3071ad55d9, type: 3}
-      propertyPath: menuBgm
-      value: 
-      objectReference: {fileID: 8300000, guid: 28c701d45161d7c43b69529858e3a363, type: 3}
-    m_RemovedComponents:
-    - {fileID: 4642039839575221705, guid: 674667e8b531f924c9594a3071ad55d9, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
